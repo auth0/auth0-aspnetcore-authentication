@@ -1,0 +1,22 @@
+trigger:
+- master
+
+pool:
+  name: Hosted VS2017
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK'
+  inputs:
+    version: 5.0.x
+
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    arguments: '-nowarn:CS1591 --configuration Release'
+
