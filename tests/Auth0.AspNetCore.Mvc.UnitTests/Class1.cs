@@ -8,7 +8,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         [Fact]
         public void Dummy()
         {
-            true.Should().Be(false);
+            true.Should().Be(true);
         }
     }
 }
