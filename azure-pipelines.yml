@@ -20,3 +20,26 @@ steps:
   inputs:
     arguments: '-nowarn:CS1591 --configuration Release'
 
+- task: DotNetCoreCLI@2
+  displayName: Test
+  inputs:
+    command: test
+
+- task: DotNetCoreCLI@2
+  displayName: Pack
+  inputs:
+    command: pack
+
+- task: CopyFiles@2
+  displayName: Stage
+  inputs:
+    SourceFolder: '$(system.defaultworkingdirectory)'
+    Contents: '**\Auth0.*.nupkg'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: Auth0.Net.Packages
+
