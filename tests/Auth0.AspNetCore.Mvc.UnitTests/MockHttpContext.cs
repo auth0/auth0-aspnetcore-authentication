@@ -17,10 +17,12 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             _serviceCollection = serviceCollection;
             _configureServiceCollection = configure;
         }
+
         public static MockHttpContext Configure(Action<ServiceCollection> cb)
         {
             return new MockHttpContext(new ServiceCollection(), cb);
         }
+
         public async Task RunAsync(Func<HttpContext, Task> cb)
         {
             var httpContext = new DefaultHttpContext();
