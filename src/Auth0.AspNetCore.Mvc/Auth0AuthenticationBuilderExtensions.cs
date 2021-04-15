@@ -40,9 +40,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.ClientSecret = auth0Options.ClientSecret;
             oidcOptions.ResponseType = OpenIdConnectResponseType.Code;
             oidcOptions.Scope.Clear();
-            oidcOptions.Scope.Add("openid");
-            oidcOptions.Scope.Add("profile");
-            oidcOptions.Scope.Add("email");
+            oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(Constants.DefaultCallbackPath);
             oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
 
