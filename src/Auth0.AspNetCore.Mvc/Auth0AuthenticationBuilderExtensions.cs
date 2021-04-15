@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -48,6 +50,38 @@ namespace Auth0.AspNetCore.Mvc
             {
                 NameClaimType = "name"
             };
+
+            oidcOptions.Events = new OpenIdConnectEvents
+            {
+                OnRedirectToIdentityProvider = CreateOnRedirectToIdentityProvider(auth0Options),
+            };
+        }
+
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0Options auth0Options)
+        {
+            return (context) =>
+            {
+                foreach (var extraParam in GetAuthorizeParameters(context.Properties.Items))
+                {
+                    context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
+                }
+
+                return Task.CompletedTask;
+            };
+        }
+
+        private static IDictionary<string, string> GetAuthorizeParameters(IDictionary<string, string> authSessionItems)
+        {
+            var parameters = new Dictionary<string, string>();
+            var authorizeParameters = new List<string> { "scope" };
+
+            foreach (var key in authorizeParameters)
+            {
+                if (authSessionItems.ContainsKey(key))
+                    parameters[key] = authSessionItems[key];
+            }
+
+            return parameters;
         }
     }
 }

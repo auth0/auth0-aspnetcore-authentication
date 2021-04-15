@@ -105,5 +105,31 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["scope"].Should().Be("ScopeA ScopeB");
             });
         }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0MVC(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+                authenticationProperties.Items.Add("scope", "ScopeA ScopeB");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["scope"].Should().Be("ScopeA ScopeB");
+            });
+        }
     }
 }
