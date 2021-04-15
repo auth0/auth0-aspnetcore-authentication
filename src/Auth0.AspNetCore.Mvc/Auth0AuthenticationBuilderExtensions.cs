@@ -10,6 +10,12 @@ namespace Auth0.AspNetCore.Mvc
 {
     public static class Auth0AuthenticationBuilderExtensions
     {
+        /// <summary>
+        /// Add Auth0 configuration using Open ID Connect
+        /// </summary>
+        /// <param name="builder">The original <see cref="AuthenticationBuilder"/> instance</param>
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
+        /// <returns>The <see cref="AuthenticationBuilder"/ instance that has been configured.</returns>
         public static AuthenticationBuilder AddAuth0MVC(this AuthenticationBuilder builder, Action<Auth0Options> configureOptions)
         {
             var auth0Options = new Auth0Options();
@@ -22,6 +28,11 @@ namespace Auth0.AspNetCore.Mvc
             return builder;
         }
 
+        /// <summary>
+        /// Configure Open ID Connect based on the provided <see cref="Auth0Options"/>.
+        /// </summary>
+        /// <param name="oidcOptions">A reference to the <see cref="OpenIdConnectOptions"/> that needs to be configured./param>
+        /// <param name="auth0Options">The provided <see cref="Auth0Options"/>.</param>
         private static void ConfigureOpenIdConnect(OpenIdConnectOptions oidcOptions, Auth0Options auth0Options)
         {
             oidcOptions.Authority = $"https://{auth0Options.Domain}";
