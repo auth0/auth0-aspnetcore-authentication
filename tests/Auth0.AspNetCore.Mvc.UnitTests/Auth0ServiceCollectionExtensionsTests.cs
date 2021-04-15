@@ -76,7 +76,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
 
                 queryParameters["client_id"].Should().Be("123");
                 queryParameters["scope"].Should().Be("openid profile email");
-                queryParameters["redirect_uri"].Should().Be("https://localhost/callback");
+                queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/callback");
                 queryParameters["response_type"].Should().Be("code");
                 queryParameters["response_mode"].Should().Be("form_post");
             });
