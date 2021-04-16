@@ -16,7 +16,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <param name="builder">The original <see cref="AuthenticationBuilder"/> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
         /// <returns>The <see cref="AuthenticationBuilder"/ instance that has been configured.</returns>
-        public static AuthenticationBuilder AddAuth0MVC(this AuthenticationBuilder builder, Action<Auth0Options> configureOptions)
+        public static AuthenticationBuilder AddAuth0Mvc(this AuthenticationBuilder builder, Action<Auth0Options> configureOptions)
         {
             var auth0Options = new Auth0Options();
 

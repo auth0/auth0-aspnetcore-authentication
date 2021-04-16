@@ -13,7 +13,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <param name="services">The original <see cref="IServiceCollection"/> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
         /// <returns>The <see cref="AuthenticationBuilder"/ instance that has been created.</returns>
-        public static AuthenticationBuilder AddAuth0MVC(this IServiceCollection services, Action<Auth0Options> configureOptions)
+        public static AuthenticationBuilder AddAuth0Mvc(this IServiceCollection services, Action<Auth0Options> configureOptions)
         {
             return services
                 .AddAuthentication(options =>
@@ -22,7 +22,7 @@ namespace Auth0.AspNetCore.Mvc
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-                .AddAuth0MVC(configureOptions);
+                .AddAuth0Mvc(configureOptions);
         }
 
     }

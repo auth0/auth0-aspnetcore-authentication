@@ -17,7 +17,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         {
             await MockHttpContext.Configure(services =>
             {
-                services.AddAuth0MVC(options =>
+                services.AddAuth0Mvc(options =>
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
@@ -37,7 +37,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         {
             await MockHttpContext.Configure(services =>
             {
-                services.AddAuth0MVC(options =>
+                services.AddAuth0Mvc(options =>
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
@@ -60,7 +60,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         {
             await MockHttpContext.Configure(services =>
             {
-                services.AddAuth0MVC(options =>
+                services.AddAuth0Mvc(options =>
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;

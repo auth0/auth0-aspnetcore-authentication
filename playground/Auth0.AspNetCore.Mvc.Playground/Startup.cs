@@ -26,7 +26,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuth0MVC(options =>
+            services.AddAuth0Mvc(options =>
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
