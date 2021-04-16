@@ -19,5 +19,10 @@
         /// Client secret of the application.
         /// </summary>
         public string ClientSecret { get; set; }
+
+        /// <summary>
+        /// Scopes to be used to request token(s).
+        /// </summary>
+        public string Scope { get; set; } = "openid profile email";
     }
 }
