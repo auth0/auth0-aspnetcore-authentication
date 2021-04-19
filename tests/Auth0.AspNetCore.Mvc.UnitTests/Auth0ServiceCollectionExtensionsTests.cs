@@ -185,5 +185,28 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/Test123");
             });
         }
+        
+        [Fact]
+        public async void Should_Redirect_To_Logout_Endpoint()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                await context.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+
+                redirectUri.Authority.Should().Be("123.auth0.com");
+                redirectUri.AbsolutePath.Should().Be("/v2/logout");
+            });
+        }
     }
 }
