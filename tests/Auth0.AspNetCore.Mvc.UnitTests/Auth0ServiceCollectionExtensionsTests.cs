@@ -3,6 +3,7 @@ using FluentAssertions;
 using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
 {
@@ -206,6 +207,56 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
 
                 redirectUri.Authority.Should().Be("123.auth0.com");
                 redirectUri.AbsolutePath.Should().Be("/v2/logout");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_ExtraParameters()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.ExtraParameters = new Dictionary<string, string>() { {"Test", "123" } };
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["Test"].Should().Be("123");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_ExtraParameters_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+                authenticationProperties.Items.Add("Auth0:Test", "123");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["Test"].Should().Be("123");
             });
         }
     }

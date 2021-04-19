@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
@@ -62,7 +63,7 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                foreach (var extraParam in GetAuthorizeParameters(context.Properties.Items))
+                foreach (var extraParam in GetAuthorizeParameters(auth0Options, context.Properties.Items))
                 {
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
@@ -97,7 +98,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static IDictionary<string, string> GetAuthorizeParameters(IDictionary<string, string> authSessionItems)
+        private static IDictionary<string, string> GetAuthorizeParameters(Auth0Options auth0Options, IDictionary<string, string> authSessionItems)
         {
             var parameters = new Dictionary<string, string>();
             var authorizeParameters = new List<string> { "scope" };
@@ -106,6 +107,22 @@ namespace Auth0.AspNetCore.Mvc
             {
                 if (authSessionItems.ContainsKey(key))
                     parameters[key] = authSessionItems[key];
+            }
+
+            // Extra Parameters
+            // 1. Globaly configured
+            if (auth0Options.ExtraParameters != null)
+            {
+                foreach (var extraParam in auth0Options.ExtraParameters)
+                {
+                    parameters[extraParam.Key] = extraParam.Value;
+                }
+            }
+
+            // 2. Provided when calling HttpContext.ChallangeAsync()
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith("Auth0:")))
+            {
+                parameters[item.Key.Replace("Auth0:", "")] = item.Value;
             }
 
             return parameters;
