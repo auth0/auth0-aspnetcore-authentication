@@ -1,0 +1,51 @@
+﻿using Microsoft.AspNetCore.Authentication;
+
+namespace Auth0.AspNetCore.Mvc
+{
+    /// <summary>
+    /// Builder class for <see cref="AuthenticationProperties"/>.
+    /// </summary>
+    /// <remarks>
+    /// Allows for Auth0 specific first-class properties when constructing an instance of <see cref="AuthenticationProperties"/>.
+    /// </remarks>
+    public class AuthenticationPropertiesBuilder
+    {
+        private readonly AuthenticationProperties authenticationProperties;
+
+        public AuthenticationPropertiesBuilder(AuthenticationProperties properties = null)
+        {
+            authenticationProperties = properties ?? new AuthenticationProperties();
+        }
+
+        /// <summary>
+        /// Build the AuthenticationProperties using the provided redirect URI
+        /// </summary>
+        /// <param name="redirectUri">Full path or absolute URI to be used to redirect back to your application.</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithRedirectUri(string redirectUri)
+        {
+            authenticationProperties.RedirectUri = redirectUri;
+            return this;
+        }
+
+        /// <summary>
+        /// Build the AuthenticationProperties using the provided scope
+        /// </summary>
+        /// <param name="scope">Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithScope(string scope)
+        {
+            authenticationProperties.Items.Add("scope", scope);
+            return this;
+        }
+
+        /// <summary>
+        /// Return the configured <see cref="AuthenticationProperties"/>.
+        /// </summary>
+        /// <returns>The configured <see cref="AuthenticationProperties"/></returns>
+        public AuthenticationProperties Build()
+        {
+            return authenticationProperties;
+        }
+    }
+}
