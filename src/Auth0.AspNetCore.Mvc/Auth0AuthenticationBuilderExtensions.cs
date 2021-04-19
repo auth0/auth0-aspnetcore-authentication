@@ -43,7 +43,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.ResponseType = OpenIdConnectResponseType.Code;
             oidcOptions.Scope.Clear();
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
-            oidcOptions.CallbackPath = new PathString(Constants.DefaultCallbackPath);
+            oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters

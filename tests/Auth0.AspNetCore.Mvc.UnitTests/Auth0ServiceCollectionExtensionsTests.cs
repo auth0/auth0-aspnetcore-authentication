@@ -131,5 +131,29 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["scope"].Should().Be("ScopeA ScopeB");
             });
         }
+
+        [Fact]
+        public async void Should_Allow_Configuring_CallbackPath()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.CallbackPath = "/Test123";
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/Test123");
+            });
+        }
     }
 }
