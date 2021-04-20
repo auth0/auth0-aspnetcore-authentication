@@ -54,6 +54,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Events = new OpenIdConnectEvents
             {
                 OnRedirectToIdentityProvider = CreateOnRedirectToIdentityProvider(auth0Options),
+                OnRedirectToIdentityProviderForSignOut = CreateOnRedirectToIdentityProviderForSignOut(auth0Options),
             };
         }
 
@@ -65,6 +66,32 @@ namespace Auth0.AspNetCore.Mvc
                 {
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
+
+                return Task.CompletedTask;
+            };
+        }
+
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0Options auth0Options)
+        {
+            return (context) =>
+            {
+                var logoutUri = $"https://{auth0Options.Domain}/v2/logout?client_id={auth0Options.ClientId}";
+                var postLogoutUri = context.Properties.RedirectUri;
+
+                if (!string.IsNullOrEmpty(postLogoutUri))
+                {
+                    if (postLogoutUri.StartsWith("/"))
+                    {
+                        // transform to absolute
+                        var request = context.Request;
+                        postLogoutUri = request.Scheme + "://" + request.Host + request.PathBase + postLogoutUri;
+                    }
+
+                    logoutUri += $"&returnTo={ Uri.EscapeDataString(postLogoutUri)}";
+                }
+
+                context.Response.Redirect(logoutUri);
+                context.HandleResponse();
 
                 return Task.CompletedTask;
             };
