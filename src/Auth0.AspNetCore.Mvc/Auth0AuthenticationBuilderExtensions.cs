@@ -2,17 +2,22 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
+
     public static class Auth0AuthenticationBuilderExtensions
     {
+
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
@@ -27,6 +32,8 @@ namespace Auth0.AspNetCore.Mvc
 
             builder.AddCookie();
             builder.AddOpenIdConnect(Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
             return builder;
         }
@@ -46,10 +53,12 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
+            oidcOptions.Backchannel = auth0Options.Backchannel ?? null;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
-                NameClaimType = "name"
+                NameClaimType = "name",
+                ValidIssuer = $"https://{auth0Options.Domain}/"
             };
 
             oidcOptions.Events = new OpenIdConnectEvents
@@ -63,6 +72,9 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
+                // Set auth0Client querystring parameter for /authorize
+                context.ProtocolMessage.SetParameter("auth0Client", Utils.CreateAgentString());
+
                 foreach (var extraParam in GetAuthorizeParameters(auth0Options, context.Properties.Items))
                 {
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);

@@ -3,6 +3,14 @@ using FluentAssertions;
 using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Moq;
+using System.Threading.Tasks;
+using Moq.Protected;
+using System.Net.Http;
+using System.Threading;
 using System.Collections.Generic;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
@@ -316,5 +324,98 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             });
         }
 
+
+        [Fact]
+        public async void Should_Send_Auth0Client_To_Authorize()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Scope = "ScopeA ScopeB";
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+                var auth0Client = queryParameters.ContainsKey("auth0Client")
+                    ? Encoding.UTF8.GetString(Convert.FromBase64String(queryParameters["auth0Client"]))
+                    : null;
+                var auth0ClientJObject = JObject.Parse(auth0Client);
+
+                auth0Client.Should().NotBeNull();
+                auth0ClientJObject.GetValue("name").Should().NotBeNull();
+                auth0ClientJObject.GetValue("name").ToString().Should().Be("aspnetcore-mvc");
+            });
+        }
+
+        [Fact(Skip = "To Implement")]
+        public async void Should_Send_Auth0Client_To_Token_Endpoint()
+        {
+            var mockHandler = TestUtils.SetupOidcMock(JwtUtils.GenerateToken(1, $"https://{AUTH0_DOMAIN}/", AUTH0_CLIENT_ID));
+            string nonce = null;
+
+            mockHandler
+              .Protected()
+              .Setup<Task<HttpResponseMessage>>(
+                 "SendAsync",
+                 ItExpr.Is<HttpRequestMessage>(me => me.RequestUri.AbsolutePath.Contains("oauth/token")),
+                 ItExpr.IsAny<CancellationToken>()
+              )
+              .ReturnsAsync(() => TestUtils.CreateTokenResponse(JwtUtils.GenerateToken(1, $"https://{AUTH0_DOMAIN}/", AUTH0_CLIENT_ID, null, nonce)))
+              .Verifiable();
+
+            var httpClient = new HttpClient(mockHandler.Object)
+            {
+                BaseAddress = new Uri("http://test.com/"),
+            };
+
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc((options) =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Backchannel = httpClient;
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                nonce = queryParameters["nonce"];
+
+
+                try { 
+                var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
+
+                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+
+                var result = await handler.HandleRequestAsync();
+
+                mockHandler
+                    .Protected()
+                    .Verify(
+                        "SendAsync",
+                        Times.Once(),
+                        ItExpr.Is<HttpRequestMessage>(me => me.RequestUri.AbsolutePath.Contains("oauth/token") ),
+                        ItExpr.IsAny<CancellationToken>()
+                    );
+                } catch(Exception e)
+                {
+                    throw e.InnerException;
+                }
+            });
+        }
     }
 }
