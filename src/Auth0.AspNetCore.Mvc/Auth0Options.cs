@@ -24,5 +24,11 @@
         /// Scopes to be used to request token(s).
         /// </summary>
         public string Scope { get; set; } = "openid profile email";
+
+        /// <summary>
+        /// The path within the application to redirect the user to.
+        /// </summary>
+        /// <remarks>Processed internally by the Open Id Connect middleware.</remarks> 
+        public string CallbackPath { get; set; }
     }
 }
