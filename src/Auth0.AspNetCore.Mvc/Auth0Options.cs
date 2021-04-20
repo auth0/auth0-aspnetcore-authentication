@@ -1,4 +1,6 @@
-﻿namespace Auth0.AspNetCore.Mvc
+﻿using System.Collections.Generic;
+
+namespace Auth0.AspNetCore.Mvc
 {
     /// <summary>
     /// Options used to configure the SDK
@@ -28,7 +30,18 @@
         /// <summary>
         /// The path within the application to redirect the user to.
         /// </summary>
-        /// <remarks>Processed internally by the Open Id Connect middleware.</remarks> 
+        /// <remarks>Processed internally by the Open Id Co nnect middleware.</remarks> 
         public string CallbackPath { get; set; }
+
+        /// <summary>
+        /// Extra parameters to be send to `/authorize`.
+        /// </summary>
+        /// <example>
+        /// services.AddAuth0Mvc(options =>
+        /// {
+        ///     options.ExtraParameters = new Dictionary<string, string>() { {"Test", "123" } };
+        /// });
+        /// </example>
+        public IDictionary<string, string> ExtraParameters { get; set; } = new Dictionary<string, string>();
     }
 }

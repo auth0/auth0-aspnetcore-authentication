@@ -40,6 +40,18 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
+        /// Build the AuthenticationProperties using an extra parameter
+        /// </summary>
+        /// <param name="key">The key for the extra parameter.</param>
+        /// <param name="value">The value for the extra parameter.</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithExtraParameter(string key, string value)
+        {
+            authenticationProperties.Items.Add($"Auth0:{key}", value);
+            return this;
+        }
+
+        /// <summary>
         /// Return the configured <see cref="AuthenticationProperties"/>.
         /// </summary>
         /// <returns>The configured <see cref="AuthenticationProperties"/></returns>
