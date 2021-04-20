@@ -287,5 +287,34 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["Test"].Should().Be("456");
             });
         }
+
+        [Fact]
+        public async void Should_Allow_Configuring_ExtraParameters_When_Calling_ChallengeAsync_Using_Builder()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithExtraParameter("Test", "123")
+                    .Build();
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["Test"].Should().Be("123");
+            });
+        }
+
     }
 }
