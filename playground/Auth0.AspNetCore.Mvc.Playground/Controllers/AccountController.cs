@@ -13,19 +13,19 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
     {
         public async Task Login(string returnUrl = "/")
         {
-            await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = returnUrl });
+            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl).Build();
+            await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
         }
 
         [Authorize]
         public async Task Logout()
         {
-            await HttpContext.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties
-            {
-                // Indicate here where Auth0 should redirect the user after a logout.
-                // Note that the resulting absolute Uri must be whitelisted in the
-                // **Allowed Logout URLs** settings for the client.
-                RedirectUri = Url.Action("Index", "Home")
-            });
+            // Indicate here where Auth0 should redirect the user after a logout.
+            // Note that the resulting absolute Uri must be whitelisted in the
+            // **Allowed Logout URLs** settings for the client.
+            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(Url.Action("Index", "Home")).Build();
+
+            await HttpContext.SignOutAsync(Constants.AuthenticationScheme, authenticationProperties);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 

@@ -131,7 +131,36 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["scope"].Should().Be("ScopeA ScopeB");
             });
         }
+      
+       
+        [Fact]
+        public async void Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync_Using_Builder()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithScope("ScopeA ScopeB")
+                    .Build();
 
+                await context.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["scope"].Should().Be("ScopeA ScopeB");
+            });
+        }
+  
         [Fact]
         public async void Should_Allow_Configuring_CallbackPath()
         {
@@ -142,6 +171,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
                     options.ClientSecret = AUTH0_CLIENT_SECRET;
+
                     options.CallbackPath = "/Test123";
                 });
             }).RunAsync(async context =>
