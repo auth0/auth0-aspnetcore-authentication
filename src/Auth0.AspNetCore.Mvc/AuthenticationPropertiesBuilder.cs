@@ -40,6 +40,17 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
+        /// Build the AuthenticationProperties using the provided audience to request API access.
+        /// </summary>
+        /// <param name="audience">Audience to request API access for.</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithAudience(string audience)
+        {
+            authenticationProperties.Items.Add("Auth0:audience", audience);
+            return this;
+        }
+
+        /// <summary>
         /// Build the AuthenticationProperties using an extra parameter
         /// </summary>
         /// <param name="key">The key for the extra parameter.</param>
