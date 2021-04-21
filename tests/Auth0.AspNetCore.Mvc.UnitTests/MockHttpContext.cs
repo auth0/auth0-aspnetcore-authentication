@@ -1,14 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using Moq;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
 {
     public class MockHttpContext
     {
+        private const string correlationId = "123";
+        private const string correlationCookieName = ".AspNetCore.Correlation.";
+        private const string correlationMarker = "N";
+
         private readonly ServiceCollection _serviceCollection;
         private readonly Action<ServiceCollection> _configureServiceCollection;
 
@@ -27,6 +35,9 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         {
             var httpContext = new DefaultHttpContext();
 
+            MockRequest(httpContext);
+            MockCookies(httpContext);
+
             httpContext.Request.Scheme = "https";
             httpContext.Request.Headers[HeaderNames.Host] = "local.auth0.com";
 
@@ -35,6 +46,39 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             httpContext.RequestServices = _serviceCollection.AddLogging(logging => logging.AddConsole()).BuildServiceProvider();
 
             await cb(httpContext);
+        }
+
+        private void MockRequest(HttpContext context)
+        {
+            var headers = new HeaderDictionary(new Dictionary<string, StringValues> { { HeaderNames.Host, "localhost" } });
+            var requestFeatureMock = new Mock<IHttpRequestFeature>();
+
+            requestFeatureMock.Setup(option => option.Scheme).Returns("https");
+            requestFeatureMock.Setup(option => option.Headers).Returns(headers);
+            requestFeatureMock.Setup(option => option.Path).Returns("/callback");
+            requestFeatureMock.Setup(option => option.Method).Returns("GET");
+            requestFeatureMock.Setup(option => option.QueryString).Returns("?code=1234&state=CfDJ8BPb7ELbAedCtEncnDGr4SocdS-70ScvDUW6wIJEez_nfvkmvXHmJGIL8rwIXKMoK5a_Y6fFtxPby0moLCmy8DRqlHg13UroeF8dqvTwFjzMSDOdLzUn9hC2CJUKSUv0Qt1MUfceO1SkCkDMaZeZPLYPACUpR63r24jMAIPxWbaggkkfkriZOlJaWIx08xor6YDsrm8fUpC_XHwVA9ExyrPSNWnTGnlso259Hxh1EkLLujf4iIDkz18G5b8x_CxidLoNfG54NVkmixS24EAd0PGyEBGCS_qJM4B1cuTCm0JrU6oZFD6ppyF9udVe4UW1mAo-5Zvh-YZAf4eEbbScONXudoOvI7aqKPK94xpkMOpiNhZ1emW4flKgU_n9gD5gEg");
+            context.Features.Set<IHttpRequestFeature>(requestFeatureMock.Object);
+
+        }
+
+        private void MockCookies(HttpContext context)
+        {
+            var cookiesFeatureMock = new Mock<IResponseCookiesFeature>();
+            var cookiesMock = new MockResponseCookies();
+
+            cookiesFeatureMock.Setup(option => option.Cookies).Returns(cookiesMock);
+
+            var requestCookiesFeatureMock = new Mock<IRequestCookiesFeature>();
+            var requestCookiesMock = new MockRequestCookies(new Dictionary<string, string>
+            {
+                [correlationCookieName + correlationId] = correlationMarker
+            });
+
+
+            requestCookiesFeatureMock.Setup(option => option.Cookies).Returns(requestCookiesMock);
+
+            context.Features.Set<IRequestCookiesFeature>(requestCookiesFeatureMock.Object);
         }
     }
 }

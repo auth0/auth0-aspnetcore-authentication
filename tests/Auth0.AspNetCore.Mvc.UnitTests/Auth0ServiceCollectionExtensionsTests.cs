@@ -12,6 +12,10 @@ using Moq.Protected;
 using System.Net.Http;
 using System.Threading;
 using System.Collections.Generic;
+using System.Net.Http;
+using Moq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
 {
@@ -59,7 +63,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 var redirectUrl = context.Response.Headers[HeaderNames.Location];
                 var redirectUri = new Uri(redirectUrl);
 
-                redirectUri.Authority.Should().Be("123.auth0.com");
+                redirectUri.Authority.Should().Be(AUTH0_DOMAIN);
                 redirectUri.AbsolutePath.Should().Be("/authorize");
             });
         }
@@ -83,7 +87,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 var redirectUri = new Uri(redirectUrl);
                 var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
-                queryParameters["client_id"].Should().Be("123");
+                queryParameters["client_id"].Should().Be(AUTH0_CLIENT_ID);
                 queryParameters["scope"].Should().Be("openid profile email");
                 queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/callback");
                 queryParameters["response_type"].Should().Be("code");
@@ -140,8 +144,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["scope"].Should().Be("ScopeA ScopeB");
             });
         }
-      
-       
+
         [Fact]
         public async void Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync_Using_Builder()
         {
@@ -169,7 +172,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["scope"].Should().Be("ScopeA ScopeB");
             });
         }
-  
+
         [Fact]
         public async void Should_Allow_Configuring_CallbackPath()
         {
@@ -194,7 +197,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/Test123");
             });
         }
-        
+
         [Fact]
         public async void Should_Redirect_To_Logout_Endpoint()
         {
@@ -213,7 +216,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 var redirectUrl = context.Response.Headers[HeaderNames.Location];
                 var redirectUri = new Uri(redirectUrl);
 
-                redirectUri.Authority.Should().Be("123.auth0.com");
+                redirectUri.Authority.Should().Be(AUTH0_DOMAIN);
                 redirectUri.AbsolutePath.Should().Be("/v2/logout");
             });
         }
@@ -228,7 +231,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
                     options.ClientSecret = AUTH0_CLIENT_SECRET;
-                    options.ExtraParameters = new Dictionary<string, string>() { {"Test", "123" } };
+                    options.ExtraParameters = new Dictionary<string, string>() { { "Test", "123" } };
                 });
             }).RunAsync(async context =>
             {
@@ -352,6 +355,84 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 auth0Client.Should().NotBeNull();
                 auth0ClientJObject.GetValue("name").Should().NotBeNull();
                 auth0ClientJObject.GetValue("name").ToString().Should().Be("aspnetcore-mvc");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Organization()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Organization = "123";
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["organization"].Should().Be("123");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Organization_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+                authenticationProperties.Items.Add("Auth0:organization", "123");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["organization"].Should().Be("123");
+            });
+        }
+
+        [Fact]
+        public async void Should_Override_Global_Organization_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Organization = "123";
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+
+                authenticationProperties.Items.Add("Auth0:organization", "456");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["organization"].Should().Be("456");
             });
         }
 
@@ -523,5 +604,181 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["audience"].Should().Be("http://local.auth0");
             });
         }
+        [Fact]
+        public async void Should_Allow_Configuring_Organization_When_Calling_ChallengeAsync_Using_Builder()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithOrganization("123")
+                    .Build();
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["organization"].Should().Be("123");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Invitation_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+                authenticationProperties.Items.Add("Auth0:invitation", "123");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["invitation"].Should().Be("123");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Invitation_When_Calling_ChallengeAsync_Using_Builder()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithInvitation("123")
+                    .Build();
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["invitation"].Should().Be("123");
+            });
+        }
+
+        [Fact(Skip = "To Implement")]
+        public async void Should_Throw_When_Organization_Provided_But_Claim_Missing()
+        {
+            var mockHandler = TestUtils.SetupOidcMock(JwtUtils.GenerateToken(1, $"https://{AUTH0_DOMAIN}/", AUTH0_CLIENT_ID));
+
+            // use real http client with mocked handler here
+            var httpClient = new HttpClient(mockHandler.Object)
+            {
+                BaseAddress = new Uri("http://test.com/"),
+            };
+
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc((options) =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    // options.Backchannel = httpClient;
+                    options.Organization = "123";
+                });
+            }).RunAsync(async context =>
+            {
+
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithExtraParameter("Test", "123")
+                    .Build();
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
+
+                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+
+                Func<Task> act = async () => { await handler.HandleRequestAsync(); };
+
+                var innerException = act
+                    .Should()
+                    .Throw<Exception>()
+                    .And.InnerException;
+
+                innerException
+                    .Should()
+                    .BeOfType<Exception>()
+                    .Which.Message.Should().Be("Organization claim must be a string present in the ID token.");
+            });
+        }
+
+        [Fact(Skip = "To Implement")]
+        public async void Should_Throw_When_Organization_Provided_But_Claim_Mismatch()
+        {
+
+            var mockHandler = TestUtils.SetupOidcMock(JwtUtils.GenerateToken(1, $"https://{AUTH0_DOMAIN}/", AUTH0_CLIENT_ID, "456"));
+
+            // use real http client with mocked handler here
+            var httpClient = new HttpClient(mockHandler.Object)
+            {
+                BaseAddress = new Uri("http://test.com/"),
+            };
+
+
+            await MockHttpContext.Configure(services =>
+            {
+
+                services.AddAuth0Mvc((options) =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    // options.Backchannel = httpClient;
+                    options.Organization = "123";
+                });
+            }).RunAsync(async context =>
+            {
+                var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
+
+                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+
+                Func<Task> act = async () => { await handler.HandleRequestAsync(); };
+
+                var innerException = act
+                    .Should()
+                    .Throw<Exception>()
+                    .And.InnerException;
+
+                innerException
+                    .Should()
+                    .BeOfType<Exception>()
+                    .Which.Message.Should().Be("Organization claim mismatch in the ID token; expected \"123\", found \"456\".");
+            });
+        }
+
+
     }
 }

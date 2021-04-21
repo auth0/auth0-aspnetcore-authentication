@@ -51,6 +51,28 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
+        /// Build the AuthenticationProperties using the provided organization
+        /// </summary>
+        /// <param name="organization">The organization used when logging in.</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithOrganization(string organization)
+        {
+            authenticationProperties.Items.Add("Auth0:organization", organization);
+            return this;
+        }
+
+        /// <summary>
+        /// Build the AuthenticationProperties using the provided invitation
+        /// </summary>
+        /// <param name="invitation">The Id of an invitation to accept. This is available from the URL that is given when participating in a user invitation flow.</param>
+        /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        public AuthenticationPropertiesBuilder WithInvitation(string invitation)
+        {
+            authenticationProperties.Items.Add("Auth0:invitation", invitation);
+            return this;
+        }
+
+        /// <summary>
         /// Build the AuthenticationProperties using an extra parameter
         /// </summary>
         /// <param name="key">The key for the extra parameter.</param>
