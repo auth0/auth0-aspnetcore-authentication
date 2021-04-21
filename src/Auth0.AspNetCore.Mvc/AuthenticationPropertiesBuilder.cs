@@ -35,7 +35,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithScope(string scope)
         {
-            authenticationProperties.Items.Add("scope", scope);
+            authenticationProperties.Items.Add("Auth0:scope", scope);
             return this;
         }
 

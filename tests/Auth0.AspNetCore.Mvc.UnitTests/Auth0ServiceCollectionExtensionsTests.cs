@@ -121,7 +121,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             }).RunAsync(async context =>
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
-                authenticationProperties.Items.Add("scope", "ScopeA ScopeB");
+                authenticationProperties.Items.Add("Auth0:scope", "ScopeA ScopeB");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
