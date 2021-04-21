@@ -112,9 +112,9 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             // Any Auth0 specific parameter
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith("Auth0:")))
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParmeters.Prefix}:")))
             {
-                parameters[item.Key.Replace("Auth0:", "")] = item.Value;
+                parameters[item.Key.Replace($"{Auth0AuthenticationParmeters.Prefix}:", "")] = item.Value;
             }
 
             return parameters;
