@@ -383,7 +383,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
                     options.ClientSecret = AUTH0_CLIENT_SECRET;
-                    options.Backchannel = httpClient;
+                    // options.Backchannel = httpClient;
                 });
             }).RunAsync(async context =>
             {

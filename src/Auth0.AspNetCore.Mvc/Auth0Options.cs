@@ -1,5 +1,4 @@
 ﻿﻿using System.Collections.Generic;
-﻿using System.Net.Http;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -44,9 +43,5 @@ namespace Auth0.AspNetCore.Mvc
         /// });
         /// </example>
         public IDictionary<string, string> ExtraParameters { get; set; } = new Dictionary<string, string>();
-
-        /// Used to communicate with Auth0 over Http
-        /// </summary>
-        public HttpClient Backchannel { get; set; }
     }
 }

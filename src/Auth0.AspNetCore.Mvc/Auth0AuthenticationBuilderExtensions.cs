@@ -9,15 +9,12 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
-
     public static class Auth0AuthenticationBuilderExtensions
     {
-
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
@@ -53,7 +50,6 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
-            oidcOptions.Backchannel = auth0Options.Backchannel ?? null;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
