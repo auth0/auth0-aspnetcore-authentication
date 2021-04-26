@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -11,6 +14,12 @@ namespace Auth0.AspNetCore.Mvc
                 collection.Add(item);
             }
         }
-    }
 
+        public static string CreateAgentString()
+        {
+            var sdkVersion = typeof(Auth0AuthenticationBuilderExtensions).GetTypeInfo().Assembly.GetName().Version;
+            var agentJson = $"{{\"name\":\"aspnetcore-mvc\",\"version\":\"{sdkVersion.Major}.{sdkVersion.Minor}.{sdkVersion.Revision}\"}}";
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(agentJson));
+        }
+    }
 }
