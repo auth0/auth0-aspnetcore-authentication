@@ -71,6 +71,11 @@ namespace Auth0.AspNetCore.Mvc
                 // Set auth0Client querystring parameter for /authorize
                 context.ProtocolMessage.SetParameter("auth0Client", Utils.CreateAgentString());
 
+                if (!string.IsNullOrWhiteSpace(auth0Options.Audience))
+                {
+                    context.ProtocolMessage.SetParameter("audience", auth0Options.Audience);
+                }
+
                 foreach (var extraParam in GetAuthorizeParameters(auth0Options, context.Properties.Items))
                 {
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);

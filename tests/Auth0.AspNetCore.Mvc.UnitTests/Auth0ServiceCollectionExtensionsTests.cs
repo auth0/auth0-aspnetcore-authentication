@@ -417,5 +417,111 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 }
             });
         }
+        [Fact]
+        public async void Should_Allow_Configuring_Audience()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Audience = "http://local.auth0";
+                });
+            }).RunAsync(async context =>
+            {
+                await context.ChallengeAsync("Auth0", new AuthenticationProperties() { RedirectUri = "/" });
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["audience"].Should().Be("http://local.auth0");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Audience_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, "http://local.auth0");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["audience"].Should().Be("http://local.auth0");
+            });
+        }
+
+        [Fact]
+        public async void Should_Override_Global_Audience_When_Calling_ChallengeAsync()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                    options.Audience = "http://local.auth0";
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
+
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, "http://remote.auth0");
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["audience"].Should().Be("http://remote.auth0");
+            });
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Audience_When_Calling_ChallengeAsync_Using_Builder()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
+                });
+            }).RunAsync(async context =>
+            {
+                var authenticationProperties = new AuthenticationPropertiesBuilder()
+                    .WithRedirectUri("/")
+                    .WithExtraParameter("Test", "123")
+                    .WithAudience("http://local.auth0")
+                    .Build();
+
+                await context.ChallengeAsync("Auth0", authenticationProperties);
+
+                var redirectUrl = context.Response.Headers[HeaderNames.Location];
+                var redirectUri = new Uri(redirectUrl);
+                var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                queryParameters["audience"].Should().Be("http://local.auth0");
+            });
+        }
     }
 }
