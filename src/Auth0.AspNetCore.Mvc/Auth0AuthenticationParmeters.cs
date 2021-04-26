@@ -7,7 +7,7 @@
         /// <summary>
         /// The key used for the scope entry in AuthenticationProperties.Items
         /// </summary>
-        public static string Scope = $"{Prefix}:scope";
+        public static readonly string Scope = $"{Prefix}:scope";
 
         /// <summary>
         /// Generate a key for any extra parameter entry in AuthenticationProperties.Items
