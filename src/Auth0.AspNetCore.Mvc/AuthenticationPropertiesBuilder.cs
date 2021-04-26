@@ -46,7 +46,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithAudience(string audience)
         {
-            authenticationProperties.Items.Add("Auth0:audience", audience);
+            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, audience);
             return this;
         }
 

@@ -455,7 +455,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             }).RunAsync(async context =>
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
-                authenticationProperties.Items.Add("Auth0:audience", "http://local.auth0");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, "http://local.auth0");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
@@ -483,7 +483,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
 
-                authenticationProperties.Items.Add("Auth0:audience", "http://remote.auth0");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, "http://remote.auth0");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 

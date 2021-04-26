@@ -10,6 +10,11 @@
         public static readonly string Scope = $"{Prefix}:scope";
 
         /// <summary>
+        /// The key used for the audience entry in AuthenticationProperties.Items
+        /// </summary>
+        public static readonly string Audience = $"{Prefix}:audience";
+
+        /// <summary>
         /// Generate a key for any extra parameter entry in AuthenticationProperties.Items
         /// </summary>
         /// <returns>The key used for the extra parameter entry in AuthenticationProperties.Items</returns>
