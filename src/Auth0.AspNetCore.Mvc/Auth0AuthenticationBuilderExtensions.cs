@@ -109,16 +109,8 @@ namespace Auth0.AspNetCore.Mvc
         private static IDictionary<string, string> GetAuthorizeParameters(Auth0Options auth0Options, IDictionary<string, string> authSessionItems)
         {
             var parameters = new Dictionary<string, string>();
-            var authorizeParameters = new List<string> { "scope" };
-
-            foreach (var key in authorizeParameters)
-            {
-                if (authSessionItems.ContainsKey(key))
-                    parameters[key] = authSessionItems[key];
-            }
 
             // Extra Parameters
-            // 1. Globaly configured
             if (auth0Options.ExtraParameters != null)
             {
                 foreach (var extraParam in auth0Options.ExtraParameters)
@@ -127,10 +119,10 @@ namespace Auth0.AspNetCore.Mvc
                 }
             }
 
-            // 2. Provided when calling HttpContext.ChallangeAsync()
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith("Auth0:")))
+            // Any Auth0 specific parameter
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParmeters.Prefix}:")))
             {
-                parameters[item.Key.Replace("Auth0:", "")] = item.Value;
+                parameters[item.Key.Replace($"{Auth0AuthenticationParmeters.Prefix}:", "")] = item.Value;
             }
 
             return parameters;

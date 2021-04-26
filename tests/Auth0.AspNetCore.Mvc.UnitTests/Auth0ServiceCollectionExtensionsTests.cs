@@ -129,7 +129,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             }).RunAsync(async context =>
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
-                authenticationProperties.Items.Add("scope", "ScopeA ScopeB");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Scope, "ScopeA ScopeB");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
@@ -256,7 +256,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             }).RunAsync(async context =>
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
-                authenticationProperties.Items.Add("Auth0:Test", "123");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.ExtraParameter("Test"), "123");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
@@ -284,7 +284,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
 
-                authenticationProperties.Items.Add("Auth0:Test", "456");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.ExtraParameter("Test"), "456");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
