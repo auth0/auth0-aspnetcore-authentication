@@ -30,8 +30,11 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
         }
 
         [Authorize]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+            var idToken = await HttpContext.GetTokenAsync("id_token");
+            var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
             return View(new UserProfileViewModel()
             {
                 Name = User.Identity.Name,
