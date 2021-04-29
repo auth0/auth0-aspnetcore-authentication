@@ -13,7 +13,7 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
             return View();
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Admin()
         {
             return View();
