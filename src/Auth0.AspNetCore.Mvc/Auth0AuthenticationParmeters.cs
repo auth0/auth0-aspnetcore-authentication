@@ -15,6 +15,11 @@
         public static readonly string Audience = $"{Prefix}:audience";
 
         /// <summary>
+        /// The key used for the organization entry in AuthenticationProperties.Items
+        /// </summary>
+        public static readonly string Organization = $"{Prefix}:organization";
+
+        /// <summary>
         /// Generate a key for any extra parameter entry in AuthenticationProperties.Items
         /// </summary>
         /// <returns>The key used for the extra parameter entry in AuthenticationProperties.Items</returns>

@@ -396,7 +396,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             }).RunAsync(async context =>
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
-                authenticationProperties.Items.Add("Auth0:organization", "123");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Organization, "123");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 
@@ -424,7 +424,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             {
                 var authenticationProperties = new AuthenticationProperties() { RedirectUri = "/" };
 
-                authenticationProperties.Items.Add("Auth0:organization", "456");
+                authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Organization, "456");
 
                 await context.ChallengeAsync("Auth0", authenticationProperties);
 

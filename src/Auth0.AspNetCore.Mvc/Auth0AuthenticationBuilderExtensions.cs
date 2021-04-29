@@ -83,9 +83,9 @@ namespace Auth0.AspNetCore.Mvc
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey("Auth0:organization"))
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization))
                 {
-                    context.Properties.Items["Auth0:organization"] = auth0Options.Organization;
+                    context.Properties.Items[Auth0AuthenticationParmeters.Organization] = auth0Options.Organization;
                 }
 
                 return Task.CompletedTask;
@@ -122,7 +122,7 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                var organization = context.Properties.Items.ContainsKey("Auth0:organization") ? context.Properties.Items["Auth0:organization"] : null;
+                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null;
 
                 if (!string.IsNullOrWhiteSpace(organization))
                 {
