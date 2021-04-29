@@ -9,6 +9,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
 {
     public class TestUtils
     {
+
         #region Dummy data
         public static string OIDC_CONFIG = @"{
   ""issuer"": ""https://tenant.eu.auth0.com/"",
@@ -79,9 +80,9 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
         public static HttpResponseMessage CreateTokenResponse(string idToken)
         {
             return new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(@"{
+               {
+                   StatusCode = HttpStatusCode.OK,
+                   Content = new StringContent(@"{
 'id_token': '" + idToken + @"',
 'access_token': '123'
 }"),

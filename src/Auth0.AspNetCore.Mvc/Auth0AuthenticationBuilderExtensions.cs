@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
@@ -61,6 +62,7 @@ namespace Auth0.AspNetCore.Mvc
             {
                 OnRedirectToIdentityProvider = CreateOnRedirectToIdentityProvider(auth0Options),
                 OnRedirectToIdentityProviderForSignOut = CreateOnRedirectToIdentityProviderForSignOut(auth0Options),
+                OnTokenValidated = CreateOnTokenValidated(auth0Options),
             };
         }
 
@@ -79,6 +81,11 @@ namespace Auth0.AspNetCore.Mvc
                 foreach (var extraParam in GetAuthorizeParameters(auth0Options, context.Properties.Items))
                 {
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization))
+                {
+                    context.Properties.Items[Auth0AuthenticationParmeters.Organization] = auth0Options.Organization;
                 }
 
                 return Task.CompletedTask;
@@ -111,9 +118,43 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
+        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0Options auth0Options)
+        {
+            return (context) =>
+            {
+                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null;
+
+                if (!string.IsNullOrWhiteSpace(organization))
+                {
+                    var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
+
+                    if (string.IsNullOrWhiteSpace(organizationClaimValue))
+                    {
+                        context.Fail("Organization claim must be a string present in the ID token.");
+                    }
+                    else if (organizationClaimValue != organization)
+                    {
+                        context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
+                    }
+                }
+
+                if (auth0Options.Events != null && auth0Options.Events.OnTokenValidated != null)
+                {
+                    return auth0Options.Events.OnTokenValidated(context);
+                }
+
+                return Task.CompletedTask;
+            };
+        }
+
         private static IDictionary<string, string> GetAuthorizeParameters(Auth0Options auth0Options, IDictionary<string, string> authSessionItems)
         {
             var parameters = new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(auth0Options.Organization))
+            {
+                parameters["organization"] = auth0Options.Organization;
+            }
 
             // Extra Parameters
             if (auth0Options.ExtraParameters != null)

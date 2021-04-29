@@ -35,8 +35,13 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// The path within the application to redirect the user to.
         /// </summary>
-        /// <remarks>Processed internally by the Open Id Co nnect middleware.</remarks> 
+        /// <remarks>Processed internally by the Open Id Connect middleware.</remarks> 
         public string CallbackPath { get; set; }
+
+        /// <summary>
+        /// The Id of the organization to which the users should log in to.
+        /// </summary>
+        public string Organization { get; set; }
 
         /// <summary>
         /// Extra parameters to be send to `/authorize`.
@@ -48,5 +53,10 @@ namespace Auth0.AspNetCore.Mvc
         /// });
         /// </example>
         public IDictionary<string, string> ExtraParameters { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
+        /// </summary>
+        public Auth0OptionsEvents Events { get; set; }
     }
 }

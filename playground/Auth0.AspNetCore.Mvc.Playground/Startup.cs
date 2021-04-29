@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.Playground
 {
@@ -24,6 +25,13 @@ namespace Auth0.AspNetCore.Mvc.Playground
                 options.ClientId = Configuration["Auth0:ClientId"];
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
                 options.Audience = Configuration["Auth0:Audience"];
+                options.Events = new Auth0OptionsEvents
+                {
+                    OnTokenValidated = (context) =>
+                    {
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             services.AddControllersWithViews();
@@ -46,7 +54,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
             app.UseStaticFiles();
 
             app.UseRouting();
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
 
