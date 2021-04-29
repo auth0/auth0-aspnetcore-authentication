@@ -62,7 +62,7 @@ namespace Auth0.AspNetCore.Mvc
             {
                 OnRedirectToIdentityProvider = CreateOnRedirectToIdentityProvider(auth0Options),
                 OnRedirectToIdentityProviderForSignOut = CreateOnRedirectToIdentityProviderForSignOut(auth0Options),
-                OnTokenValidated = CreateOnTokenValidated(),
+                OnTokenValidated = CreateOnTokenValidated(auth0Options),
             };
         }
 
@@ -118,7 +118,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated()
+        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0Options auth0Options)
         {
             return (context) =>
             {
@@ -136,6 +136,11 @@ namespace Auth0.AspNetCore.Mvc
                     {
                         context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
                     }
+                }
+
+                if (auth0Options.Events != null && auth0Options.Events.OnTokenValidated != null)
+                {
+                    return auth0Options.Events.OnTokenValidated(context);
                 }
 
                 return Task.CompletedTask;

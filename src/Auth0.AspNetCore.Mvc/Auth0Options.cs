@@ -53,5 +53,10 @@ namespace Auth0.AspNetCore.Mvc
         /// });
         /// </example>
         public IDictionary<string, string> ExtraParameters { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
+        /// </summary>
+        public Auth0OptionsEvents Events { get; set; }
     }
 }
