@@ -51,6 +51,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
+            oidcOptions.SaveTokens = true;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
