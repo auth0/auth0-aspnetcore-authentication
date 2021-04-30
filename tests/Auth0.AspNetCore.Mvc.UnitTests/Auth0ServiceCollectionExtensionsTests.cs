@@ -12,10 +12,6 @@ using Moq.Protected;
 using System.Net.Http;
 using System.Threading;
 using System.Collections.Generic;
-using System.Net.Http;
-using Moq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
 {
