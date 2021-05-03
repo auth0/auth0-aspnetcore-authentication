@@ -34,7 +34,7 @@ Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
 
 Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureService` method:
 
-```
+```csharp
 services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
@@ -45,7 +45,7 @@ services.AddAuth0Mvc(options =>
 
 Triggering login or logout is done using ASP.NET's `HttpContext`:
 
-```
+```csharp
 public async Task Login(string returnUrl = "/")
 {
     await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = "/" });
@@ -66,7 +66,7 @@ public async Task Logout()
 
 By default, this SDK requests the `openid profile email` scopes, if needed you can configure the SDK to request a different set of scopes.
 
-```
+```csharp
 services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
@@ -78,7 +78,7 @@ services.AddAuth0Mvc(options =>
 
 Apart from being able to configure the used scopes globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
 
-```
+```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithRedirectUri("/")
     .WithScope("openid profile email scope1 scope2")
@@ -93,7 +93,7 @@ await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationP
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. To obtain the token, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
 
-```
+```csharp
 services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
@@ -105,7 +105,7 @@ services.AddAuth0Mvc(options =>
 
 Apart from being able to configure the audience globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
 
-```
+```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithRedirectUri("/")
     .WithAudience("YOUR_AUDIENCE")
