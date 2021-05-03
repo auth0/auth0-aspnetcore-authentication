@@ -87,7 +87,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: Specifing the scopes when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
+> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
 
 ### Audience
 
@@ -114,9 +114,72 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: Specifing the Audience when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Audience.
+> :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Audience.
 
 ### Organization
+
+[Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
+
+Using Organizations, you can:
+
+- Represent teams, business customers, partner companies, or any logical grouping of users that should have different ways of accessing your applications, as organizations.
+
+- Manage their membership in a variety of ways, including user invitation.
+
+- Configure branded, federated login flows for each organization.
+
+- Implement role-based access control, such that users can have different roles when authenticating in the context of different organizations.
+
+- Build administration capabilities into your products, using Organizations APIs, so that those businesses can manage their own organizations.
+
+Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.
+
+#### Log in to an organization
+
+Log in to an organization by specyfing the `Organization` when calling `AddAuth0Mvc`:
+
+```csharp
+services.AddAuth0Mvc(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+    options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    options.Organization = Configuration["Auth0:Organization"];
+});
+```
+
+Apart from being able to configure the organization globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
+
+```csharp
+var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithRedirectUri("/")
+    .WithOrganization("YOUR_ORGANIZATION")
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+```
+
+> :information_source: specifying the Organization when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Organization.
+
+#### Accept user invitations
+Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
+
+```csharp
+public class InvitationController : Controller {
+
+    public async Task Accept(string organization, string invitation)
+    {
+        var authenticationProperties = new AuthenticationPropertiesBuilder()
+            .WithRedirectUri("/")
+            .WithOrganization(organization)
+            .WithInvitation(invitation)
+            .Build();
+            
+        await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+    }
+}
+
+```
 
 ### Extra Parameters
 
@@ -145,7 +208,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: Specifing any extra parameter when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured parameter.
+> :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured parameter.
 
 ## Contributing
 
