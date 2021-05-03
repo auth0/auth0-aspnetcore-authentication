@@ -230,6 +230,27 @@ await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationP
 
 > :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured parameter.
 
+### Roles
+
+Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
+
+Once the role is created and assigned to the required user(s), you will need to create a [rule](https://auth0.com/docs/rules/current) that adds the role(s) to the Id Token so that it is available to your backend. To do so, go to the [new rule page](https://manage.auth0.com/#/rules/new) and create an empty rule. Then, use the following code for your rule:
+
+```javascript
+function (user, context, callback) {
+  const assignedRoles = (context.authorization || {}).roles;
+  const idTokenClaims = context.idToken || {};
+
+  idTokenClaims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] = assignedRoles;
+
+  context.idToken = idTokenClaims;
+
+  callback(null, user, context);
+}
+```
+
+> :information_source: As this SDK uses the OpenId Connect middleware, it expects roles to exist in the `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` claim.
+
 ## Contributing
 
 We appreciate feedback and contribution to this repo! Before you get started, please see the following:
