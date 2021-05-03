@@ -87,7 +87,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> When specifying the used scopes, the default values will be ignored. Ensure to also include `openid profile email` if you need them as well.
+> :information_source: Specifing the scopes when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
 
 ### Audience
 
@@ -114,9 +114,38 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
+> :information_source: Specifing the Audience when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Audience.
+
 ### Organization
 
 ### Extra Parameters
+
+Auth0's `/authorize` endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the `ExtraParameters` when calling `AddAuth0Mvc`.
+
+An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
+
+```csharp
+services.AddAuth0Mvc(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+    options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    options.ExtraParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
+});
+```
+
+Apart from being able to configure these globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
+
+```csharp
+var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithRedirectUri("/")
+    .WithExtraParameter("screen_hint", "signup")
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+```
+
+> :information_source: Specifing any extra parameter when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured parameter.
 
 ## Contributing
 
