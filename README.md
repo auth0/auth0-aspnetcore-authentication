@@ -10,6 +10,12 @@ This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authe
 - [Documentation](#documentation)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
+  - [Login and Logout](#login-and-logout)
+  - [Scopes](#scopes)
+  - [Calling an API](#calling-an-api)
+  - [Organization](#organization)
+  - [Extra Parameters](#extra-parameters)
+  - [Roles](#roles)
 - [Contributing](#contributing)
 - [Support + Feedback](#support--feedback)
 - [Vulnerability Reporting](#vulnerability-reporting)
@@ -43,6 +49,7 @@ services.AddAuth0Mvc(options =>
 });
 ```
 
+### Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
 
 ```csharp
@@ -89,7 +96,7 @@ await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationP
 
 > :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
 
-### Audience
+### Calling an API
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. To obtain the token, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
 
