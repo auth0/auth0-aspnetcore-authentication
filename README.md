@@ -116,6 +116,26 @@ await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationP
 
 > :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Audience.
 
+#### Retrieving the Access Token
+
+As the SDK uses the OpenId Connect middleware, the ID Token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
+
+The access token can be retrieved by calling `HttpContext.GetTokenAsync("access_token")`.
+
+```csharp
+[Authorize]
+public async Task<IActionResult> Profile()
+{
+    var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+    return View(new UserProfileViewModel()
+    {
+        Name = User.Identity.Name,
+        EmailAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+        ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
+    });
+}
+```
 ### Organization
 
 [Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
