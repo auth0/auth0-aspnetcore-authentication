@@ -24,9 +24,8 @@ This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authe
 
 ## Documentation
 
-- Documentation
-- API reference
-- Migrate from `Microsoft.AspNetCore.Authentication.OpenIdConnect` to the Auth0 ASP.NET MVC SDK
+- API Reference
+- Quickstart Guide
 
 ## Installation
 
@@ -35,6 +34,8 @@ The SDK is available on Nuget and can be installed through the UI or using the P
 ```
 Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
 ```
+
+As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the `-IncludePrerelease` flag when using the Package Manager Console, or by checking the `Include prerelease` checkbox when installing the SDK through the Package Manager UI.
 
 ## Getting Started
 
