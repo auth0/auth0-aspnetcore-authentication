@@ -3,7 +3,7 @@
 
 This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core 5 application using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce) as seamlessly as possible.
 
-> :information_source: This SDK is designed to support the most common use-cases. In the event that you have more complex needs, you can still integrate Auth0 using `Microsoft.AspNetCore.Authentication.OpenIdConnect` directly.
+> :information_source: This SDK is designed to support the most common use-cases. If you have more complex needs, you can still integrate Auth0 using `Microsoft.AspNetCore.Authentication.OpenIdConnect` directly.
 
 ## Table of Contents
 
@@ -95,7 +95,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
+> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
 
 ### Calling an API
 
@@ -122,7 +122,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Audience.
+> :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
 
 #### Retrieving the Access Token
 
@@ -164,7 +164,7 @@ Note that Organizations is currently only available to customers on our Enterpri
 
 #### Log in to an organization
 
-Log in to an organization by specyfing the `Organization` when calling `AddAuth0Mvc`:
+Log in to an organization by specifying the `Organization` when calling `AddAuth0Mvc`:
 
 ```csharp
 services.AddAuth0Mvc(options =>
@@ -187,7 +187,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the Organization when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured Organization.
+> :information_source: specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
 #### Accept user invitations
 Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
@@ -236,7 +236,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precendence over any globally configured parameter.
+> :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
 
 ### Roles
 
