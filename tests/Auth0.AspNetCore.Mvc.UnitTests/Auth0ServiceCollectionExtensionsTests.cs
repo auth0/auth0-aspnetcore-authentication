@@ -19,7 +19,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
     {
         readonly string AUTH0_DOMAIN = "123.auth0.com";
         readonly string AUTH0_CLIENT_ID = "123";
-        readonly string AUTH0_CLIENT_SECRET = "456";
 
         [Fact]
         public async void Should_Have_Redirect_Header()
@@ -30,7 +29,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -50,7 +48,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -73,7 +70,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -86,7 +82,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 queryParameters["client_id"].Should().Be(AUTH0_CLIENT_ID);
                 queryParameters["scope"].Should().Be("openid profile email");
                 queryParameters["redirect_uri"].Should().Be("https://local.auth0.com/callback");
-                queryParameters["response_type"].Should().Be("code");
+                queryParameters["response_type"].Should().Be("id_token");
                 queryParameters["response_mode"].Should().Be("form_post");
             });
         }
@@ -100,7 +96,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Scope = "ScopeA ScopeB";
                 });
             }).RunAsync(async context =>
@@ -124,7 +119,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -150,7 +144,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -178,7 +171,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
 
                     options.CallbackPath = "/Test123";
                 });
@@ -203,7 +195,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -226,7 +217,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.ExtraParameters = new Dictionary<string, string>() { { "Test", "123" } };
                 });
             }).RunAsync(async context =>
@@ -250,7 +240,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -276,7 +265,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.ExtraParameters = new Dictionary<string, string>() { { "Test", "123" } };
                 });
             }).RunAsync(async context =>
@@ -304,7 +292,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -333,7 +320,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Scope = "ScopeA ScopeB";
                 });
             }).RunAsync(async context =>
@@ -363,7 +349,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Organization = "123";
                 });
             }).RunAsync(async context =>
@@ -387,7 +372,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -413,7 +397,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Organization = "123";
                 });
             }).RunAsync(async context =>
@@ -459,7 +442,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     // options.Backchannel = httpClient;
                 });
             }).RunAsync(async context =>
@@ -503,7 +485,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Audience = "http://local.auth0";
                 });
             }).RunAsync(async context =>
@@ -527,7 +508,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -553,7 +533,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Audience = "http://local.auth0";
                 });
             }).RunAsync(async context =>
@@ -581,7 +560,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -609,7 +587,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -637,7 +614,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -663,7 +639,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                 });
             }).RunAsync(async context =>
             {
@@ -699,7 +674,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     // options.Backchannel = httpClient;
                     options.Organization = "123";
                 });
@@ -751,7 +725,6 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
-                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     // options.Backchannel = httpClient;
                     options.Organization = "123";
                 });
