@@ -1,7 +1,7 @@
 # Auth0 SDK for ASP.NET Core MVC (Beta)
 [![Build status](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_apis/build/status/Auth0.AspNetCore.MVC)](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_build/latest?definitionId=8)
 
-This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core 5 application using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce) as seamlessly as possible.
+This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core 5 application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
 
 > :information_source: This SDK is designed to support the most common use-cases. If you have more complex needs, you can still integrate Auth0 using `Microsoft.AspNetCore.Authentication.OpenIdConnect` directly.
 
@@ -46,7 +46,6 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
 });
 ```
 
@@ -79,7 +78,6 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
     options.Scope = "openid profile email scope1 scope2";
 });
 ```
@@ -106,7 +104,6 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
     options.Audience = Configuration["Auth0:Audience"];
 });
 ```
@@ -171,7 +168,6 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
     options.Organization = Configuration["Auth0:Organization"];
 });
 ```
@@ -220,7 +216,6 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
     options.ExtraParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
 });
 ```
