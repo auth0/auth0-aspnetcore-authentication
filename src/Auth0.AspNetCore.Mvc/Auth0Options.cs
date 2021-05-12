@@ -18,11 +18,6 @@ namespace Auth0.AspNetCore.Mvc
         public string ClientId { get; set; }
 
         /// <summary>
-        /// Client secret of the application.
-        /// </summary>
-        public string ClientSecret { get; set; }
-
-        /// <summary>
         /// The audience to be used for requesting API access.
         /// </summary>
         public string Audience { get; set; }

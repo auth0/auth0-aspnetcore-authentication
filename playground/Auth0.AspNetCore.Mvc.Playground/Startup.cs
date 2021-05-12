@@ -23,15 +23,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
-                options.ClientSecret = Configuration["Auth0:ClientSecret"];
                 options.Audience = Configuration["Auth0:Audience"];
-                options.Events = new Auth0OptionsEvents
-                {
-                    OnTokenValidated = (context) =>
-                    {
-                        return Task.CompletedTask;
-                    }
-                };
             });
 
             services.AddControllersWithViews();

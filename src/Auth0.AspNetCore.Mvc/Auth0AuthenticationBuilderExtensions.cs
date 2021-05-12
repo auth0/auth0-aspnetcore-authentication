@@ -45,12 +45,9 @@ namespace Auth0.AspNetCore.Mvc
         {
             oidcOptions.Authority = $"https://{auth0Options.Domain}";
             oidcOptions.ClientId = auth0Options.ClientId;
-            oidcOptions.ClientSecret = auth0Options.ClientSecret;
-            oidcOptions.ResponseType = OpenIdConnectResponseType.Code;
             oidcOptions.Scope.Clear();
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
-            oidcOptions.ClaimsIssuer = Constants.ClaimsIssuer;
             oidcOptions.SaveTokens = true;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
