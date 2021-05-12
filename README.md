@@ -62,7 +62,7 @@ public async Task Login(string returnUrl = "/")
 public async Task Logout()
 {
     // Indicate here where Auth0 should redirect the user after a logout.
-    // Note that the resulting absolute Uri must be whitelisted in the
+    // Note that the resulting absolute Uri must be added in the
     // **Allowed Logout URLs** settings for the client.
     await HttpContext.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action("Index", "Home") });
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

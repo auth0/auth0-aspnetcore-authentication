@@ -4,7 +4,7 @@ Please read [Auth0's contribution guidelines](https://github.com/auth0/open-sour
 
 ## Environment setup
 
-- Make sure you have the [.NET 5 SKD](https://dotnet.microsoft.com/download/dotnet/5.0) installed.
+- Make sure you have the [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0) installed.
 - Restore the Nuget dependencies using `dotnet restore` or through the UI.
 - Follow the local development steps below to get started
 
