@@ -15,13 +15,15 @@ namespace Auth0.AspNetCore.Mvc
         public AuthenticationPropertiesBuilder(AuthenticationProperties properties = null)
         {
             authenticationProperties = properties ?? new AuthenticationProperties();
+            authenticationProperties.RedirectUri = authenticationProperties.RedirectUri ?? "/";
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using the provided redirect URI
+        /// Build the <see cref="AuthenticationProperties"/> using the provided redirect URI
         /// </summary>
         /// <param name="redirectUri">Full path or absolute URI to be used to redirect back to your application.</param>
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
+        /// <remarks>Defaults to "/" when <see cref="WithRedirectUri"/> is not called while building the <see cref="AuthenticationProperties"/>.</remarks>
         public AuthenticationPropertiesBuilder WithRedirectUri(string redirectUri)
         {
             authenticationProperties.RedirectUri = redirectUri;
@@ -29,7 +31,7 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using the provided scope
+        /// Build the <see cref="AuthenticationProperties"/> using the provided scope.
         /// </summary>
         /// <param name="scope">Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")</param>
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
@@ -40,7 +42,7 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using the provided audience to request API access.
+        /// Build the <see cref="AuthenticationProperties"/> using the provided audience to request API access.
         /// </summary>
         /// <param name="audience">Audience to request API access for.</param>
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
@@ -51,7 +53,7 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using the provided organization
+        /// Build the <see cref="AuthenticationProperties"/> using the provided organization
         /// </summary>
         /// <param name="organization">The organization used when logging in.</param>
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
@@ -62,7 +64,7 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using the provided invitation
+        /// Build the <see cref="AuthenticationProperties"/> using the provided invitation
         /// </summary>
         /// <param name="invitation">The Id of an invitation to accept. This is available from the URL that is given when participating in a user invitation flow.</param>
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
@@ -73,7 +75,7 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Build the AuthenticationProperties using an extra parameter
+        /// Build the <see cref="AuthenticationProperties"/> using an extra parameter
         /// </summary>
         /// <param name="key">The key for the extra parameter.</param>
         /// <param name="value">The value for the extra parameter.</param>

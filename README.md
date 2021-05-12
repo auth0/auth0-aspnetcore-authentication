@@ -86,7 +86,6 @@ Apart from being able to configure the used scopes globally, the SDK's `Authenti
 
 ```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithRedirectUri("/")
     .WithScope("openid profile email scope1 scope2")
     .Build();
 
@@ -116,7 +115,7 @@ Apart from being able to configure the audience globally, the SDK's `Authenticat
 
 ```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithRedirectUri("/")
+    .WithRedirectUri("/") // "/" is the default value used for RedirectUri, so this can be omitted.
     .WithAudience("YOUR_AUDIENCE")
     .Build();
 
@@ -180,7 +179,6 @@ Apart from being able to configure the organization globally, the SDK's `Authent
 
 ```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithRedirectUri("/")
     .WithOrganization("YOUR_ORGANIZATION")
     .Build();
 
@@ -198,7 +196,6 @@ public class InvitationController : Controller {
     public async Task Accept(string organization, string invitation)
     {
         var authenticationProperties = new AuthenticationPropertiesBuilder()
-            .WithRedirectUri("/")
             .WithOrganization(organization)
             .WithInvitation(invitation)
             .Build();
@@ -228,7 +225,6 @@ Apart from being able to configure these globally, the SDK's `AuthenticationProp
 
 ```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithRedirectUri("/")
     .WithExtraParameter("screen_hint", "signup")
     .Build();
 
