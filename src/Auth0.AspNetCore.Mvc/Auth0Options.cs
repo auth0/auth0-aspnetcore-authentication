@@ -18,8 +18,19 @@ namespace Auth0.AspNetCore.Mvc
         public string ClientId { get; set; }
 
         /// <summary>
+        /// Client Secret of the application.
+        /// </summary>
+        /// <remarks>
+        /// Required when using <see cref="ResponseType"/> set to `code` or `code id_token`.
+        /// </remarks>
+        public string ClientSecret { get; set; }
+
+        /// <summary>
         /// The audience to be used for requesting API access.
         /// </summary>
+        /// <remark>
+        /// When set, ensure to set <see cref="ResponseType"/> to `code` or `code id_token`.
+        /// </remark>
         public string Audience { get; set; }
 
         /// <summary>
@@ -53,5 +64,13 @@ namespace Auth0.AspNetCore.Mvc
         /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
         /// </summary>
         public Auth0OptionsEvents Events { get; set; }
+
+        /// <summary>
+        /// Set the ResponseType to be used.
+        /// </summary>
+        /// <remarks>
+        /// Supports `id_token`, `code` or `code id_token`, defaults to `id_token` when omitted.
+        /// </remarks>
+        public string ResponseType { get; set; }
     }
 }

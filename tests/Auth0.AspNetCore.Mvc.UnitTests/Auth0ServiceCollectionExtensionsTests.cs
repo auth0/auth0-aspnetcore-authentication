@@ -12,6 +12,7 @@ using Moq.Protected;
 using System.Net.Http;
 using System.Threading;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Auth0.AspNetCore.Mvc.UnitTests
 {
@@ -19,6 +20,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
     {
         readonly string AUTH0_DOMAIN = "123.auth0.com";
         readonly string AUTH0_CLIENT_ID = "123";
+        readonly string AUTH0_CLIENT_SECRET = "123";
 
         [Fact]
         public async void Should_Have_Redirect_Header()
@@ -476,6 +478,44 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 }
             });
         }
+
+        [Fact]
+        public async void Should_Not_Allow_Configuring_Audience_Without_Code()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                Func<AuthenticationBuilder> act = () => services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.Audience = "http://local.auth0";
+                });
+
+                act.Should()
+                    .Throw<InvalidOperationException>()
+                    .Which.Message.Should().Be("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }).RunAsync(async context => {});
+        }
+
+        [Fact]
+        public async void Should_Not_Allow_Configuring_Audience_Without_ClientSecret()
+        {
+            await MockHttpContext.Configure(services =>
+            {
+                Func<AuthenticationBuilder> act = () => services.AddAuth0Mvc(options =>
+                {
+                    options.Domain = AUTH0_DOMAIN;
+                    options.ClientId = AUTH0_CLIENT_ID;
+                    options.Audience = "http://local.auth0";
+                    options.ResponseType = OpenIdConnectResponseType.Code;
+                });
+
+                act.Should()
+                    .Throw<ArgumentNullException>()
+                    .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");
+            }).RunAsync(async context => { });
+        }
+
         [Fact]
         public async void Should_Allow_Configuring_Audience()
         {
@@ -485,7 +525,9 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Audience = "http://local.auth0";
+                    options.ResponseType = OpenIdConnectResponseType.Code;
                 });
             }).RunAsync(async context =>
             {
@@ -533,7 +575,9 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 {
                     options.Domain = AUTH0_DOMAIN;
                     options.ClientId = AUTH0_CLIENT_ID;
+                    options.ClientSecret = AUTH0_CLIENT_SECRET;
                     options.Audience = "http://local.auth0";
+                    options.ResponseType = OpenIdConnectResponseType.Code;
                 });
             }).RunAsync(async context =>
             {
