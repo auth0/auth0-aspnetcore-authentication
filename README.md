@@ -97,13 +97,17 @@ await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationP
 
 ### Calling an API
 
-If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. To obtain the token, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
+If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
+As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
+Next, To obtain the token to access an external API, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
 
 ```csharp
 services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
+    options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    options.ResponseType = OpenIdConnectResponseType.Code;
     options.Audience = Configuration["Auth0:Audience"];
 });
 ```
