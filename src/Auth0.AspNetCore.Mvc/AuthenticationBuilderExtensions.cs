@@ -14,14 +14,17 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
-    public static class Auth0AuthenticationBuilderExtensions
+    /// <summary>
+    /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> extension(s) for registering Auth0.
+    /// </summary>
+    public static class AuthenticationBuilderExtensions
     {
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
-        /// <param name="builder">The original <see cref="AuthenticationBuilder"/> instance</param>
+        /// <param name="builder">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
-        /// <returns>The <see cref="AuthenticationBuilder"/ instance that has been configured.</returns>
+        /// <returns>The <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance that has been configured.</returns>
         public static AuthenticationBuilder AddAuth0Mvc(this AuthenticationBuilder builder, Action<Auth0Options> configureOptions)
         {
             var auth0Options = new Auth0Options();
@@ -30,7 +33,7 @@ namespace Auth0.AspNetCore.Mvc
             ValidateOptions(auth0Options);
 
             builder.AddCookie();
-            builder.AddOpenIdConnect(Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
+            builder.AddOpenIdConnect(Auth0Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
@@ -40,7 +43,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Configure Open ID Connect based on the provided <see cref="Auth0Options"/>.
         /// </summary>
-        /// <param name="oidcOptions">A reference to the <see cref="OpenIdConnectOptions"/> that needs to be configured./param>
+        /// <param name="oidcOptions">A reference to the <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.openidconnect.openidconnectoptions">OpenIdConnectOptions</see> that needs to be configured./param>
         /// <param name="auth0Options">The provided <see cref="Auth0Options"/>.</param>
         private static void ConfigureOpenIdConnect(OpenIdConnectOptions oidcOptions, Auth0Options auth0Options)
         {
@@ -49,7 +52,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.ClientSecret = auth0Options.ClientSecret;
             oidcOptions.Scope.Clear();
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
-            oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
+            oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Auth0Constants.DefaultCallbackPath);
             oidcOptions.SaveTokens = true;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
 

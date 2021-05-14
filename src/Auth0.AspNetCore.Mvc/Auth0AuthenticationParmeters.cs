@@ -20,6 +20,11 @@
         public static readonly string Organization = $"{Prefix}:organization";
 
         /// <summary>
+        /// The key used for the invitation entry in AuthenticationProperties.Items
+        /// </summary>
+        public static readonly string Invitation = $"{Prefix}:invitation";
+
+        /// <summary>
         /// Generate a key for any extra parameter entry in AuthenticationProperties.Items
         /// </summary>
         /// <returns>The key used for the extra parameter entry in AuthenticationProperties.Items</returns>

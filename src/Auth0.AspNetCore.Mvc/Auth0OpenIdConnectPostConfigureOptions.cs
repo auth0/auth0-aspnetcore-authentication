@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace Auth0.AspNetCore.Mvc
 {
     /// <summary>
-    /// Used to setup Auth0 specific defaults for <see cref="OpenIdConnectOptions"/>.
+    /// Used to setup Auth0 specific defaults for <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.openidconnect.openidconnectoptions">OpenIdConnectOptions</see>.
     /// </summary>
     internal class Auth0OpenIdConnectPostConfigureOptions : IPostConfigureOptions<OpenIdConnectOptions>
     {

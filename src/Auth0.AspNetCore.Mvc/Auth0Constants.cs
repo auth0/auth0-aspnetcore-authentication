@@ -1,6 +1,9 @@
 ﻿namespace Auth0.AspNetCore.Mvc
 {
-    public class Constants
+    /// <summary>
+    /// Class containing Auth0 specific constants used throughout the SDK
+    /// </summary>
+    public class Auth0Constants
     {
         /// <summary>
         /// The Authentication Scheme, used when configuring OpenIdConnect

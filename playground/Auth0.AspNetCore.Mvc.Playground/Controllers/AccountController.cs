@@ -14,7 +14,7 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
         public async Task Login(string returnUrl = "/")
         {
             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl).Build();
-            await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
 
         [Authorize]
@@ -25,7 +25,7 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
             // **Allowed Logout URLs** settings for the client.
             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(Url.Action("Index", "Home")).Build();
 
-            await HttpContext.SignOutAsync(Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 

@@ -154,7 +154,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                     .WithScope("ScopeA ScopeB")
                     .Build();
 
-                await context.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+                await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 
                 var redirectUrl = context.Response.Headers[HeaderNames.Location];
                 var redirectUri = new Uri(redirectUrl);
@@ -200,7 +200,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 });
             }).RunAsync(async context =>
             {
-                await context.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = "/" });
+                await context.SignOutAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = "/" });
 
                 var redirectUrl = context.Response.Headers[HeaderNames.Location];
                 var redirectUri = new Uri(redirectUrl);
@@ -460,7 +460,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
                 try { 
                 var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
 
-                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+                await handler.InitializeAsync(new AuthenticationScheme(Auth0Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
 
                 var result = await handler.HandleRequestAsync();
 
@@ -733,7 +733,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
 
                 var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
 
-                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+                await handler.InitializeAsync(new AuthenticationScheme(Auth0Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
 
                 Func<Task> act = async () => { await handler.HandleRequestAsync(); };
 
@@ -776,7 +776,7 @@ namespace Auth0.AspNetCore.Mvc.UnitTests
             {
                 var handler = context.RequestServices.GetService(typeof(OpenIdConnectHandler)) as OpenIdConnectHandler;
 
-                await handler.InitializeAsync(new AuthenticationScheme(Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
+                await handler.InitializeAsync(new AuthenticationScheme(Auth0Constants.AuthenticationScheme, null, typeof(OpenIdConnectHandler)), context);
 
                 Func<Task> act = async () => { await handler.HandleRequestAsync(); };
 
