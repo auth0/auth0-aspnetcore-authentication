@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
+    /// <summary>
+    /// HttpClient Extensions to support a URL as a string as well as cookie headers.
+    /// </summary>
     internal static class HttpClientExtensions
     {
         public static Task<HttpResponseMessage> SendAsync(this HttpClient client, string url)

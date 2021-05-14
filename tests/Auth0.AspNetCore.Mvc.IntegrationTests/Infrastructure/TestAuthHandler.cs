@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
+    /// <summary>
+    ///  AuthenticationHandler used to Mock the Authentication in Integration Tests that an authenticated user to be available
+    ///  See: https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-5.0#mock-authentication
+    /// </summary>
     public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,

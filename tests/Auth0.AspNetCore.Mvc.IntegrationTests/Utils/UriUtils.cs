@@ -4,8 +4,16 @@ using System.Linq;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
+    /// <summary>
+    /// Utils class for Uri's
+    /// </summary>
     public class UriUtils
     {
+        /// <summary>
+        /// Convert the Query Params to a Dictionary
+        /// </summary>
+        /// <param name="uri">The Uri containing the query params.</param>
+        /// <returns>The Dictionary containing the query params.</returns>
         public static IDictionary<string, string> GetQueryParams(Uri uri)
         {
             return uri.Query.TrimStart('?')

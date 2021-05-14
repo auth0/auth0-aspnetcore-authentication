@@ -9,6 +9,9 @@ using Microsoft.Extensions.Hosting;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
+    /// <summary>
+    /// Helper class to create an instance of the TestServer to use for Integration Tests.
+    /// </summary>
     internal class TestServerBuilder
     {
         public static readonly string Host = @"https://localhost";
@@ -17,6 +20,12 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         public static readonly string Logout = "Account/Logout";
         public static readonly string Callback = "Callback";
 
+        /// <summary>
+        /// Create an instance of the TestServer to use for Integration Tests.
+        /// </summary>
+        /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
+        /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
+        /// <returns>The created TestServer instance.</returns>
         public static TestServer CreateServer(Action<Auth0Options> configureOptions = null, bool mockAuthentication = false)
         {
             var configuration = TestConfiguration.GetConfiguration();

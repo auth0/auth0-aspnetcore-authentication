@@ -10,19 +10,24 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
+    /// <summary>
+    /// Builder used to set up a Mock<HttpMessageHandler> that handles the Oidc and OAuth requests.
+    /// </summary>
     public class OidcMockBuilder
     {
         private Mock<HttpMessageHandler> _mockHandler = new Mock<HttpMessageHandler>();
 
+        /// <summary>
+        /// Mock the `.well-known/openid-configuration` request.
+        /// </summary>
+        /// <returns>The contents of `wellknownconfig.json`, containing some dummy information needed for the tests.</returns>
         public OidcMockBuilder MockOpenIdConfig()
         {
             _mockHandler
                    .Protected()
-                       // Setup the PROTECTED method to mock
                        .Setup<Task<HttpResponseMessage>>(
                           "SendAsync",
-                          ItExpr.Is<HttpRequestMessage>(me => me.RequestUri.AbsolutePath.Contains(".well-known/openid-configuration")),
-                          //ItExpr.IsAny<HttpRequestMessage>(),
+                          ItExpr.Is<HttpRequestMessage>(me => me.IsOpenIdConfigurationEndPoint()),
                           ItExpr.IsAny<CancellationToken>()
                        )
                        .ReturnsAsync(ReturnResource("wellknownconfig.json").Result);
@@ -30,15 +35,17 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             return this;
         }
 
+        /// <summary>
+        /// Mock the `.well-known/jwks.json` request.
+        /// </summary>
+        /// <returns>An empty object as the contents are irrelevant for the tests.</returns>
         public OidcMockBuilder MockJwks()
         {
             _mockHandler
                .Protected()
-                   // Setup the PROTECTED method to mock
                    .Setup<Task<HttpResponseMessage>>(
                       "SendAsync",
-                      ItExpr.Is<HttpRequestMessage>(me => me.RequestUri.AbsolutePath.Contains(".well-known/jwks.json")),
-                      //ItExpr.IsAny<HttpRequestMessage>(),
+                      ItExpr.Is<HttpRequestMessage>(me => me.IsJwksEndPoint()),
                       ItExpr.IsAny<CancellationToken>()
                    )
                    .ReturnsAsync(new HttpResponseMessage()
@@ -50,6 +57,12 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             return this;
         }
 
+        /// <summary>
+        /// Mock the `oauth/token` request.
+        /// </summary>
+        /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
+        /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
+        /// <returns></returns>
         public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null)
         {
             _mockHandler
@@ -77,10 +90,14 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             return _mockHandler;
         }
 
+        /// <summary>
+        /// Converts an Embedded Resource to an HttpResponseMessage.
+        /// </summary>
+        /// <param name="resource">The name of the resource, has to exist as `Auth0.AspNetCore.Mvc.IntegrationTests.{resource}`</param>
+        /// <returns>The HttpResponseMessage instance containing the Embedded Resource.</returns>
         private async Task<HttpResponseMessage> ReturnResource(string resource)
         {
             var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests." + resource;
-            var names = typeof(Startup).Assembly.GetManifestResourceNames();
             using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
             using (var reader = new StreamReader(stream))
             {
