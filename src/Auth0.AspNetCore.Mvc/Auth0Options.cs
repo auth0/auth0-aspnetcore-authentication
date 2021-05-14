@@ -1,4 +1,5 @@
 ﻿﻿using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -53,5 +54,7 @@ namespace Auth0.AspNetCore.Mvc
         /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
         /// </summary>
         public Auth0OptionsEvents Events { get; set; }
+
+        public HttpClient Backchannel { get; set; }
     }
 }

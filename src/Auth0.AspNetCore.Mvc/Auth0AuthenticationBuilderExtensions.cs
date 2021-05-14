@@ -49,11 +49,14 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.SaveTokens = true;
+            oidcOptions.Backchannel = auth0Options.Backchannel;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
-                ValidIssuer = $"https://{auth0Options.Domain}/"
+                ValidIssuer = $"https://{auth0Options.Domain}/",
+                ValidateAudience = true,
+                ValidAudience = auth0Options.ClientId
             };
 
             oidcOptions.Events = new OpenIdConnectEvents
