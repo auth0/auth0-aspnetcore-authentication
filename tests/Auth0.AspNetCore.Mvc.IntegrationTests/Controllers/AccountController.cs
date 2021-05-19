@@ -67,7 +67,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Profile()
+        public IActionResult Profile()
         {
             return View(new
             {
