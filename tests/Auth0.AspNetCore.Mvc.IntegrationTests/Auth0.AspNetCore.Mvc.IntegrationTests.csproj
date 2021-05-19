@@ -35,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\playground\Auth0.AspNetCore.Mvc.Playground\Auth0.AspNetCore.Mvc.Playground.csproj" />
     <ProjectReference Include="..\..\src\Auth0.AspNetCore.Mvc\Auth0.AspNetCore.Mvc.csproj" />
   </ItemGroup>
 
