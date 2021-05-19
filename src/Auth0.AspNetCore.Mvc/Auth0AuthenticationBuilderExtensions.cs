@@ -27,6 +27,7 @@ namespace Auth0.AspNetCore.Mvc
             var auth0Options = new Auth0Options();
 
             configureOptions(auth0Options);
+            ValidateOptions(auth0Options);
 
             builder.AddCookie();
             builder.AddOpenIdConnect(Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
@@ -45,10 +46,12 @@ namespace Auth0.AspNetCore.Mvc
         {
             oidcOptions.Authority = $"https://{auth0Options.Domain}";
             oidcOptions.ClientId = auth0Options.ClientId;
+            oidcOptions.ClientSecret = auth0Options.ClientSecret;
             oidcOptions.Scope.Clear();
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Constants.DefaultCallbackPath);
             oidcOptions.SaveTokens = true;
+            oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
@@ -173,6 +176,24 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             return parameters;
+        }
+
+        private static void ValidateOptions(Auth0Options auth0Options)
+        {
+            var codeResponseTypes = new[] {
+                OpenIdConnectResponseType.Code,
+                OpenIdConnectResponseType.CodeIdToken
+            };
+
+            if (codeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
+            {
+                throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
+            {
+                throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }
         }
     }
 }
