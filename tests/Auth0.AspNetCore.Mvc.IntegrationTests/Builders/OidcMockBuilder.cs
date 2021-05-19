@@ -59,7 +59,14 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                  ItExpr.Is<HttpRequestMessage>(me => me.IsTokenEndPoint() && (matcher == null || matcher(me))),
                  ItExpr.IsAny<CancellationToken>()
               )
-              .ReturnsAsync(() => TestUtils.CreateTokenResponse(idTokenFunc()))
+              .ReturnsAsync(() => new HttpResponseMessage()
+              {
+                  StatusCode = HttpStatusCode.OK,
+                  Content = new StringContent(@"{
+'id_token': '" + idTokenFunc() + @"',
+'access_token': '123'
+}"),
+              })
               .Verifiable();
 
             return this;

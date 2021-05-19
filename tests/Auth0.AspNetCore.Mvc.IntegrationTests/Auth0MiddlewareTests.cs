@@ -317,6 +317,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(options =>
             {
                 options.Audience = "http://local.auth0";
+                options.ResponseType = "code";
+                options.ClientSecret = Configuration["Auth0:ClientSecret"];
             }))
             {
                 using (var client = server.CreateClient())
@@ -352,6 +354,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(options =>
             {
                 options.Audience = "http://local.auth0";
+                options.ResponseType = "code";
+                options.ClientSecret = Configuration["Auth0:ClientSecret"];
             }))
             {
                 using (var client = server.CreateClient())
