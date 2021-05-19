@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
@@ -312,12 +313,40 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
+        public void Should_Not_Allow_Configuring_Audience_Without_Code()
+        {
+
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+        }
+
+        [Fact]
+        public void Should_Not_Allow_Configuring_Audience_Without_ClientSecret()
+        {
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.Audience = "http://local.auth0";
+                options.ResponseType = OpenIdConnectResponseType.Code;
+            });
+
+            act.Should()
+                .Throw<ArgumentNullException>()
+                .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");           
+        }
+
+        [Fact]
         public async void Should_Allow_Configuring_Audience()
         {
             using (var server = TestServerBuilder.CreateServer(options =>
             {
                 options.Audience = "http://local.auth0";
-                options.ResponseType = "code";
+                options.ResponseType = OpenIdConnectResponseType.Code;
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
             }))
             {
