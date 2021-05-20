@@ -1,0 +1,217 @@
+{
+  "homepages": [],
+  "source_base_path": "C:/Dev/Auth0/auth0-aspnetcore-mvc/docs-source",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "source_relative_path": "images/logo.png",
+      "output": {
+        "resource": {
+          "relative_path": "images/logo.png"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/logo.svg",
+      "output": {
+        "resource": {
+          "relative_path": "images/logo.svg"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "v7IQ5p9zhzzK8OWODKnGFo9CswdPCvo8HNgGbfIonE0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html",
+          "hash": "97HDhyyxIVd0ca31iL6JaHDSZtLWtqAGWx7GAcHX/hk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0Constants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0Constants.html",
+          "hash": "C/SNdMLHKvmkYT7oFtKjGMLfpF+ToQEQFE3cTNQXJ1M="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0Options.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0Options.html",
+          "hash": "GvhXCfjC//TH8mpdj3mzH77V2IG8ZQbqPjFSFqdbN+Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.html",
+          "hash": "lErzNbYDJUoAW64bOtwoGEVM9+HfqTglq/sDnWl2iBk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html",
+          "hash": "HaMHaV8HoJpDv5I8hmTFOrZnjHV3rUubYZBQFUmSnog="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html",
+          "hash": "lLgx02jbVTpNN7DsL077kR0DnvxtmzG8qHw7Oy5QQqw="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html",
+          "hash": "XSe72ErwlB5NltZbs4b43ATy/NODUbQG/JkkW+q6DcU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.html",
+          "hash": "lKKk0KYuSOYycYWywXRciqvKyPDnv2dxg6Nq3/czOQ8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "obj/api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "9xPq9lz3aQzj9WV0URgEpidSFzo7BMYWIwegpRgp1xk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "b/3ztO4NPRBkvYSGCrClDWdbjOrIC1nLsnGrLfz6g6A="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 1,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 8,
+          "skipped_file_count": 0
+        },
+        "ResourceDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor ResourceDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

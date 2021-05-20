@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Auth0 ASP.NET MVC SDK (Beta) </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Auth0 ASP.NET MVC SDK (Beta) ">
+    <meta name="generator" content="docfx 2.57.2.0">
+    
+    <link rel="shortcut icon" href="images/logo.png">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="images/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="auth0-aspnet-mvc-sdk-beta">Auth0 ASP.NET MVC SDK (Beta)</h1>
+
+<p>This library supports .NET 5 and is a wrapper around <code>Microsoft.AspNetCore.Authentication.OpenIdConnect</code> to make integrating Auth0 in your ASP.NET Core 5 application using <a href="https://auth0.com/docs/flows/implicit-flow-with-form-post">Implicit Grant with Form Post</a> as seamlessly as possible.</p>
+<h2 id="installation">Installation</h2>
+<p>The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:</p>
+<pre><code>Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
+</code></pre>
+<p>As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the <code>-IncludePrerelease</code> flag when using the Package Manager Console, or by checking the <code>Include prerelease</code> checkbox when installing the SDK through the Package Manager UI.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>Integrate the SDK in your ASP.NET Core application by calling <code>AddAuth0Mvc</code> in your <code>Startup.ConfigureService</code> method:</p>
+<pre><code class="lang-csharp">services.AddAuth0Mvc(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+});
+</code></pre>
+<h3 id="login-and-logout">Login and Logout</h3>
+<p>Triggering login or logout is done using ASP.NET's <code>HttpContext</code>:</p>
+<pre><code class="lang-csharp">public async Task Login(string returnUrl = &quot;/&quot;)
+{
+    await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = &quot;/&quot; });
+}
+
+[Authorize]
+public async Task Logout()
+{
+    // Indicate here where Auth0 should redirect the user after a logout.
+    // Note that the resulting absolute Uri must be added in the
+    // **Allowed Logout URLs** settings for the client.
+    await HttpContext.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action(&quot;Index&quot;, &quot;Home&quot;) });
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+}
+</code></pre>
+<h3 id="scopes">Scopes</h3>
+<p>By default, this SDK requests the <code>openid profile email</code> scopes, if needed you can configure the SDK to request a different set of scopes.</p>
+<pre><code class="lang-csharp">services.AddAuth0Mvc(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+    options.Scope = &quot;openid profile email scope1 scope2&quot;;
+});
+</code></pre>
+<p>Apart from being able to configure the used scopes globally, the SDK's <code>AuthenticationPropertiesBuilder</code> can be used to supply scopes when triggering login through <code>HttpContext.ChallengeAsync</code>:</p>
+<pre><code class="lang-csharp">var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithScope(&quot;openid profile email scope1 scope2&quot;)
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+</code></pre>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Specifying the scopes when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured scopes. Ensure to also include <code>openid profile email</code> if you need them as well.</p>
+</div>
+<h3 id="calling-an-api">Calling an API</h3>
+<p>If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call.
+As the SDK is configured to use OAuth's <a href="https://auth0.com/docs/flows/implicit-flow-with-form-post">Implicit Grant with Form Post</a>, no access token will be returned by default. In order to do so, we should be using the <a href="https://auth0.com/docs/flows/authorization-code-flow">Authorization Code Grant</a>, which requires the use of a <code>ClientSecret</code>.
+Next, To obtain the token to access an external API, set the <code>audience</code> to the API Identifier when calling <code>AddAuth0Mvc</code>. You can get the API Identifier from the API Settings for the API you want to use.</p>
+<pre><code class="lang-csharp">services.AddAuth0Mvc(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+    options.ClientSecret = Configuration[&quot;Auth0:ClientSecret&quot;];
+    options.ResponseType = OpenIdConnectResponseType.Code;
+    options.Audience = Configuration[&quot;Auth0:Audience&quot;];
+});
+</code></pre>
+<p>Apart from being able to configure the audience globally, the SDK's <code>AuthenticationPropertiesBuilder</code> can be used to supply the audience when triggering login through <code>HttpContext.ChallengeAsync</code>:</p>
+<pre><code class="lang-csharp">var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithRedirectUri(&quot;/&quot;) // &quot;/&quot; is the default value used for RedirectUri, so this can be omitted.
+    .WithAudience(&quot;YOUR_AUDIENCE&quot;)
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+</code></pre>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Specifying the Audience when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured Audience.</p>
+</div>
+<h4 id="retrieving-the-access-token">Retrieving the Access Token</h4>
+<p>As the SDK uses the OpenId Connect middleware, the ID Token is decoded and the corresponding claims are added to the <code>ClaimsIdentity</code>, making them available by using <code>User.Claims</code>.</p>
+<p>The access token can be retrieved by calling <code>HttpContext.GetTokenAsync(&quot;access_token&quot;)</code>.</p>
+<pre><code class="lang-csharp">[Authorize]
+public async Task&lt;IActionResult&gt; Profile()
+{
+    var accessToken = await HttpContext.GetTokenAsync(&quot;access_token&quot;);
+
+    return View(new UserProfileViewModel()
+    {
+        Name = User.Identity.Name,
+        EmailAddress = User.Claims.FirstOrDefault(c =&gt; c.Type == ClaimTypes.Email)?.Value,
+        ProfileImage = User.Claims.FirstOrDefault(c =&gt; c.Type == &quot;picture&quot;)?.Value
+    });
+}
+</code></pre>
+<h3 id="organization">Organization</h3>
+<p><a href="https://auth0.com/docs/organizations">Organizations</a> is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.</p>
+<p>Using Organizations, you can:</p>
+<ul>
+<li><p>Represent teams, business customers, partner companies, or any logical grouping of users that should have different ways of accessing your applications, as organizations.</p>
+</li>
+<li><p>Manage their membership in a variety of ways, including user invitation.</p>
+</li>
+<li><p>Configure branded, federated login flows for each organization.</p>
+</li>
+<li><p>Implement role-based access control, such that users can have different roles when authenticating in the context of different organizations.</p>
+</li>
+<li><p>Build administration capabilities into your products, using Organizations APIs, so that those businesses can manage their own organizations.</p>
+</li>
+</ul>
+<p>Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.</p>
+<h4 id="log-in-to-an-organization">Log in to an organization</h4>
+<p>Log in to an organization by specifying the <code>Organization</code> when calling <code>AddAuth0Mvc</code>:</p>
+<pre><code class="lang-csharp">services.AddAuth0Mvc(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+    options.Organization = Configuration[&quot;Auth0:Organization&quot;];
+});
+</code></pre>
+<p>Apart from being able to configure the organization globally, the SDK's <code>AuthenticationPropertiesBuilder</code> can be used to supply the organization when triggering login through <code>HttpContext.ChallengeAsync</code>:</p>
+<pre><code class="lang-csharp">var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithOrganization(&quot;YOUR_ORGANIZATION&quot;)
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+</code></pre>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Specifying the Organization when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured Organization.</p>
+</div>
+<h4 id="accept-user-invitations">Accept user invitations</h4>
+<p>Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the <code>organization</code> and <code>invitation</code> parameters from this URL.</p>
+<pre><code class="lang-csharp">public class InvitationController : Controller {
+
+    public async Task Accept(string organization, string invitation)
+    {
+        var authenticationProperties = new AuthenticationPropertiesBuilder()
+            .WithOrganization(organization)
+            .WithInvitation(invitation)
+            .Build();
+            
+        await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+    }
+}
+
+</code></pre>
+<h3 id="extra-parameters">Extra Parameters</h3>
+<p>Auth0's <code>/authorize</code> endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the <code>ExtraParameters</code> when calling <code>AddAuth0Mvc</code>.</p>
+<p>An example is the <code>screen_hint</code> parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:</p>
+<pre><code class="lang-csharp">services.AddAuth0Mvc(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+    options.ExtraParameters = new Dictionary&lt;string, string&gt;() { { &quot;screen_hint&quot;, &quot;signup&quot; } };
+});
+</code></pre>
+<p>Apart from being able to configure these globally, the SDK's <code>AuthenticationPropertiesBuilder</code> can be used to supply extra parameters when triggering login through <code>HttpContext.ChallengeAsync</code>:</p>
+<pre><code class="lang-csharp">var authenticationProperties = new AuthenticationPropertiesBuilder()
+    .WithExtraParameter(&quot;screen_hint&quot;, &quot;signup&quot;)
+    .Build();
+
+await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+</code></pre>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Specifying any extra parameter when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured parameter.</p>
+</div>
+<h3 id="roles">Roles</h3>
+<p>Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in <a href="https://auth0.com/docs/users/assign-roles-to-users">assign-roles-to-users</a> to ensure your user gets assigned the admin role.</p>
+<p>Once the role is created and assigned to the required user(s), you will need to create a <a href="https://auth0.com/docs/rules/current">rule</a> that adds the role(s) to the Id Token so that it is available to your backend. To do so, go to the <a href="https://manage.auth0.com/#/rules/new">new rule page</a> and create an empty rule. Then, use the following code for your rule:</p>
+<pre><code class="lang-javascript">function (user, context, callback) {
+  const assignedRoles = (context.authorization || {}).roles;
+  const idTokenClaims = context.idToken || {};
+
+  idTokenClaims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] = assignedRoles;
+
+  context.idToken = idTokenClaims;
+
+  callback(null, user, context);
+}
+</code></pre>
+<div class="NOTE">
+<h5>Note</h5>
+<p>As this SDK uses the OpenId Connect middleware, it expects roles to exist in the <code>http://schemas.microsoft.com/ws/2008/06/identity/claims/role</code> claim.</p>
+</div>
+<h2 id="contributing">Contributing</h2>
+<p>We appreciate feedback and contribution to this SDK! Before you get started, please see the following:</p>
+<ul>
+<li><a href="https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md">Auth0's general contribution guidelines</a></li>
+<li><a href="https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md">Auth0's code of conduct guidelines</a></li>
+<li><a href="https://github.com/auth0/auth0-aspnetcore-mvc/blob/main/CONTRIBUTING.md">This repo's contribution guide</a></li>
+</ul>
+<h2 id="support--feedback">Support + Feedback</h2>
+<p>For support or to provide feedback, please <a href="https://github.com/auth0/auth0-aspnetcore-mvc/issues">raise an issue on our issue tracker</a>.</p>
+<h2 id="vulnerability-reporting">Vulnerability Reporting</h2>
+<p>Please do not report security vulnerabilities on the public GitHub issue tracker. The <a href="https://auth0.com/whitehat">Responsible Disclosure Program</a> details the procedure for disclosing security issues.</p>
+<h2 id="what-is-auth0">What is Auth0</h2>
+<p>Auth0 helps you to easily:</p>
+<ul>
+<li>implement authentication with multiple identity providers, including social (e.g., Google, Facebook, Microsoft, LinkedIn, GitHub, Twitter, etc), or enterprise (e.g., Windows Azure AD, Google Apps, Active Directory, ADFS, SAML, etc.)</li>
+<li>log in users with username/password databases, passwordless, or multi-factor authentication</li>
+<li>link multiple user accounts together</li>
+<li>generate signed JSON Web Tokens to authorize your API calls and flow the user identity securely</li>
+<li>access demographics and analytics detailing how, when, and where users are logging in</li>
+<li>enrich user profiles from other data sources using customizable JavaScript rules</li>
+</ul>
+<p><a href="https://auth0.com/why-auth0">Why Auth0?</a></p>
+<h2 id="license">License</h2>
+<p>This project is licensed under the MIT license. See the <a href="https://github.com/auth0/auth0-aspnetcore-mvc/blob/main/LICENSE">LICENSE</a> file for more info.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>
