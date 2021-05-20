@@ -5,14 +5,17 @@ using System;
 
 namespace Auth0.AspNetCore.Mvc
 {
-    public static class Auth0ServiceCollectionExtensions
+    /// <summary>
+    /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> extension(s) for registering Auth0.
+    /// </summary>
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
-        /// <param name="services">The original <see cref="IServiceCollection"/> instance</param>
+        /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
-        /// <returns>The <see cref="AuthenticationBuilder"/ instance that has been created.</returns>
+        /// <returns>The <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance that has been created.</returns>
         public static AuthenticationBuilder AddAuth0Mvc(this IServiceCollection services, Action<Auth0Options> configureOptions)
         {
             return services

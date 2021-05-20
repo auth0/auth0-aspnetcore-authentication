@@ -3,10 +3,10 @@
 namespace Auth0.AspNetCore.Mvc
 {
     /// <summary>
-    /// Builder class for <see cref="AuthenticationProperties"/>.
+    /// Builder class for <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</see>.
     /// </summary>
     /// <remarks>
-    /// Allows for Auth0 specific first-class properties when constructing an instance of <see cref="AuthenticationProperties"/>.
+    /// Allows for Auth0 specific first-class properties when constructing an instance of <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</see>.
     /// </remarks>
     public class AuthenticationPropertiesBuilder
     {
@@ -59,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithOrganization(string organization)
         {
-            authenticationProperties.Items.Add("Auth0:organization", organization);
+            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Organization, organization);
             return this;
         }
 
@@ -70,7 +70,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithInvitation(string invitation)
         {
-            authenticationProperties.Items.Add("Auth0:invitation", invitation);
+            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Invitation, invitation);
             return this;
         }
 
@@ -87,9 +87,9 @@ namespace Auth0.AspNetCore.Mvc
         }
 
         /// <summary>
-        /// Return the configured <see cref="AuthenticationProperties"/>.
+        /// Return the configured <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</see>.
         /// </summary>
-        /// <returns>The configured <see cref="AuthenticationProperties"/></returns>
+        /// <returns>The configured <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</see></returns>
         public AuthenticationProperties Build()
         {
             return authenticationProperties;
