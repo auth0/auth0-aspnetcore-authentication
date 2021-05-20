@@ -1,4 +1,5 @@
 ﻿﻿using System.Collections.Generic;
+using System.Net.Http;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -72,5 +73,10 @@ namespace Auth0.AspNetCore.Mvc
         /// Supports `id_token`, `code` or `code id_token`, defaults to `id_token` when omitted.
         /// </remarks>
         public string ResponseType { get; set; }
+
+        /// <summary>
+        /// Backchannel used to communicate with the Identity Provider.
+        /// </summary>
+        public HttpClient Backchannel { get; set; }
     }
 }
