@@ -27,6 +27,20 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Redirect_To_Login_When_Using_Service_Collection_Extensions()
+        {
+            using (var server = TestServerBuilder.CreateServer(null, false, true))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Protected}"));
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Found);
+                    response.Headers.Location.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
+                }
+            }
+        }
+
+        [Fact]
         public async Task Should_Redirect_To_Login()
         {
             using (var server = TestServerBuilder.CreateServer())
@@ -552,6 +566,69 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                         .Should()
                         .BeOfType<Exception>()
                         .Which.Message.Should().Be("Organization claim mismatch in the ID token; expected \"org_123\", found \"org_456\".");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Allow_Custom_Token_Validation()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+                opt.Events = new Auth0OptionsEvents
+                {
+                    OnTokenValidated = (context) =>
+                    {
+                        context.Fail("Triggered Custom Validation.");
+                        return Task.CompletedTask;
+                    }
+                };
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    Func<Task> act = async () =>
+                    {
+                        // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                        await client.SendAsync(message, setCookie.Value);
+                    };
+
+                    var innerException = act
+                        .Should()
+                        .Throw<Exception>()
+                        .And.InnerException;
+
+                    innerException
+                        .Should()
+                        .BeOfType<Exception>()
+                        .Which.Message.Should().Be("Triggered Custom Validation.");
                 }
             }
         }

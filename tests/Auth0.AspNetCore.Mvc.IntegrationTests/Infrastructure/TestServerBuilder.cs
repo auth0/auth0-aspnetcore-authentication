@@ -26,7 +26,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0Options> configureOptions = null, bool mockAuthentication = false)
+        public static TestServer CreateServer(Action<Auth0Options> configureOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -46,21 +46,34 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                         })
                         .ConfigureServices(services =>
                         {
-                            services.AddAuthentication(options =>
+                            if (useServiceCollectionExtension)
                             {
-                                if (!mockAuthentication)
+                                services.AddAuth0Mvc(options =>
                                 {
-                                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                                }
-                            }).AddAuth0Mvc(options =>
-                            {
-                                options.Domain = configuration["Auth0:Domain"];
-                                options.ClientId = configuration["Auth0:ClientId"];
+                                    options.Domain = configuration["Auth0:Domain"];
+                                    options.ClientId = configuration["Auth0:ClientId"];
 
-                                if (configureOptions != null) configureOptions(options);
-                            });
+                                    if (configureOptions != null) configureOptions(options);
+                                });
+                            }
+                            else
+                            {
+                                services.AddAuthentication(options =>
+                                {
+                                    if (!mockAuthentication)
+                                    {
+                                        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                                        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                                        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                                    }
+                                }).AddAuth0Mvc(options =>
+                                {
+                                    options.Domain = configuration["Auth0:Domain"];
+                                    options.ClientId = configuration["Auth0:ClientId"];
+
+                                    if (configureOptions != null) configureOptions(options);
+                                });
+                            }
 
                             services.AddControllersWithViews();
                         })
