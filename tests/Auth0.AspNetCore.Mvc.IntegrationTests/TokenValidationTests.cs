@@ -568,6 +568,34 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             }
         }
 
+        [Fact]
+        public void Should_Throw_When_Missing_Iat()
+        {
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(JwtRegisteredClaimNames.Sub, "1")
+            };
+
+            var token = new JwtSecurityToken($"https://{domain}/", clientId, claims, null, null);
+
+            Func<Task> act = async () =>
+            {
+                        // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                        IdTokenValidator.Validate(new Auth0Options(), token);
+            };
+
+            var innerException = act
+                .Should()
+                .Throw<IdTokenValidationException>()
+                .Which.Message.Should().Be("Issued At (iat) claim must be an integer present in the ID token.");
+
+
+        }
+
         private string GenerateToken(int userId, string issuer, string audience, string nonce, string subject, string org_id = null, bool expired = false, string extraAudience = null, string azp = null, DateTime? authTime = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -578,12 +606,12 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             if (subject != null)
             {
-                claims.Add(new Claim("sub", subject));
+                claims.Add(new Claim(JwtRegisteredClaimNames.Sub, subject));
             }
 
             if (extraAudience != null)
             {
-                claims.Add(new Claim("aud", extraAudience));
+                claims.Add(new Claim(JwtRegisteredClaimNames.Aud, extraAudience));
             }
 
             if (!string.IsNullOrWhiteSpace(org_id))
@@ -593,17 +621,17 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             if (!string.IsNullOrWhiteSpace(nonce))
             {
-                claims.Add(new Claim("nonce", nonce));
+                claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, nonce));
             }
 
             if (!string.IsNullOrWhiteSpace(azp))
             {
-                claims.Add(new Claim("azp", azp));
+                claims.Add(new Claim(JwtRegisteredClaimNames.Azp, azp));
             }
 
             if (authTime != null)
             {
-                claims.Add(new Claim("auth_time", EpochTime.GetIntDate(authTime.Value).ToString()));
+                claims.Add(new Claim(JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(authTime.Value).ToString()));
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -619,6 +647,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
 
 
     }

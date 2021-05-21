@@ -137,68 +137,13 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null;
-
-                if (!string.IsNullOrWhiteSpace(organization))
+                try
                 {
-                    var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
-
-                    if (string.IsNullOrWhiteSpace(organizationClaimValue))
-                    {
-                        context.Fail("Organization claim must be a string present in the ID token.");
-                    }
-                    else if (organizationClaimValue != organization)
-                    {
-                        context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
-                    }
+                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null);
                 }
-
-                var sub = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
-
-                if (sub == null)
+                catch (IdTokenValidationException ex)
                 {
-                    context.Fail("Subject (sub) claim must be a string present in the ID token.");
-                }
-
-                var iat = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Iat)?.Value;
-
-                if (iat == null)
-                {
-                    context.Fail("Issued At (iat) claim must be an integer present in the ID token.");
-                }
-
-                if (context.SecurityToken.Audiences.Count() > 1)
-                {
-                    if (string.IsNullOrWhiteSpace(context.SecurityToken.Payload.Azp))
-                    {
-                        context.Fail("Authorized Party (azp) claim must be a string present in the ID token when Audiences (aud) claim has multiple values.");
-
-                    }
-                    else if (context.SecurityToken.Payload.Azp != auth0Options.ClientId)
-                    {
-                        context.Fail($"Authorized Party (azp) claim mismatch in the ID token; expected \"{auth0Options.ClientId}\", found \"{context.SecurityToken.Payload.Azp}\".");
-                    }
-                }
-
-                if (auth0Options.MaxAge.HasValue)
-                {
-                    var authTimeRaw = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.AuthTime)?.Value;
-                    long? authTime = !string.IsNullOrWhiteSpace(authTimeRaw) ? (long)Convert.ToDouble(authTimeRaw, CultureInfo.InvariantCulture) : null;
-
-                    if (!authTime.HasValue)
-                    {
-                        context.Fail("Authentication Time (auth_time) claim must be an integer present in the ID token when MaxAge specified.");
-                    }
-                    else
-                    {
-                        var authValidUntil = (long)(authTime + auth0Options.MaxAge.Value.TotalSeconds);
-                        var epochNow = EpochTime.GetIntDate(DateTime.Now);
-
-                        if (epochNow > authValidUntil)
-                        {
-                            context.Fail($"Authentication Time (auth_time) claim in the ID token indicates that too much time has passed since the last end-user authentication. Current time ({epochNow}) is after last auth at {authValidUntil}.");
-                        }
-                    }
+                    context.Fail(ex.Message);
                 }
 
                 if (auth0Options.Events != null && auth0Options.Events.OnTokenValidated != null)
