@@ -1,4 +1,5 @@
-﻿﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Auth0.AspNetCore.Mvc
@@ -78,5 +79,7 @@ namespace Auth0.AspNetCore.Mvc
         /// Backchannel used to communicate with the Identity Provider.
         /// </summary>
         public HttpClient Backchannel { get; set; }
+
+        public TimeSpan? MaxAge { get; set; }
     }
 }

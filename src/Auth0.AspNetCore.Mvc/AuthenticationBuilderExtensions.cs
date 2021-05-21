@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -60,9 +62,15 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
-                ValidIssuer = $"https://{auth0Options.Domain}/",
+                // Audience
                 ValidateAudience = true,
-                ValidAudience = auth0Options.ClientId
+                ValidAudience = auth0Options.ClientId,
+                // Issuer
+                ValidateIssuer = true,
+                ValidIssuer = $"https://{auth0Options.Domain}/",
+
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
             };
 
             oidcOptions.Events = new OpenIdConnectEvents
@@ -142,6 +150,54 @@ namespace Auth0.AspNetCore.Mvc
                     else if (organizationClaimValue != organization)
                     {
                         context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
+                    }
+                }
+
+                var sub = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+                if (sub == null)
+                {
+                    context.Fail("Subject (sub) claim must be a string present in the ID token.");
+                }
+
+                var iat = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Iat)?.Value;
+
+                if (iat == null)
+                {
+                    context.Fail("Issued At (iat) claim must be an integer present in the ID token.");
+                }
+
+                if (context.SecurityToken.Audiences.Count() > 1)
+                {
+                    if (string.IsNullOrWhiteSpace(context.SecurityToken.Payload.Azp))
+                    {
+                        context.Fail("Authorized Party (azp) claim must be a string present in the ID token when Audiences (aud) claim has multiple values.");
+
+                    }
+                    else if (context.SecurityToken.Payload.Azp != auth0Options.ClientId)
+                    {
+                        context.Fail($"Authorized Party (azp) claim mismatch in the ID token; expected \"{auth0Options.ClientId}\", found \"{context.SecurityToken.Payload.Azp}\".");
+                    }
+                }
+
+                if (auth0Options.MaxAge.HasValue)
+                {
+                    var authTimeRaw = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.AuthTime)?.Value;
+                    long? authTime = !string.IsNullOrWhiteSpace(authTimeRaw) ? (long)Convert.ToDouble(authTimeRaw, CultureInfo.InvariantCulture) : null;
+
+                    if (!authTime.HasValue)
+                    {
+                        context.Fail("Authentication Time (auth_time) claim must be an integer present in the ID token when MaxAge specified.");
+                    }
+                    else
+                    {
+                        var authValidUntil = (long)(authTime + auth0Options.MaxAge.Value.TotalSeconds);
+                        var epochNow = EpochTime.GetIntDate(DateTime.Now);
+
+                        if (epochNow > authValidUntil)
+                        {
+                            context.Fail($"Authentication Time (auth_time) claim in the ID token indicates that too much time has passed since the last end-user authentication. Current time ({epochNow}) is after last auth at {authValidUntil}.");
+                        }
                     }
                 }
 
