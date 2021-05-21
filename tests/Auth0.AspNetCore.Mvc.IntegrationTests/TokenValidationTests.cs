@@ -582,10 +582,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             var token = new JwtSecurityToken($"https://{domain}/", clientId, claims, null, null);
 
-            Func<Task> act = async () =>
+            Action act = () =>
             {
-                        // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
-                        IdTokenValidator.Validate(new Auth0Options(), token);
+                // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                IdTokenValidator.Validate(new Auth0Options(), token);
             };
 
             var innerException = act
