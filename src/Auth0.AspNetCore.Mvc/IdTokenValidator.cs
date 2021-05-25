@@ -1,21 +1,20 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Auth0.AspNetCore.Mvc.IntegrationTests")]
 namespace Auth0.AspNetCore.Mvc
 {
     internal static class IdTokenValidator
     {
-        public static void Validate(Auth0Options auth0Options, JwtSecurityToken token, string organization = null)
+        public static void Validate(Auth0Options auth0Options, JwtSecurityToken token, IDictionary<string, string> properties = null)
         {
+            var organization = properties != null && properties.ContainsKey(Auth0AuthenticationParmeters.Organization) ? properties[Auth0AuthenticationParmeters.Organization] : null;
+
             if (!string.IsNullOrWhiteSpace(organization))
             {
                 var organizationClaimValue = token.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;

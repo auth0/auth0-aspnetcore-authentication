@@ -63,13 +63,10 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
-                // Audience
                 ValidateAudience = true,
                 ValidAudience = auth0Options.ClientId,
-                // Issuer
                 ValidateIssuer = true,
                 ValidIssuer = $"https://{auth0Options.Domain}/",
-
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
             };
@@ -140,7 +137,7 @@ namespace Auth0.AspNetCore.Mvc
             {
                 try
                 {
-                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null);
+                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items);
                 }
                 catch (IdTokenValidationException ex)
                 {
