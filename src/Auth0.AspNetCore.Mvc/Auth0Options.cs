@@ -80,6 +80,11 @@ namespace Auth0.AspNetCore.Mvc
         /// </summary>
         public HttpClient Backchannel { get; set; }
 
+        /// <summary>
+        /// If provided, will set the 'max_age' parameter with the authentication request.
+        /// If the identity provider has not actively authenticated the user within the length of time specified, 
+        /// the user will be prompted to re-authenticate.
+        /// </summary>
         public TimeSpan? MaxAge { get; set; }
     }
 }

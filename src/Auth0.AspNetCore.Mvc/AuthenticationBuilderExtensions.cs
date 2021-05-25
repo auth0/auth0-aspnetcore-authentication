@@ -58,6 +58,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.SaveTokens = true;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
+            oidcOptions.MaxAge = auth0Options.MaxAge;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
