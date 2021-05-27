@@ -11,12 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Auth0Icon.png" Pack="true" Visible="false" PackagePath=""/>
+    <None Include="Auth0Icon.png" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
 
   <PropertyGroup>
     <Product>Auth0.AspNetCore.Mvc</Product>
-    <Description>Auth0 middleware for ASP.NET Core Mvc (.NET Core 3.1 and .NET 5).</Description>
+    <Description>Auth0 middleware for ASP.NET Core Mvc.</Description>
     <Copyright>Auth0® Inc.</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Auth0</Authors>
