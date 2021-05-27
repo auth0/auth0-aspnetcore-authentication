@@ -18,7 +18,7 @@ services.AddAuth0Mvc(options =>
 });
 ```
 
-**Supported Features**
+**Added**
 
 - Implement Basic Cookie & OpenIdConnect Authentication [#7](https://github.com/auth0/auth0-aspnetcore-mvc/pull/7) ([frederikprijck](https://github.com/frederikprijck))
 - Support configuring the Scopes [#8](https://github.com/auth0/auth0-aspnetcore-mvc/pull/8) ([frederikprijck](https://github.com/frederikprijck))
