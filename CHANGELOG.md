@@ -16,6 +16,7 @@ services.AddAuth0Mvc(options =>
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
 });
+```
 
 **Supported Features**
 
