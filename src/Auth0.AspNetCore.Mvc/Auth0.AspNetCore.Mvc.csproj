@@ -35,10 +35,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>7.1</LangVersion>
-    <Major>0</Major>
+    <Major>1</Major>
     <Minor>0</Minor>
-    <Revision>1</Revision>
-    <Suffix>-beta</Suffix>
+    <Revision>0</Revision>
+    <Suffix>-beta.0</Suffix>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyVersion>$(Major).$(Minor).$(Revision)</AssemblyVersion>
