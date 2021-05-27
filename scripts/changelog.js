@@ -3,7 +3,7 @@ if (process.platform === 'win32') {
     process.exit(1);
   }
   
-  const repo = 'auth0.net';
+  const repo = 'auth0-aspnetcore-mvc';
   const fs = require('fs');
   const path = require('path');
   const execSync = require('child_process').execSync;
