@@ -71,14 +71,15 @@ public async Task Logout()
 
 ### Scopes
 
-By default, this SDK requests the `openid profile email` scopes, if needed you can configure the SDK to request a different set of scopes.
+By default, this SDK requests the `openid profile` scopes, if needed you can configure the SDK to request a different set of scopes.
+When doing so, ensure to include `openid` as it is a required scope.
 
 ```csharp
 services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.Scope = "openid profile email scope1 scope2";
+    options.Scope = "openid profile scope1 scope2";
 });
 ```
 
@@ -86,13 +87,13 @@ Apart from being able to configure the used scopes globally, the SDK's `Authenti
 
 ```csharp
 var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithScope("openid profile email scope1 scope2")
+    .WithScope("openid profile scope1 scope2")
     .Build();
 
 await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
+> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
 
 ### Calling an API
 
