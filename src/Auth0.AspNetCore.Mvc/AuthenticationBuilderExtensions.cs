@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -56,13 +58,17 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.SaveTokens = true;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
+            oidcOptions.MaxAge = auth0Options.MaxAge;
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
-                ValidIssuer = $"https://{auth0Options.Domain}/",
                 ValidateAudience = true,
-                ValidAudience = auth0Options.ClientId
+                ValidAudience = auth0Options.ClientId,
+                ValidateIssuer = true,
+                ValidIssuer = $"https://{auth0Options.Domain}/",
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
             };
 
             oidcOptions.Events = new OpenIdConnectEvents
@@ -129,20 +135,13 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null;
-
-                if (!string.IsNullOrWhiteSpace(organization))
+                try
                 {
-                    var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
-
-                    if (string.IsNullOrWhiteSpace(organizationClaimValue))
-                    {
-                        context.Fail("Organization claim must be a string present in the ID token.");
-                    }
-                    else if (organizationClaimValue != organization)
-                    {
-                        context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
-                    }
+                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items);
+                }
+                catch (IdTokenValidationException ex)
+                {
+                    context.Fail(ex.Message);
                 }
 
                 if (auth0Options.Events != null && auth0Options.Events.OnTokenValidated != null)

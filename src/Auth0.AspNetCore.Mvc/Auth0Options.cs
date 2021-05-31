@@ -1,4 +1,5 @@
-﻿﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Auth0.AspNetCore.Mvc
@@ -78,5 +79,12 @@ namespace Auth0.AspNetCore.Mvc
         /// Backchannel used to communicate with the Identity Provider.
         /// </summary>
         public HttpClient Backchannel { get; set; }
+
+        /// <summary>
+        /// If provided, will set the 'max_age' parameter with the authentication request.
+        /// If the identity provider has not actively authenticated the user within the length of time specified, 
+        /// the user will be prompted to re-authenticate.
+        /// </summary>
+        public TimeSpan? MaxAge { get; set; }
     }
 }

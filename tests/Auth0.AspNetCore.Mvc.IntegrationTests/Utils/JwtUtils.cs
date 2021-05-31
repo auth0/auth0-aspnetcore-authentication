@@ -26,7 +26,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim("sub", userId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             };
 
             if (!string.IsNullOrWhiteSpace(org_id))
@@ -36,7 +36,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             if (!string.IsNullOrWhiteSpace(nonce))
             {
-                claims.Add(new Claim("nonce", nonce));
+                claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, nonce));
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor
