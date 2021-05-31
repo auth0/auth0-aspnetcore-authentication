@@ -1,6 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -10,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -101,7 +98,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
                     queryParameters["client_id"].Should().Be(Configuration["Auth0:ClientId"]);
-                    queryParameters["scope"].Should().Be("openid profile email");
+                    queryParameters["scope"].Should().Be("openid profile");
                     queryParameters["redirect_uri"].Should().BeEquivalentTo($"{TestServerBuilder.Host}/{TestServerBuilder.Callback}");
                     queryParameters["response_type"].Should().Be("id_token");
                     queryParameters["response_mode"].Should().Be("form_post");
@@ -110,9 +107,23 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
+        public void Should_Not_Allow_Configuring_Scope_Without_OpenId()
+        {
+
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.Scope = "test";
+            });
+
+            act.Should()
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("When configuring Scope, using openid is required. Ensure `openid` is added to `Auth0Options.Scope`.");
+        }
+
+        [Fact]
         public async Task Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync()
         {
-            var scope = "ScopeA ScopeB";
+            var scope = "openid ScopeA ScopeB";
             using (var server = TestServerBuilder.CreateServer())
             {
                 using (var client = server.CreateClient())

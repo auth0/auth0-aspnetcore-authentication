@@ -1,6 +1,6 @@
 ﻿namespace Auth0.AspNetCore.Mvc
 {
-    public static class Auth0AuthenticationParmeters
+    public static class Auth0AuthenticationParameters
     {
         internal static readonly string Prefix = "Auth0";
 

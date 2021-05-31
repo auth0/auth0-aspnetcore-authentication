@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
@@ -90,9 +89,9 @@ namespace Auth0.AspNetCore.Mvc
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization))
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization))
                 {
-                    context.Properties.Items[Auth0AuthenticationParmeters.Organization] = auth0Options.Organization;
+                    context.Properties.Items[Auth0AuthenticationParameters.Organization] = auth0Options.Organization;
                 }
 
                 return Task.CompletedTask;
@@ -110,7 +109,6 @@ namespace Auth0.AspNetCore.Mvc
                 {
                     if (postLogoutUri.StartsWith("/"))
                     {
-                        // transform to absolute
                         var request = context.Request;
                         postLogoutUri = request.Scheme + "://" + request.Host + request.PathBase + postLogoutUri;
                     }
@@ -129,7 +127,7 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization) ? context.Properties.Items[Auth0AuthenticationParmeters.Organization] : null;
+                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization) ? context.Properties.Items[Auth0AuthenticationParameters.Organization] : null;
 
                 if (!string.IsNullOrWhiteSpace(organization))
                 {
@@ -173,9 +171,9 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             // Any Auth0 specific parameter
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParmeters.Prefix}:")))
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParmeters.Prefix}:", "")] = item.Value;
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
             }
 
             return parameters;
@@ -196,6 +194,11 @@ namespace Auth0.AspNetCore.Mvc
             if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(auth0Options.Scope) && !auth0Options.Scope.Contains("openid"))
+            {
+                throw new InvalidOperationException("When configuring Scope, using openid is required. Ensure `openid` is added to `Auth0Options.Scope`.");
             }
         }
     }
