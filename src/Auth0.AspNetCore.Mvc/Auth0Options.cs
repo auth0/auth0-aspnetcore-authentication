@@ -86,5 +86,13 @@ namespace Auth0.AspNetCore.Mvc
         /// the user will be prompted to re-authenticate.
         /// </summary>
         public TimeSpan? MaxAge { get; set; }
+
+        /// <summary>
+        /// Define whether or not Refresh Tokens should be used internally
+        /// </summary>
+        /// <remarks>
+        /// Setting this to true will try refreshing the access token when it's expired.
+        /// </remarks>
+        public bool UseRefreshTokens { get; set; }
     }
 }

@@ -27,6 +27,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
                 options.Audience = Configuration["Auth0:Audience"];
                 options.ResponseType = OpenIdConnectResponseType.Code;
+                options.UseRefreshTokens = true;
             });
 
             services.AddControllersWithViews();

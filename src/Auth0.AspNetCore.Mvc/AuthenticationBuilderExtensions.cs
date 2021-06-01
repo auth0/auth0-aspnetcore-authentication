@@ -1,4 +1,7 @@
+using Auth0.AuthenticationApi;
+using Auth0.AuthenticationApi.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,9 +37,13 @@ namespace Auth0.AspNetCore.Mvc
             configureOptions(auth0Options);
             ValidateOptions(auth0Options);
 
-            builder.AddCookie();
+            builder.AddCookie(options =>
+            {
+                options.Events.OnValidatePrincipal = CreateOnValidatePrincipal();
+            });
             builder.AddOpenIdConnect(Auth0Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
+            builder.Services.AddSingleton(auth0Options);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
             return builder;
@@ -59,6 +66,11 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
             oidcOptions.MaxAge = auth0Options.MaxAge;
+
+            if (auth0Options.UseRefreshTokens)
+            {
+                oidcOptions.Scope.AddSafe("offline_access");
+            }
 
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
@@ -150,6 +162,54 @@ namespace Auth0.AspNetCore.Mvc
                 }
 
                 return Task.CompletedTask;
+            };
+        }
+
+        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal()
+        {
+            return async (context) =>
+            {
+                var options = context.HttpContext.RequestServices.GetRequiredService<Auth0Options>();
+                var accessToken = context.Properties.Items[".Token.access_token"];
+
+                if (options.UseRefreshTokens)
+                {
+
+                    var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
+                    // var expiresAt = DateTimeOffset.Parse(authenticationInfo.Properties.GetTokenValue("expires_at"));
+                    string refreshToken;
+                    if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
+                    {
+                        var now = DateTimeOffset.Now;
+
+                        var leeway = 1 * 24 * 60 * 60;
+                        var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
+                        var isExpired = difference <= 0;
+
+                        if (isExpired)
+                        {
+                            using (var client = new AuthenticationApiClient(options.Domain))
+                            {
+                                var result = await client.GetTokenAsync(new RefreshTokenRequest
+                                {
+                                    Audience = options.Audience,
+                                    ClientId = options.ClientId,
+                                    ClientSecret = options.ClientSecret,
+                                    // Organization = authenticationInfo.Properties.Items[Auth0AuthenticationParameters.Organization],
+                                    RefreshToken = refreshToken
+                                });
+
+                                context.Properties.UpdateTokenValue("access_token", result.AccessToken);
+                                context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                context.Properties.UpdateTokenValue("id_token", result.IdToken);
+                                context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                            }
+
+                            context.ShouldRenew = true;
+                        }
+                    }
+
+                }
             };
         }
 
