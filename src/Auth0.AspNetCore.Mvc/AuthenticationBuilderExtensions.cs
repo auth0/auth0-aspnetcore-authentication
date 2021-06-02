@@ -1,5 +1,6 @@
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
+using Auth0.Core.Exceptions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -176,39 +177,34 @@ namespace Auth0.AspNetCore.Mvc
                 {
 
                     var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
-                    // var expiresAt = DateTimeOffset.Parse(authenticationInfo.Properties.GetTokenValue("expires_at"));
                     string refreshToken;
                     if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
                     {
                         var now = DateTimeOffset.Now;
 
-                        var leeway = 1 * 24 * 60 * 60;
+                        var leeway = 60;
                         var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
                         var isExpired = difference <= 0;
 
-                        if (isExpired)
+                        if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                         {
-                            using (var client = new AuthenticationApiClient(options.Domain))
-                            {
-                                var result = await client.GetTokenAsync(new RefreshTokenRequest
-                                {
-                                    Audience = options.Audience,
-                                    ClientId = options.ClientId,
-                                    ClientSecret = options.ClientSecret,
-                                    // Organization = authenticationInfo.Properties.Items[Auth0AuthenticationParameters.Organization],
-                                    RefreshToken = refreshToken
-                                });
+                            var result = await RefreshTokens((ClaimsIdentity)context.Principal.Identity, options, refreshToken);
 
+                            if (result != null)
+                            {
                                 context.Properties.UpdateTokenValue("access_token", result.AccessToken);
                                 context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
                                 context.Properties.UpdateTokenValue("id_token", result.IdToken);
                                 context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                                context.ShouldRenew = true;
                             }
-
-                            context.ShouldRenew = true;
+                            else
+                            {
+                                context.Properties.UpdateTokenValue("refresh_token", null);
+                                context.ShouldRenew = true;
+                            }
                         }
                     }
-
                 }
             };
         }
@@ -255,6 +251,29 @@ namespace Auth0.AspNetCore.Mvc
             if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }
+        }
+
+        private static async Task<AccessTokenResponse> RefreshTokens(ClaimsIdentity identity, Auth0Options options, string refreshToken)
+        {
+            try
+            {
+                using (var client = new AuthenticationApiClient(options.Domain))
+                {
+                    var organization = identity.FindFirst("org_id")?.Value;
+                    return await client.GetTokenAsync(new RefreshTokenRequest
+                    {
+                        Audience = options.Audience,
+                        ClientId = options.ClientId,
+                        ClientSecret = options.ClientSecret,
+                        Organization = organization,
+                        RefreshToken = refreshToken
+                    });
+                }
+            }
+            catch (ErrorApiException)
+            {
+                return null;
             }
         }
     }
