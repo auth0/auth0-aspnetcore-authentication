@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         public static readonly string Host = @"https://localhost";
         public static readonly string Login = "Account/Login";
         public static readonly string Protected = "Account/Claims";
+        public static readonly string Process = "Process";
         public static readonly string Logout = "Account/Logout";
         public static readonly string Callback = "Callback";
 
@@ -37,6 +39,21 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                             app.UseRouting();
                             app.UseAuthentication();
                             app.UseAuthorization();
+                            app.Use(async (context, next) =>
+                            {
+                                var req = context.Request;
+                                var res = context.Response;
+
+                               if (req.Path == new PathString("/process"))
+                                {
+                                    var ticket = await context.AuthenticateAsync("Cookies");
+                                    return;
+                                }
+                                else
+                                {
+                                    await next();
+                                }
+                            });
                             app.UseEndpoints(endpoints =>
                             {
                                 endpoints.MapControllerRoute(

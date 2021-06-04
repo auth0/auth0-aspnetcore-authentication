@@ -13,6 +13,15 @@ using Xunit;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.AspNetCore.Builder;
+using System.Linq;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
@@ -351,7 +360,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             act.Should()
                 .Throw<ArgumentNullException>()
-                .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");           
+                .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");
         }
 
         [Fact]
@@ -629,6 +638,112 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                         .Should()
                         .BeOfType<Exception>()
                         .Which.Message.Should().Be("Triggered Custom Validation.");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Refresh_Access_Token_When_Expired()
+        {   
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20)
+                .Build();
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.UseRefreshTokens = true;
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }))
+            {
+
+                using (var client = server.CreateClient())
+                {
+                    // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Cookie");
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    mockHandler.Verify();
+                }
+            }
+        }
+
+
+        [Fact]
+        public async void Should_Not_Refresh_Access_Token_When_Not_Expired()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(70)), (me) => me.HasGrantType("authorization_code"))
+                .Build();
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.UseRefreshTokens = true;
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }))
+            {
+
+                using (var client = server.CreateClient())
+                {
+                    // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Cookie");
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    mockHandler.Verify();
                 }
             }
         }

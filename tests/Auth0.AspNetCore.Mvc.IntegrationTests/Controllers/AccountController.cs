@@ -32,7 +32,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
                 {
                     authenticationPropertiesBuilder = authenticationPropertiesBuilder.WithExtraParameter(entry.Key, entry.Value);
                 }
-                
+
             }
 
             if (!string.IsNullOrWhiteSpace(organization))
@@ -85,7 +85,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
         [Authorize]
         public IActionResult Claims()
         {
-            return View();
+            return Content("Hello from claims");
         }
 
         public IActionResult AccessDenied()

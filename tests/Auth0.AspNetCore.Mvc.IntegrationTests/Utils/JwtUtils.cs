@@ -20,7 +20,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="org_id">The (optional) org_id claim to be used.</param>
         /// <param name="nonce">The (optional) nonce to be used.</param>
         /// <returns>The generated JWT token.</returns>
-        public static string GenerateToken(int userId, string issuer, string audience, string org_id = null, string nonce = null)
+        public static string GenerateToken(int userId, string issuer, string audience, string org_id = null, string nonce = null, DateTime? expires = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new List<Claim>
@@ -42,7 +42,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = expires != null ? expires : DateTime.UtcNow.AddDays(7),
                 Issuer = issuer,
                 Audience = audience,
             };

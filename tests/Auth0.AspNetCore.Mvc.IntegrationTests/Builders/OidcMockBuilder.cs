@@ -63,7 +63,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
         /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
         /// <returns></returns>
-        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null)
+        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70)
         {
             _mockHandler
               .Protected()
@@ -77,7 +77,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                   StatusCode = HttpStatusCode.OK,
                   Content = new StringContent(@"{
 'id_token': '" + idTokenFunc() + @"',
-'access_token': '123'
+'access_token': '123',
+'refresh_token': '456',
+'expires_in': '" + expiresIn + @"',
 }"),
               })
               .Verifiable();
@@ -85,30 +87,30 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             return this;
         }
 
-        public Mock<HttpMessageHandler> Build()
-        {
-            return _mockHandler;
-        }
+    public Mock<HttpMessageHandler> Build()
+    {
+        return _mockHandler;
+    }
 
-        /// <summary>
-        /// Converts an Embedded Resource to an HttpResponseMessage.
-        /// </summary>
-        /// <param name="resource">The name of the resource, has to exist as `Auth0.AspNetCore.Mvc.IntegrationTests.{resource}`</param>
-        /// <returns>The HttpResponseMessage instance containing the Embedded Resource.</returns>
-        private async Task<HttpResponseMessage> ReturnResource(string resource)
+    /// <summary>
+    /// Converts an Embedded Resource to an HttpResponseMessage.
+    /// </summary>
+    /// <param name="resource">The name of the resource, has to exist as `Auth0.AspNetCore.Mvc.IntegrationTests.{resource}`</param>
+    /// <returns>The HttpResponseMessage instance containing the Embedded Resource.</returns>
+    private async Task<HttpResponseMessage> ReturnResource(string resource)
+    {
+        var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests." + resource;
+        using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
+        using (var reader = new StreamReader(stream))
         {
-            var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests." + resource;
-            using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
-            using (var reader = new StreamReader(stream))
+            var body = await reader.ReadToEndAsync();
+            var content = new StringContent(body, Encoding.UTF8, "application/json");
+            return new HttpResponseMessage()
             {
-                var body = await reader.ReadToEndAsync();
-                var content = new StringContent(body, Encoding.UTF8, "application/json");
-                return new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = content,
-                };
-            }
+                StatusCode = HttpStatusCode.OK,
+                Content = content,
+            };
         }
     }
+}
 }

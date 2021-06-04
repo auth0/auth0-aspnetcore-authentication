@@ -1,6 +1,4 @@
-using Auth0.AuthenticationApi;
-using Auth0.AuthenticationApi.Models;
-using Auth0.Core.Exceptions;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -12,14 +10,13 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
+
     /// <summary>
     /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> extension(s) for registering Auth0.
     /// </summary>
@@ -40,7 +37,7 @@ namespace Auth0.AspNetCore.Mvc
 
             builder.AddCookie(options =>
             {
-                options.Events.OnValidatePrincipal = CreateOnValidatePrincipal();
+                options.Events.OnValidatePrincipal = CreateOnValidatePrincipal(auth0Options);
             });
             builder.AddOpenIdConnect(Auth0Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
@@ -166,7 +163,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal()
+        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(Auth0Options auth0Options)
         {
             return async (context) =>
             {
@@ -188,7 +185,7 @@ namespace Auth0.AspNetCore.Mvc
 
                         if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                         {
-                            var result = await RefreshTokens((ClaimsIdentity)context.Principal.Identity, options, refreshToken);
+                            var result = await RefreshTokens(options, refreshToken, auth0Options.Backchannel);
 
                             if (result != null)
                             {
@@ -196,13 +193,14 @@ namespace Auth0.AspNetCore.Mvc
                                 context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
                                 context.Properties.UpdateTokenValue("id_token", result.IdToken);
                                 context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
-                                context.ShouldRenew = true;
                             }
                             else
                             {
                                 context.Properties.UpdateTokenValue("refresh_token", null);
-                                context.ShouldRenew = true;
                             }
+
+                            context.ShouldRenew = true;
+
                         }
                     }
                 }
@@ -254,26 +252,11 @@ namespace Auth0.AspNetCore.Mvc
             }
         }
 
-        private static async Task<AccessTokenResponse> RefreshTokens(ClaimsIdentity identity, Auth0Options options, string refreshToken)
+        private static async Task<AccessTokenResponse> RefreshTokens(Auth0Options options, string refreshToken, HttpClient? httpClient)
         {
-            try
+            using (var tokenClient = new TokenClient(httpClient))
             {
-                using (var client = new AuthenticationApiClient(options.Domain))
-                {
-                    var organization = identity.FindFirst("org_id")?.Value;
-                    return await client.GetTokenAsync(new RefreshTokenRequest
-                    {
-                        Audience = options.Audience,
-                        ClientId = options.ClientId,
-                        ClientSecret = options.ClientSecret,
-                        Organization = organization,
-                        RefreshToken = refreshToken
-                    });
-                }
-            }
-            catch (ErrorApiException)
-            {
-                return null;
+                return await tokenClient.Refresh(options, refreshToken);
             }
         }
     }
