@@ -56,6 +56,11 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
 
+            if (!oidcOptions.Scope.Contains("openid"))
+            {
+                oidcOptions.Scope.Add("openid");
+            }
+
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
@@ -173,7 +178,16 @@ namespace Auth0.AspNetCore.Mvc
             // Any Auth0 specific parameter
             foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
+                var value = item.Value;
+                if (item.Key == Auth0AuthenticationParameters.Scope)
+                {
+                    // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
+                    if (value.IndexOf("openid") == -1)
+                    {
+                        value += " openid";
+                    }
+                }
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
             }
 
             return parameters;
@@ -194,11 +208,6 @@ namespace Auth0.AspNetCore.Mvc
             if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
-            }
-
-            if (!string.IsNullOrWhiteSpace(auth0Options.Scope) && !auth0Options.Scope.Contains("openid"))
-            {
-                throw new InvalidOperationException("When configuring Scope, using openid is required. Ensure `openid` is added to `Auth0Options.Scope`.");
             }
         }
     }

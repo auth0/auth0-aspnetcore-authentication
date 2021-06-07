@@ -107,17 +107,46 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_Configuring_Scope_Without_OpenId()
+        public async void Should_Add_OpenId_When_Setting_Scope_Without_OpenId()
         {
-
-            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer(opts =>
             {
-                options.Scope = "test";
-            });
+                opts.Scope = scope;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
 
-            act.Should()
-                .Throw<InvalidOperationException>()
-                .Which.Message.Should().Be("When configuring Scope, using openid is required. Ensure `openid` is added to `Auth0Options.Scope`.");
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"{scope} openid");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Add_OpenId_When_Setting_Scope_Without_OpenId_Using_ChallengeAsync()
+        {
+            var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer())
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scope={scope}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"{scope} openid");
+                }
+            }
         }
 
         [Fact]
