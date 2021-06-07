@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
-
     /// <summary>
     /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> extension(s) for registering Auth0.
     /// </summary>
@@ -172,7 +171,6 @@ namespace Auth0.AspNetCore.Mvc
 
                 if (options.UseRefreshTokens)
                 {
-
                     var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
                     string refreshToken;
                     if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))

@@ -5,7 +5,7 @@ namespace Auth0.AspNetCore.Mvc
     /// <summary>
     /// Represents an access token response.
     /// </summary>
-    public class AccessTokenResponse
+    internal class AccessTokenResponse
     {
         /// <summary>
         /// Identifier token.
