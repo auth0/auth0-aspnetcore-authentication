@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Threading.Tasks;
+using System.Security.Policy;
 
 namespace Auth0.AspNetCore.Mvc.Playground
 {
@@ -53,6 +56,26 @@ namespace Auth0.AspNetCore.Mvc.Playground
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.Use(async (context, next) =>
+            {
+                var idToken = await context.GetTokenAsync("id_token");
+                var refreshToken = await context.GetTokenAsync("refresh_token");
+
+                var options = context.RequestServices.GetRequiredService<Auth0Options>();
+
+                if (options.UseRefreshTokens && !string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(refreshToken))
+                {
+                    var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/Account/Login").Build();
+
+                    await context.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                }
+
+                // Call the next delegate/middleware in the pipeline
+                await next();
+            });
+
 
             app.UseEndpoints(endpoints =>
             {
