@@ -72,7 +72,7 @@ public async Task Logout()
 ### Scopes
 
 By default, this SDK requests the `openid profile` scopes, if needed you can configure the SDK to request a different set of scopes.
-As `openid` is a required scope (https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
+As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
 
 ```csharp
 services.AddAuth0Mvc(options =>
