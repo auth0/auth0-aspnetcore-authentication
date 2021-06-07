@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -257,7 +256,7 @@ namespace Auth0.AspNetCore.Mvc
             }
         }
 
-        private static async Task<AccessTokenResponse> RefreshTokens(Auth0Options options, string refreshToken, HttpClient? httpClient)
+        private static async Task<AccessTokenResponse> RefreshTokens(Auth0Options options, string refreshToken, HttpClient httpClient = null)
         {
             using (var tokenClient = new TokenClient(httpClient))
             {
