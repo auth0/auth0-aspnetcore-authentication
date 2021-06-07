@@ -167,38 +167,40 @@ namespace Auth0.AspNetCore.Mvc
             return async (context) =>
             {
                 var options = context.HttpContext.RequestServices.GetRequiredService<Auth0Options>();
-                var accessToken = context.Properties.Items[".Token.access_token"];
 
                 if (options.UseRefreshTokens)
                 {
-                    var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
-                    string refreshToken;
-                    if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
+                    string accessToken;
+                    if (context.Properties.Items.TryGetValue(".Token.access_token", out accessToken))
                     {
-                        var now = DateTimeOffset.Now;
-
-                        var leeway = 60;
-                        var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
-                        var isExpired = difference <= 0;
-
-                        if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
+                        string refreshToken;
+                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
                         {
-                            var result = await RefreshTokens(options, refreshToken, auth0Options.Backchannel);
+                            var now = DateTimeOffset.Now;
+                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
+                            var leeway = TimeSpan.FromDays(3).TotalSeconds;
+                            var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
+                            var isExpired = difference <= 0;
 
-                            if (result != null)
+                            if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                             {
-                                context.Properties.UpdateTokenValue("access_token", result.AccessToken);
-                                context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
-                                context.Properties.UpdateTokenValue("id_token", result.IdToken);
-                                context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
-                            }
-                            else
-                            {
-                                context.Properties.UpdateTokenValue("refresh_token", null);
-                            }
+                                var result = await RefreshTokens(options, refreshToken, auth0Options.Backchannel);
 
-                            context.ShouldRenew = true;
+                                if (result != null)
+                                {
+                                    context.Properties.UpdateTokenValue("access_token", result.AccessToken);
+                                    context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                    context.Properties.UpdateTokenValue("id_token", result.IdToken);
+                                    context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                                }
+                                else
+                                {
+                                    context.Properties.UpdateTokenValue("refresh_token", null);
+                                }
 
+                                context.ShouldRenew = true;
+
+                            }
                         }
                     }
                 }
@@ -247,6 +249,11 @@ namespace Auth0.AspNetCore.Mvc
             if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }
+
+            if (auth0Options.UseRefreshTokens && string.IsNullOrWhiteSpace(auth0Options.Audience))
+            {
+                throw new InvalidOperationException("Using Refresh Tokens is only supported when using an `Audience`.");
             }
         }
 
