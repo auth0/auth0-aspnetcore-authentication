@@ -59,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc
             if (auth0Options.MaxAge.HasValue)
             {
                 var authTimeRaw = token.Claims.SingleOrDefault(claim => claim.Type == JwtRegisteredClaimNames.AuthTime)?.Value;
-                long? authTime = !string.IsNullOrWhiteSpace(authTimeRaw) ? (long)Convert.ToDouble(authTimeRaw, CultureInfo.InvariantCulture) : null;
+                long? authTime = !string.IsNullOrWhiteSpace(authTimeRaw) ? (long?)Convert.ToDouble(authTimeRaw, CultureInfo.InvariantCulture) : null;
 
                 if (!authTime.HasValue)
                 {
