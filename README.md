@@ -39,6 +39,15 @@ As the SDK is still in beta, you need to tell Nuget to also include prereleases,
 
 ## Getting Started
 
+Make sure you have enabled​ authentication and authorization in your `Startup.Configure` method:
+
+```csharp
+...
+app.UseAuthentication();
+app.UseAuthorization();
+...
+```
+
 Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureServices` method:
 
 ```csharp
@@ -68,15 +77,6 @@ public async Task Logout()
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 }
 ```
-
-> :warning: Make sure you have enabled​ authentication and authorization in your `Startup.Configure` method:
->
-> ```csharp
-> ...
-> app.UseAuthentication();
-> app.UseAuthorization();
-> ...
-> ```
 
 ### Scopes
 
