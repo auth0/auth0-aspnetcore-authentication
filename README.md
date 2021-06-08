@@ -39,7 +39,16 @@ As the SDK is still in beta, you need to tell Nuget to also include prereleases,
 
 ## Getting Started
 
-Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureService` method:
+Make sure you have enabled​ authentication and authorization in your `Startup.Configure` method:
+
+```csharp
+...
+app.UseAuthentication();
+app.UseAuthorization();
+...
+```
+
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureServices` method:
 
 ```csharp
 services.AddAuth0Mvc(options =>
@@ -55,7 +64,7 @@ Triggering login or logout is done using ASP.NET's `HttpContext`:
 ```csharp
 public async Task Login(string returnUrl = "/")
 {
-    await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = returnUrl });
+    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = returnUrl });
 }
 
 [Authorize]
@@ -64,7 +73,7 @@ public async Task Logout()
     // Indicate here where Auth0 should redirect the user after a logout.
     // Note that the resulting absolute Uri must be added in the
     // **Allowed Logout URLs** settings for the client.
-    await HttpContext.SignOutAsync(Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action("Index", "Home") });
+    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action("Index", "Home") });
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 }
 ```
@@ -89,7 +98,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithScope("openid profile email scope1 scope2")
     .Build();
 
-await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes. Ensure to also include `openid profile email` if you need them as well.
@@ -119,7 +128,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithAudience("YOUR_AUDIENCE")
     .Build();
 
-await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
@@ -182,7 +191,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithOrganization("YOUR_ORGANIZATION")
     .Build();
 
-await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
@@ -200,7 +209,7 @@ public class InvitationController : Controller {
             .WithInvitation(invitation)
             .Build();
             
-        await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+        await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     }
 }
 
@@ -228,7 +237,7 @@ var authenticationProperties = new AuthenticationPropertiesBuilder()
     .WithExtraParameter("screen_hint", "signup")
     .Build();
 
-await HttpContext.ChallengeAsync(Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
