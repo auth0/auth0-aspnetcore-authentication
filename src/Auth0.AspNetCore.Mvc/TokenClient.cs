@@ -17,7 +17,7 @@ namespace Auth0.AspNetCore.Mvc
             DateParseHandling = DateParseHandling.DateTime
         };
 
-        public TokenClient(HttpClient httpClient)
+        public TokenClient(HttpClient httpClient = null)
         {
             this.isHttpClientOwner = httpClient == null;
             this.httpClient = httpClient ?? new HttpClient();
@@ -53,9 +53,7 @@ namespace Auth0.AspNetCore.Mvc
 
                     var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    return typeof(AccessTokenResponse) == typeof(string)
-                        ? (AccessTokenResponse)(object)responseContent
-                        : JsonConvert.DeserializeObject<AccessTokenResponse>(responseContent, jsonSerializerSettings);
+                    return JsonConvert.DeserializeObject<AccessTokenResponse>(responseContent, jsonSerializerSettings);
                 }
             }
         }
