@@ -643,6 +643,20 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
+        public void Should_Not_Allow_Configuring_RefreshTokens_Without_Audience()
+        {
+
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.UseRefreshTokens = true;
+            });
+
+            act.Should()
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Using Refresh Tokens is only supported when using an `Audience`.");
+        }
+
+        [Fact]
         public async void Should_Refresh_Access_Token_When_Expired()
         {   
             var nonce = "";
@@ -658,6 +672,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
+                opts.ClientSecret = "123";
+                opts.ResponseType = OpenIdConnectResponseType.Code;
+                opts.Audience = "123";
                 opts.UseRefreshTokens = true;
                 opts.Backchannel = new HttpClient(mockHandler.Object);
             }))
@@ -711,6 +728,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
+                opts.ClientSecret = "123";
+                opts.ResponseType = OpenIdConnectResponseType.Code;
+                opts.Audience = "123";
                 opts.UseRefreshTokens = true;
                 opts.Backchannel = new HttpClient(mockHandler.Object);
             }))

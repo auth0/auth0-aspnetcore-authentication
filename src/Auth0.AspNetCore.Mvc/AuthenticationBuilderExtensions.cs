@@ -177,7 +177,7 @@ namespace Auth0.AspNetCore.Mvc
                         {
                             var now = DateTimeOffset.Now;
                             var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
-                            var leeway = TimeSpan.FromDays(3).TotalSeconds;
+                            var leeway = 60;
                             var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
                             var isExpired = difference <= 0;
 
