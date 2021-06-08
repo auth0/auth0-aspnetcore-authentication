@@ -4,7 +4,7 @@
 
 ## Refresh Tokens
 
-In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token  expires before the application's session does. In order to ensure the Access Token is valid for the entire duration of the session, you can configure the SDK to use Refresh Tokens:
+In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure the Access Token is valid for the entire duration of the session, you can configure the SDK to use Refresh Tokens:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -26,7 +26,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Detecting the absense of a Refresh Token
 
-In the event where the API isn't configured to allow offline usage, or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out and force them to re-login).
+In the event where the API isn't configured to allow offline usage, or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
 ```
 app.Use(async (context, next) =>
@@ -37,19 +37,20 @@ app.Use(async (context, next) =>
 
     if (options.UseRefreshTokens && !string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(refreshToken))
     {
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        
         var authenticationProperties = new AuthenticationPropertiesBuilder()
-            .WithRedirectUri("/Account/Login")
+            .WithRedirectUri("/")
             .Build();
 
-        await context.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     }
 
     await next();
 });
 ```
 
-The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out, configuring the login URL as a redirect URL.
+The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
 

@@ -64,10 +64,9 @@ namespace Auth0.AspNetCore.Mvc.Playground
 
                 if (options.UseRefreshTokens && !string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(refreshToken))
                 {
-                    var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/Account/Login").Build();
-
-                    await context.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
                     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                    await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
                 }
 
                 // Call the next delegate/middleware in the pipeline
