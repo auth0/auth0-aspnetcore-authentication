@@ -72,7 +72,7 @@ To make your ASP.NET web application communicate properly with Auth0, you need t
 
 Replace the placeholders with the proper values from the Auth0 Dashboard.
 
-Make sure you have enabled​ authentication and authorization in your `Startup.Configure` method:
+Make sure you have enabled authentication and authorization in your `Startup.Configure` method:
 
 ```csharp
 ...
