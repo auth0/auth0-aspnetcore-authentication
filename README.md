@@ -46,16 +46,18 @@ Create a **Regular Web Application** in the [Auth0 Dashboard](https://manage.aut
 > **If you're using an existing application**, verify that you have configured the following settings in your Regular Web Application:
 >
 > - Click on the "Settings" tab of your application's page.
-> - Scroll down and click on the "Show Advanced Settings" link.
+> - Scroll down and click on "Advanced Settings".
 > - Under "Advanced Settings", click on the "OAuth" tab.
-> - Ensure that "JsonWebToken Signature Algorithm" is set to `RS256` and that "OIDC Conformant" is enabled.
+> - Ensure that "JSON Web Token (JWT) Signature Algorithm" is set to `RS256` and that "OIDC Conformant" is enabled.
 
 Next, configure the following URLs for your application under the "Application URIs" section of the "Settings" page:
 
-- **Allowed Callback URLs**: `http://localhost:5001/callback`
-- **Allowed Logout URLs**: `http://localhost:5001/`
+- **Allowed Callback URLs**: `https://YOUR_APP_DOMAIN:YOUR_APP_PORT/callback`
+- **Allowed Logout URLs**: `https://YOUR_APP_DOMAIN:YOUR_APP_PORT/`
 
 Take note of the **Client ID**, **Client Secret**, and **Domain** values under the "Basic Information" section. You'll need these values to configure your ASP.NET web application.
+
+> :information_source: You need the **Client Secret** only when you have to get an access token to [call an API](#calling-an-api).
 
 ### Basic Setup
 
