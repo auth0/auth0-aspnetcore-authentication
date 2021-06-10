@@ -109,36 +109,23 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
         private string BuildTokenRespone(string idToken, int expiresIn, bool includeAccessToken, bool includeRefreshToken)
         {
-            if (includeAccessToken && includeRefreshToken)
-            {
-                return @"{
+            var token = @"{
 'id_token': '" + idToken + @"',
-'access_token': '123',
-'refresh_token': '456',
 'expires_in': '" + expiresIn + @"',
-}";
-            }
-            else if (includeAccessToken)
+";
+
+            if (includeAccessToken)
             {
-                return @"{
-'id_token': '" + idToken + @"',
-'access_token': '123',
-'expires_in': '" + expiresIn + @"',
-}";
-            }
-            else if (includeRefreshToken)
-            {
-                return @"{
-'id_token': '" + idToken + @"',
-'refresh_token': '456',
-'expires_in': '" + expiresIn + @"',
-}";
+                token += "'access_token': '123',";
             }
 
-            return @"{
-'id_token': '" + idToken + @"',
-'expires_in': '" + expiresIn + @"',
-}";
+            if (includeRefreshToken)
+            {
+                token += "'refresh_token': '456',";
+            }
+
+            token += "}";
+            return token;
         }
     }
 }
