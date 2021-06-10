@@ -653,7 +653,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             act.Should()
                 .Throw<InvalidOperationException>()
-                .Which.Message.Should().Be("Using Refresh Tokens is only supported when using an `Audience`.");
+                .Which.Message.Should().Be("Using Refresh Tokens is only supported when using `code` or `code id_token` as the response_type.");
         }
 
         [Fact]

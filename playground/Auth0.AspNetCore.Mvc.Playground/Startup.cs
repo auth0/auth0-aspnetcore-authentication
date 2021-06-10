@@ -29,6 +29,15 @@ namespace Auth0.AspNetCore.Mvc.Playground
                 options.Audience = Configuration["Auth0:Audience"];
                 options.ResponseType = OpenIdConnectResponseType.Code;
                 options.UseRefreshTokens = true;
+                options.Events = new Auth0OptionsEvents
+                {
+                    OnMissingRefreshToken = async (context) =>
+                    {
+                        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                    }
+                };
             });
 
             services.AddControllersWithViews();
@@ -54,25 +63,6 @@ namespace Auth0.AspNetCore.Mvc.Playground
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.Use(async (context, next) =>
-            {
-                var idToken = await context.GetTokenAsync("id_token");
-                var refreshToken = await context.GetTokenAsync("refresh_token");
-
-                var options = context.RequestServices.GetRequiredService<Auth0Options>();
-
-                if (options.UseRefreshTokens && !string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(refreshToken))
-                {
-                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                    await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-                }
-
-                // Call the next delegate/middleware in the pipeline
-                await next();
-            });
-
 
             app.UseEndpoints(endpoints =>
             {

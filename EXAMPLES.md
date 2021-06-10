@@ -4,7 +4,7 @@
 
 ## Refresh Tokens
 
-In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure the Access Token is valid for the entire duration of the session, you can configure the SDK to use Refresh Tokens:
+In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure you have a valid Access Token at all times, you can configure the SDK to use Refresh Tokens:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -26,27 +26,20 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Detecting the absense of a Refresh Token
 
-In the event where the API isn't configured to allow offline usage, or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
+In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
 ```
-app.Use(async (context, next) =>
+services.AddAuth0Mvc(options =>
 {
-    var idToken = await context.GetTokenAsync("id_token");
-    var refreshToken = await context.GetTokenAsync("refresh_token");
-    var options = context.RequestServices.GetRequiredService<Auth0Options>();
-
-    if (options.UseRefreshTokens && !string.IsNullOrEmpty(idToken) && string.IsNullOrEmpty(refreshToken))
+    options.Events = new Auth0OptionsEvents
     {
-        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        
-        var authenticationProperties = new AuthenticationPropertiesBuilder()
-            .WithRedirectUri("/")
-            .Build();
-
-        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-    }
-
-    await next();
+        OnMissingRefreshToken = async (context) =>
+        {
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        }
+    };
 });
 ```
 

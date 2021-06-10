@@ -20,6 +20,11 @@ namespace Auth0.AspNetCore.Mvc
     /// </summary>
     public static class AuthenticationBuilderExtensions
     {
+        private static IList<string> codeResponseTypes = new List<string>() {
+            OpenIdConnectResponseType.Code,
+            OpenIdConnectResponseType.CodeIdToken
+        };
+
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
@@ -167,10 +172,10 @@ namespace Auth0.AspNetCore.Mvc
             {
                 var options = context.HttpContext.RequestServices.GetRequiredService<Auth0Options>();
 
-                if (options.UseRefreshTokens)
+                string accessToken;
+                if (context.Properties.Items.TryGetValue(".Token.access_token", out accessToken))
                 {
-                    string accessToken;
-                    if (context.Properties.Items.TryGetValue(".Token.access_token", out accessToken))
+                    if (options.UseRefreshTokens)
                     {
                         string refreshToken;
                         if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
@@ -200,6 +205,23 @@ namespace Auth0.AspNetCore.Mvc
                                 context.ShouldRenew = true;
 
                             }
+                        }
+                        else
+                        {
+                            if (auth0Options.Events != null && auth0Options.Events.OnMissingRefreshToken != null)
+                            {
+                                await auth0Options.Events.OnMissingRefreshToken(context.HttpContext);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (codeResponseTypes.Contains(options.ResponseType))
+                    {
+                        if (auth0Options.Events != null && auth0Options.Events.OnMissingAccessToken != null)
+                        {
+                            await auth0Options.Events.OnMissingAccessToken(context.HttpContext);
                         }
                     }
                 }
@@ -235,11 +257,6 @@ namespace Auth0.AspNetCore.Mvc
 
         private static void ValidateOptions(Auth0Options auth0Options)
         {
-            var codeResponseTypes = new[] {
-                OpenIdConnectResponseType.Code,
-                OpenIdConnectResponseType.CodeIdToken
-            };
-
             if (codeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
             {
                 throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
@@ -250,9 +267,9 @@ namespace Auth0.AspNetCore.Mvc
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
             }
 
-            if (auth0Options.UseRefreshTokens && string.IsNullOrWhiteSpace(auth0Options.Audience))
+            if (auth0Options.UseRefreshTokens && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
-                throw new InvalidOperationException("Using Refresh Tokens is only supported when using an `Audience`.");
+                throw new InvalidOperationException("Using Refresh Tokens is only supported when using `code` or `code id_token` as the response_type.");
             }
         }
 
