@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
@@ -39,16 +42,30 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, nonce));
             }
 
+            JsonWebKeySet keys = new JsonWebKeySet(GetKeys().Result);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires != null ? expires : DateTime.UtcNow.AddDays(7),
                 Issuer = issuer,
                 Audience = audience,
+                SigningCredentials = new SigningCredentials(keys.Keys[0], SecurityAlgorithms.RsaSha256)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private static async Task<string> GetKeys()
+        {
+            var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests.jwks.json";
+            using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
+            {
+                var body = await reader.ReadToEndAsync();
+                return body;
+            }
         }
     }
 }

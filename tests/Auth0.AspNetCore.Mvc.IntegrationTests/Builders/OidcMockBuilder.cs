@@ -48,11 +48,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                       ItExpr.Is<HttpRequestMessage>(me => me.IsJwksEndPoint()),
                       ItExpr.IsAny<CancellationToken>()
                    )
-                   .ReturnsAsync(new HttpResponseMessage()
-                   {
-                       StatusCode = HttpStatusCode.OK,
-                       Content = new StringContent("{}"),
-                   });
+                   .ReturnsAsync(ReturnResource("jwks.json").Result);
 
             return this;
         }
@@ -63,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
         /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
         /// <returns></returns>
-        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70)
+        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, bool includeRefreshToken = true)
         {
             _mockHandler
               .Protected()
@@ -72,45 +68,78 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                  ItExpr.Is<HttpRequestMessage>(me => me.IsTokenEndPoint() && (matcher == null || matcher(me))),
                  ItExpr.IsAny<CancellationToken>()
               )
-              .ReturnsAsync(() => new HttpResponseMessage()
+              .ReturnsAsync(() =>
               {
-                  StatusCode = HttpStatusCode.OK,
-                  Content = new StringContent(@"{
-'id_token': '" + idTokenFunc() + @"',
-'access_token': '123',
-'refresh_token': '456',
-'expires_in': '" + expiresIn + @"',
-}"),
+                  return new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.OK,
+                      Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
+                  };
               })
               .Verifiable();
 
             return this;
         }
 
-    public Mock<HttpMessageHandler> Build()
-    {
-        return _mockHandler;
-    }
-
-    /// <summary>
-    /// Converts an Embedded Resource to an HttpResponseMessage.
-    /// </summary>
-    /// <param name="resource">The name of the resource, has to exist as `Auth0.AspNetCore.Mvc.IntegrationTests.{resource}`</param>
-    /// <returns>The HttpResponseMessage instance containing the Embedded Resource.</returns>
-    private async Task<HttpResponseMessage> ReturnResource(string resource)
-    {
-        var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests." + resource;
-        using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
-        using (var reader = new StreamReader(stream))
+        public Mock<HttpMessageHandler> Build()
         {
-            var body = await reader.ReadToEndAsync();
-            var content = new StringContent(body, Encoding.UTF8, "application/json");
-            return new HttpResponseMessage()
+            return _mockHandler;
+        }
+
+        /// <summary>
+        /// Converts an Embedded Resource to an HttpResponseMessage.
+        /// </summary>
+        /// <param name="resource">The name of the resource, has to exist as `Auth0.AspNetCore.Mvc.IntegrationTests.{resource}`</param>
+        /// <returns>The HttpResponseMessage instance containing the Embedded Resource.</returns>
+        private async Task<HttpResponseMessage> ReturnResource(string resource)
+        {
+            var resourceName = "Auth0.AspNetCore.Mvc.IntegrationTests." + resource;
+            using (var stream = typeof(Startup).Assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
             {
-                StatusCode = HttpStatusCode.OK,
-                Content = content,
-            };
+                var body = await reader.ReadToEndAsync();
+                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                return new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = content,
+                };
+            }
+        }
+
+        private string BuildTokenRespone(string idToken, int expiresIn, bool includeAccessToken, bool includeRefreshToken)
+        {
+            if (includeAccessToken && includeRefreshToken)
+            {
+                return @"{
+'id_token': '" + idToken + @"',
+'access_token': '123',
+'refresh_token': '456',
+'expires_in': '" + expiresIn + @"',
+}";
+            }
+            else if (includeAccessToken)
+            {
+                return @"{
+'id_token': '" + idToken + @"',
+'access_token': '123',
+'expires_in': '" + expiresIn + @"',
+}";
+            }
+            else if (includeRefreshToken)
+            {
+                return @"{
+'id_token': '" + idToken + @"',
+'refresh_token': '456',
+'expires_in': '" + expiresIn + @"',
+}";
+            }
+
+            return @"{
+'id_token': '" + idToken + @"',
+'expires_in': '" + expiresIn + @"',
+}";
         }
     }
 }
-}
+

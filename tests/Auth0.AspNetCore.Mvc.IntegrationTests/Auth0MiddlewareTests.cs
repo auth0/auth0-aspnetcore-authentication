@@ -658,7 +658,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
         [Fact]
         public async void Should_Refresh_Access_Token_When_Expired()
-        {   
+        {
             var nonce = "";
             var configuration = TestConfiguration.GetConfiguration();
             var domain = configuration["Auth0:Domain"];
@@ -764,6 +764,130 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
 
                     mockHandler.Verify();
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Call_On_Access_Token_Missing()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+                opts.Events = new Auth0OptionsEvents
+                {
+                    OnMissingAccessToken = async (context) =>
+                    {
+                        context.Response.Redirect("http://missing.at/");
+                    }
+                };
+            }))
+            {
+
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var nvc = new List<KeyValuePair<string, string>>();
+                    nvc.Add(new KeyValuePair<string, string>("state", state));
+                    nvc.Add(new KeyValuePair<string, string>("nonce", nonce));
+                    nvc.Add(new KeyValuePair<string, string>("id_token", JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20))));
+
+                    var message = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}") { Content = new FormUrlEncodedContent(nvc) };
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    var opts = server.Services.GetRequiredService<Auth0Options>();
+
+                    opts.ResponseType = OpenIdConnectResponseType.Code;
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    response.Headers.Location.AbsoluteUri.Should().Be("http://missing.at/");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Call_On_Refresh_Token_Missing()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20, true, false)
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.Audience = "123";
+                opts.ClientSecret = "123";
+                opts.ResponseType = OpenIdConnectResponseType.Code;
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+                opts.Events = new Auth0OptionsEvents
+                {
+                    OnMissingRefreshToken = async (context) =>
+                    {
+                        context.Response.Redirect("http://missing.rt/");
+                    }
+                };
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    var opts = server.Services.GetRequiredService<Auth0Options>();
+
+                    opts.UseRefreshTokens = true;
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    response.Headers.Location.AbsoluteUri.Should().Be("http://missing.rt/");
                 }
             }
         }
