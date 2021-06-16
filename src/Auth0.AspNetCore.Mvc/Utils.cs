@@ -15,6 +15,14 @@ namespace Auth0.AspNetCore.Mvc
             }
         }
 
+        public static void AddSafe<T>(this ICollection<T> collection, T item)
+        {
+            if (!collection.Contains(item))
+            {
+                collection.Add(item);
+            }
+        }
+
         public static string CreateAgentString()
         {
             var sdkVersion = typeof(AuthenticationBuilderExtensions).GetTypeInfo().Assembly.GetName().Version;

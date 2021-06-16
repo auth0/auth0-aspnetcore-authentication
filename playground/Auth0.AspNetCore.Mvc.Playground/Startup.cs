@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.Playground
 {
@@ -27,6 +28,16 @@ namespace Auth0.AspNetCore.Mvc.Playground
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
                 options.Audience = Configuration["Auth0:Audience"];
                 options.ResponseType = OpenIdConnectResponseType.Code;
+                options.UseRefreshTokens = true;
+                options.Events = new Auth0OptionsEvents
+                {
+                    OnMissingRefreshToken = async (context) =>
+                    {
+                        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                    }
+                };
             });
 
             services.AddControllersWithViews();
