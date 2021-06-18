@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 
@@ -66,6 +67,8 @@ namespace Auth0.AspNetCore.Mvc
         /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
         /// </summary>
         public Auth0OptionsEvents Events { get; set; }
+
+        public OpenIdConnectEvents OpenIdConnectEvents { get; set; }
 
         /// <summary>
         /// Set the ResponseType to be used.

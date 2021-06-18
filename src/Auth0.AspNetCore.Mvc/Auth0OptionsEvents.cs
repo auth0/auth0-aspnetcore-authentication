@@ -35,7 +35,7 @@ namespace Auth0.AspNetCore.Mvc
         /// });
         /// </code>
         /// </example>
-        public Func<TokenValidatedContext, Task> OnTokenValidated { get; set; }
+        // public Func<TokenValidatedContext, Task> OnTokenValidated { get; set; }
 
         /// <summary>
         /// Executed when an Access Token is missing while it was expected, allowing you to react accordingly.
@@ -78,5 +78,7 @@ namespace Auth0.AspNetCore.Mvc
         /// </code>
         /// </example>
         public Func<HttpContext, Task> OnMissingRefreshToken { get; set; }
+
+        
     }
 }
