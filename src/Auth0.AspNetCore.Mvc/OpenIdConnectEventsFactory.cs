@@ -2,14 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
-    public class OpenIdConnectEventsFactory
+    internal class OpenIdConnectEventsFactory
     {
-        public static OpenIdConnectEvents Create(Auth0Options auth0Options)
+        internal static OpenIdConnectEvents Create(Auth0Options auth0Options)
         {
             return new OpenIdConnectEvents
             {
@@ -138,6 +137,5 @@ namespace Auth0.AspNetCore.Mvc
 
             return parameters;
         }
-
     }
 }

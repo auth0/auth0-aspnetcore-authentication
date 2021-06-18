@@ -51,7 +51,5 @@ namespace Auth0.AspNetCore.Mvc
         /// </code>
         /// </example>
         public Func<HttpContext, Task> OnMissingRefreshToken { get; set; }
-
-        
     }
 }
