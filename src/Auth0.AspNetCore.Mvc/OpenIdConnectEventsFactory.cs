@@ -13,9 +13,9 @@ namespace Auth0.AspNetCore.Mvc
         {
             return new OpenIdConnectEvents
             {
-                OnRedirectToIdentityProvider = CreateOnRedirectToIdentityProvider(auth0Options),
-                OnRedirectToIdentityProviderForSignOut = CreateOnRedirectToIdentityProviderForSignOut(auth0Options),
-                OnTokenValidated = CreateOnTokenValidated(auth0Options),
+                OnRedirectToIdentityProvider = ProxyEvent(CreateOnRedirectToIdentityProvider(auth0Options)),
+                OnRedirectToIdentityProviderForSignOut = ProxyEvent(CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
+                OnTokenValidated = ProxyEvent(CreateOnTokenValidated(auth0Options)),
 
                 OnAccessDenied = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAccessDenied),
                 OnAuthenticationFailed = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthenticationFailed),
