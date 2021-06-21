@@ -46,5 +46,16 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         {
             return me.Headers.Contains("Auth0-Client");
         }
+
+        /// <summary>
+        /// Indicate whether or not the HttpRequestMessage countains the `Auth0-Client` header.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>True if the request countains the `Auth0-Client` header, false if not.</returns>
+        public static bool HasGrantType(this HttpRequestMessage me, string grantType)
+        {
+            var content = me.Content.ReadAsStringAsync().Result;
+            return content.Contains($"grant_type={grantType}");
+        }
     }
 }

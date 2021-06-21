@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
@@ -18,6 +20,11 @@ namespace Auth0.AspNetCore.Mvc
     /// </summary>
     public static class AuthenticationBuilderExtensions
     {
+        private static IList<string> codeResponseTypes = new List<string>() {
+            OpenIdConnectResponseType.Code,
+            OpenIdConnectResponseType.CodeIdToken
+        };
+
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
@@ -31,9 +38,13 @@ namespace Auth0.AspNetCore.Mvc
             configureOptions(auth0Options);
             ValidateOptions(auth0Options);
 
-            builder.AddCookie();
+            builder.AddCookie(options =>
+            {
+                options.Events.OnValidatePrincipal = CreateOnValidatePrincipal(auth0Options);
+            });
             builder.AddOpenIdConnect(Auth0Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
+            builder.Services.AddSingleton(auth0Options);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
             return builder;
@@ -55,18 +66,27 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.SaveTokens = true;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel;
+            oidcOptions.MaxAge = auth0Options.MaxAge;
 
             if (!oidcOptions.Scope.Contains("openid"))
             {
                 oidcOptions.Scope.Add("openid");
             }
 
+            if (auth0Options.UseRefreshTokens)
+            {
+                oidcOptions.Scope.AddSafe("offline_access");
+            }
+
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
-                ValidIssuer = $"https://{auth0Options.Domain}/",
                 ValidateAudience = true,
-                ValidAudience = auth0Options.ClientId
+                ValidAudience = auth0Options.ClientId,
+                ValidateIssuer = true,
+                ValidIssuer = $"https://{auth0Options.Domain}/",
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
             };
 
             oidcOptions.Events = new OpenIdConnectEvents
@@ -132,20 +152,13 @@ namespace Auth0.AspNetCore.Mvc
         {
             return (context) =>
             {
-                var organization = context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization) ? context.Properties.Items[Auth0AuthenticationParameters.Organization] : null;
-
-                if (!string.IsNullOrWhiteSpace(organization))
+                try
                 {
-                    var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
-
-                    if (string.IsNullOrWhiteSpace(organizationClaimValue))
-                    {
-                        context.Fail("Organization claim must be a string present in the ID token.");
-                    }
-                    else if (organizationClaimValue != organization)
-                    {
-                        context.Fail($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
-                    }
+                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items);
+                }
+                catch (IdTokenValidationException ex)
+                {
+                    context.Fail(ex.Message);
                 }
 
                 if (auth0Options.Events != null && auth0Options.Events.OnTokenValidated != null)
@@ -154,6 +167,68 @@ namespace Auth0.AspNetCore.Mvc
                 }
 
                 return Task.CompletedTask;
+            };
+        }
+
+        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(Auth0Options auth0Options)
+        {
+            return async (context) =>
+            {
+                var options = context.HttpContext.RequestServices.GetRequiredService<Auth0Options>();
+
+                string accessToken;
+                if (context.Properties.Items.TryGetValue(".Token.access_token", out accessToken))
+                {
+                    if (options.UseRefreshTokens)
+                    {
+                        string refreshToken;
+                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
+                        {
+                            var now = DateTimeOffset.Now;
+                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
+                            var leeway = 60;
+                            var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
+                            var isExpired = difference <= 0;
+
+                            if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
+                            {
+                                var result = await RefreshTokens(options, refreshToken, auth0Options.Backchannel);
+
+                                if (result != null)
+                                {
+                                    context.Properties.UpdateTokenValue("access_token", result.AccessToken);
+                                    context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                    context.Properties.UpdateTokenValue("id_token", result.IdToken);
+                                    context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                                }
+                                else
+                                {
+                                    context.Properties.UpdateTokenValue("refresh_token", null);
+                                }
+
+                                context.ShouldRenew = true;
+
+                            }
+                        }
+                        else
+                        {
+                            if (auth0Options.Events != null && auth0Options.Events.OnMissingRefreshToken != null)
+                            {
+                                await auth0Options.Events.OnMissingRefreshToken(context.HttpContext);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (codeResponseTypes.Contains(options.ResponseType))
+                    {
+                        if (auth0Options.Events != null && auth0Options.Events.OnMissingAccessToken != null)
+                        {
+                            await auth0Options.Events.OnMissingAccessToken(context.HttpContext);
+                        }
+                    }
+                }
             };
         }
 
@@ -195,11 +270,6 @@ namespace Auth0.AspNetCore.Mvc
 
         private static void ValidateOptions(Auth0Options auth0Options)
         {
-            var codeResponseTypes = new[] {
-                OpenIdConnectResponseType.Code,
-                OpenIdConnectResponseType.CodeIdToken
-            };
-
             if (codeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
             {
                 throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
@@ -208,6 +278,19 @@ namespace Auth0.AspNetCore.Mvc
             if (!string.IsNullOrWhiteSpace(auth0Options.Audience) && !codeResponseTypes.Contains(auth0Options.ResponseType))
             {
                 throw new InvalidOperationException("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
+            }
+
+            if (auth0Options.UseRefreshTokens && !codeResponseTypes.Contains(auth0Options.ResponseType))
+            {
+                throw new InvalidOperationException("Using Refresh Tokens is only supported when using `code` or `code id_token` as the response_type.");
+            }
+        }
+
+        private static async Task<AccessTokenResponse> RefreshTokens(Auth0Options options, string refreshToken, HttpClient httpClient = null)
+        {
+            using (var tokenClient = new TokenClient(httpClient))
+            {
+                return await tokenClient.Refresh(options, refreshToken);
             }
         }
     }

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="jwks.json" />
     <EmbeddedResource Include="wellknownconfig.json" />
   </ItemGroup>
 

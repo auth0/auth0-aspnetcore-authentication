@@ -48,11 +48,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                       ItExpr.Is<HttpRequestMessage>(me => me.IsJwksEndPoint()),
                       ItExpr.IsAny<CancellationToken>()
                    )
-                   .ReturnsAsync(new HttpResponseMessage()
-                   {
-                       StatusCode = HttpStatusCode.OK,
-                       Content = new StringContent("{}"),
-                   });
+                   .ReturnsAsync(ReturnResource("jwks.json").Result);
 
             return this;
         }
@@ -63,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
         /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
         /// <returns></returns>
-        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null)
+        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, bool includeRefreshToken = true)
         {
             _mockHandler
               .Protected()
@@ -72,13 +68,13 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                  ItExpr.Is<HttpRequestMessage>(me => me.IsTokenEndPoint() && (matcher == null || matcher(me))),
                  ItExpr.IsAny<CancellationToken>()
               )
-              .ReturnsAsync(() => new HttpResponseMessage()
+              .ReturnsAsync(() =>
               {
-                  StatusCode = HttpStatusCode.OK,
-                  Content = new StringContent(@"{
-'id_token': '" + idTokenFunc() + @"',
-'access_token': '123'
-}"),
+                  return new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.OK,
+                      Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
+                  };
               })
               .Verifiable();
 
@@ -110,5 +106,27 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 };
             }
         }
+
+        private string BuildTokenRespone(string idToken, int expiresIn, bool includeAccessToken, bool includeRefreshToken)
+        {
+            var token = @"{
+'id_token': '" + idToken + @"',
+'expires_in': '" + expiresIn + @"',
+";
+
+            if (includeAccessToken)
+            {
+                token += "'access_token': '123',";
+            }
+
+            if (includeRefreshToken)
+            {
+                token += "'refresh_token': '456',";
+            }
+
+            token += "}";
+            return token;
+        }
     }
 }
+
