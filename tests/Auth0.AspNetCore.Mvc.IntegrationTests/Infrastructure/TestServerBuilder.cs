@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -28,7 +30,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0Options> configureOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -47,7 +49,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                                if (req.Path == new PathString("/process"))
                                 {
                                     var ticket = await context.AuthenticateAsync("Cookies");
-                                    return;
+                                    await res.WriteAsync(JsonSerializer.Serialize(new
+                                    {
+                                        RefreshToken = await context.GetTokenAsync("refresh_token")
+                                    }));
                                 }
                                 else
                                 {
@@ -63,9 +68,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                         })
                         .ConfigureServices(services =>
                         {
+                            Auth0WebAppAuthenticationBuilder builder;
                             if (useServiceCollectionExtension)
                             {
-                                services.AddAuth0Mvc(options =>
+                                builder = services.AddAuth0WebAppAuthentication(options =>
                                 {
                                     options.Domain = configuration["Auth0:Domain"];
                                     options.ClientId = configuration["Auth0:ClientId"];
@@ -75,7 +81,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                             }
                             else
                             {
-                                services.AddAuthentication(options =>
+                                builder = services.AddAuthentication(options =>
                                 {
                                     if (!mockAuthentication)
                                     {
@@ -83,13 +89,18 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                                         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                                         options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                                     }
-                                }).AddAuth0Mvc(options =>
+                                }).AddAuth0WebAppAuthentication(options =>
                                 {
                                     options.Domain = configuration["Auth0:Domain"];
                                     options.ClientId = configuration["Auth0:ClientId"];
 
                                     if (configureOptions != null) configureOptions(options);
                                 });
+                            }
+
+                            if (configureWithAccessTokensOptions != null)
+                            {
+                                builder.WithAccessToken(configureWithAccessTokensOptions);
                             }
 
                             services.AddControllersWithViews();

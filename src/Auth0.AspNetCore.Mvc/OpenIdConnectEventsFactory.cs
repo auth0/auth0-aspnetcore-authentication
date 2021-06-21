@@ -8,7 +8,7 @@ namespace Auth0.AspNetCore.Mvc
 {
     internal class OpenIdConnectEventsFactory
     {
-        internal static OpenIdConnectEvents Create(Auth0Options auth0Options)
+        internal static OpenIdConnectEvents Create(Auth0WebAppOptions auth0Options)
         {
             return new OpenIdConnectEvents
             {
@@ -45,17 +45,12 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0Options auth0Options)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
                 // Set auth0Client querystring parameter for /authorize
                 context.ProtocolMessage.SetParameter("auth0Client", Utils.CreateAgentString());
-
-                if (!string.IsNullOrWhiteSpace(auth0Options.Audience))
-                {
-                    context.ProtocolMessage.SetParameter("audience", auth0Options.Audience);
-                }
 
                 foreach (var extraParam in GetAuthorizeParameters(auth0Options, context.Properties.Items))
                 {
@@ -71,7 +66,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0Options auth0Options)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
@@ -97,7 +92,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0Options auth0Options)
+        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
@@ -114,7 +109,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static IDictionary<string, string> GetAuthorizeParameters(Auth0Options auth0Options, IDictionary<string, string> authSessionItems)
+        private static IDictionary<string, string> GetAuthorizeParameters(Auth0WebAppOptions auth0Options, IDictionary<string, string> authSessionItems)
         {
             var parameters = new Dictionary<string, string>();
 

@@ -8,7 +8,7 @@ namespace Auth0.AspNetCore.Mvc
     /// <summary>
     /// Options used to configure the SDK
     /// </summary>
-    public class Auth0Options
+    public class Auth0WebAppOptions
     {
         /// <summary>
         /// Auth0 domain name, e.g. tenant.auth0.com.
@@ -27,14 +27,6 @@ namespace Auth0.AspNetCore.Mvc
         /// Required when using <see cref="ResponseType"/> set to `code` or `code id_token`.
         /// </remarks>
         public string ClientSecret { get; set; }
-
-        /// <summary>
-        /// The audience to be used for requesting API access.
-        /// </summary>
-        /// <remark>
-        /// When set, ensure to set <see cref="ResponseType"/> to `code` or `code id_token`.
-        /// </remark>
-        public string Audience { get; set; }
 
         /// <summary>
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")
@@ -56,7 +48,7 @@ namespace Auth0.AspNetCore.Mvc
         /// Extra parameters to be send to `/authorize`.
         /// </summary>
         /// <example>
-        /// services.AddAuth0Mvc(options =>
+        /// services.AddAuth0WebAppAuthentication(options =>
         /// {
         ///     options.ExtraParameters = new Dictionary<string, string>() { {"Test", "123" } };
         /// });
@@ -92,13 +84,5 @@ namespace Auth0.AspNetCore.Mvc
         /// the user will be prompted to re-authenticate.
         /// </summary>
         public TimeSpan? MaxAge { get; set; }
-
-        /// <summary>
-        /// Define whether or not Refresh Tokens should be used internally when the access token is expired.
-        /// </summary>
-        /// <remarks>
-        /// When set, ensure to specify an Audience.
-        /// </remarks>
-        public bool UseRefreshTokens { get; set; }
     }
 }

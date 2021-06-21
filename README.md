@@ -81,10 +81,10 @@ app.UseAuthorization();
 ...
 ```
 
-Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureServices` method:
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0WebAppAuthentication` in your `Startup.ConfigureServices` method:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -117,7 +117,7 @@ By default, this SDK requests the `openid profile` scopes, if needed you can con
 As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -141,17 +141,20 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
 As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
-Next, To obtain the token to access an external API, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
+Next, To obtain the token to access an external API, call `WithAccessToken` and set the `audience` to the API Identifier. You can get the API Identifier from the API Settings for the API you want to use.
 
 ```csharp
-services.AddAuth0Mvc(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
-    options.ResponseType = OpenIdConnectResponseType.Code;
-    options.Audience = Configuration["Auth0:Audience"];
-});
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+    });
 ```
 
 Apart from being able to configure the audience globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
@@ -207,10 +210,10 @@ Note that Organizations is currently only available to customers on our Enterpri
 
 #### Log in to an organization
 
-Log in to an organization by specifying the `Organization` when calling `AddAuth0Mvc`:
+Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -251,12 +254,12 @@ public class InvitationController : Controller {
 
 ### Extra Parameters
 
-Auth0's `/authorize` endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the `ExtraParameters` when calling `AddAuth0Mvc`.
+Auth0's `/authorize` endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the `ExtraParameters` when calling `AddAuth0WebAppAuthentication`.
 
 An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
