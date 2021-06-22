@@ -68,6 +68,11 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Backchannel = auth0Options.Backchannel;
             oidcOptions.MaxAge = auth0Options.MaxAge;
 
+            if (!oidcOptions.Scope.Contains("openid"))
+            {
+                oidcOptions.Scope.Add("openid");
+            }
+
             if (auth0Options.UseRefreshTokens)
             {
                 oidcOptions.Scope.AddSafe("offline_access");
@@ -109,9 +114,9 @@ namespace Auth0.AspNetCore.Mvc
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization))
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization))
                 {
-                    context.Properties.Items[Auth0AuthenticationParmeters.Organization] = auth0Options.Organization;
+                    context.Properties.Items[Auth0AuthenticationParameters.Organization] = auth0Options.Organization;
                 }
 
                 return Task.CompletedTask;
@@ -129,7 +134,6 @@ namespace Auth0.AspNetCore.Mvc
                 {
                     if (postLogoutUri.StartsWith("/"))
                     {
-                        // transform to absolute
                         var request = context.Request;
                         postLogoutUri = request.Scheme + "://" + request.Host + request.PathBase + postLogoutUri;
                     }
@@ -247,9 +251,18 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             // Any Auth0 specific parameter
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParmeters.Prefix}:")))
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParmeters.Prefix}:", "")] = item.Value;
+                var value = item.Value;
+                if (item.Key == Auth0AuthenticationParameters.Scope)
+                {
+                    // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
+                    if (value.IndexOf("openid") == -1)
+                    {
+                        value += " openid";
+                    }
+                }
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
             }
 
             return parameters;

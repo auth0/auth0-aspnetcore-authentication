@@ -1,6 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -10,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -110,7 +107,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
                     queryParameters["client_id"].Should().Be(Configuration["Auth0:ClientId"]);
-                    queryParameters["scope"].Should().Be("openid profile email");
+                    queryParameters["scope"].Should().Be("openid profile");
                     queryParameters["redirect_uri"].Should().BeEquivalentTo($"{TestServerBuilder.Host}/{TestServerBuilder.Callback}");
                     queryParameters["response_type"].Should().Be("id_token");
                     queryParameters["response_mode"].Should().Be("form_post");
@@ -119,9 +116,52 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public async Task Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync()
+        public async void Should_Add_OpenId_When_Setting_Scope_Without_OpenId()
         {
             var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.Scope = scope;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"{scope} openid");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Add_OpenId_When_Setting_Scope_Without_OpenId_Using_ChallengeAsync()
+        {
+            var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer())
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scope={scope}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"{scope} openid");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync()
+        {
+            var scope = "openid ScopeA ScopeB";
             using (var server = TestServerBuilder.CreateServer())
             {
                 using (var client = server.CreateClient())

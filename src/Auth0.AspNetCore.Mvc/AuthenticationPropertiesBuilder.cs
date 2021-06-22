@@ -37,7 +37,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithScope(string scope)
         {
-            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Scope, scope);
+            authenticationProperties.Items.Add(Auth0AuthenticationParameters.Scope, scope);
             return this;
         }
 
@@ -48,7 +48,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithAudience(string audience)
         {
-            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Audience, audience);
+            authenticationProperties.Items.Add(Auth0AuthenticationParameters.Audience, audience);
             return this;
         }
 
@@ -59,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithOrganization(string organization)
         {
-            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Organization, organization);
+            authenticationProperties.Items.Add(Auth0AuthenticationParameters.Organization, organization);
             return this;
         }
 
@@ -70,7 +70,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithInvitation(string invitation)
         {
-            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.Invitation, invitation);
+            authenticationProperties.Items.Add(Auth0AuthenticationParameters.Invitation, invitation);
             return this;
         }
 
@@ -82,7 +82,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>The current <see cref="AuthenticationPropertiesBuilder"/> instance.</returns>
         public AuthenticationPropertiesBuilder WithExtraParameter(string key, string value)
         {
-            authenticationProperties.Items.Add(Auth0AuthenticationParmeters.ExtraParameter(key), value);
+            authenticationProperties.Items.Add(Auth0AuthenticationParameters.ExtraParameter(key), value);
             return this;
         }
 
