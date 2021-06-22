@@ -39,7 +39,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")
         /// </summary>
-        public string Scope { get; set; } = "openid profile email";
+        public string Scope { get; set; } = "openid profile";
 
         /// <summary>
         /// The path within the application to redirect the user to.

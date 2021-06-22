@@ -13,7 +13,7 @@ namespace Auth0.AspNetCore.Mvc
     {
         public static void Validate(Auth0Options auth0Options, JwtSecurityToken token, IDictionary<string, string> properties = null)
         {
-            var organization = properties != null && properties.ContainsKey(Auth0AuthenticationParmeters.Organization) ? properties[Auth0AuthenticationParmeters.Organization] : null;
+            var organization = properties != null && properties.ContainsKey(Auth0AuthenticationParameters.Organization) ? properties[Auth0AuthenticationParameters.Organization] : null;
 
             if (!string.IsNullOrWhiteSpace(organization))
             {

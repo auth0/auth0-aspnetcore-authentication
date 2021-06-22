@@ -67,6 +67,11 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.Backchannel = auth0Options.Backchannel;
             oidcOptions.MaxAge = auth0Options.MaxAge;
 
+            if (!oidcOptions.Scope.Contains("openid"))
+            {
+                oidcOptions.Scope.Add("openid");
+            }
+
             if (auth0Options.UseRefreshTokens)
             {
                 oidcOptions.Scope.AddSafe("offline_access");

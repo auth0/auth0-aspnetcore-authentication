@@ -54,9 +54,9 @@ namespace Auth0.AspNetCore.Mvc
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParmeters.Organization))
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization))
                 {
-                    context.Properties.Items[Auth0AuthenticationParmeters.Organization] = auth0Options.Organization;
+                    context.Properties.Items[Auth0AuthenticationParameters.Organization] = auth0Options.Organization;
                 }
 
                 return Task.CompletedTask;
@@ -130,9 +130,9 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             // Any Auth0 specific parameter
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParmeters.Prefix}:")))
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParmeters.Prefix}:", "")] = item.Value;
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
             }
 
             return parameters;
