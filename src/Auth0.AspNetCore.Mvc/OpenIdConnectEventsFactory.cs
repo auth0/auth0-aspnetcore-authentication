@@ -12,9 +12,9 @@ namespace Auth0.AspNetCore.Mvc
         {
             return new OpenIdConnectEvents
             {
-                OnRedirectToIdentityProvider = ProxyEvent(CreateOnRedirectToIdentityProvider(auth0Options)),
-                OnRedirectToIdentityProviderForSignOut = ProxyEvent(CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
-                OnTokenValidated = ProxyEvent(CreateOnTokenValidated(auth0Options)),
+                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options)),
+                OnRedirectToIdentityProviderForSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut, CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
+                OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated, CreateOnTokenValidated(auth0Options)),
 
                 OnAccessDenied = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAccessDenied),
                 OnAuthenticationFailed = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthenticationFailed),
@@ -29,11 +29,19 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<T, Task> ProxyEvent<T>(Func<T, Task> original)
+        private static Func<T, Task> ProxyEvent<T>(Func<T, Task> originalHandler, Func<T, Task> newHandler = null)
         {
-            return (T context) =>
+            return async (T context) =>
             {
-                return original != null ? original(context) : Task.CompletedTask;
+                if (newHandler != null)
+                {
+                   await newHandler(context);
+                }
+
+                if (originalHandler != null)
+                {
+                    await originalHandler(context);
+                }
             };
         }
 
@@ -102,11 +110,6 @@ namespace Auth0.AspNetCore.Mvc
                     context.Fail(ex.Message);
                 }
 
-                if (auth0Options.OpenIdConnectEvents != null && auth0Options.OpenIdConnectEvents.OnTokenValidated != null)
-                {
-                    return auth0Options.OpenIdConnectEvents.OnTokenValidated(context);
-                }
-
                 return Task.CompletedTask;
             };
         }
@@ -132,7 +135,17 @@ namespace Auth0.AspNetCore.Mvc
             // Any Auth0 specific parameter
             foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
+                var value = item.Value;
+                if (item.Key == Auth0AuthenticationParameters.Scope)
+                {
+                    // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
+                    if (value.IndexOf("openid", StringComparison.CurrentCultureIgnoreCase) == -1)
+                    {
+                        value += " openid";
+                    }
+                }
+
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
             }
 
             return parameters;
