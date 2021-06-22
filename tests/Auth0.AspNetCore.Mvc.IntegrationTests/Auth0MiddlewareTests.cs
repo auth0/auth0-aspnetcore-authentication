@@ -635,7 +635,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(opt =>
             {
                 opt.Backchannel = new HttpClient(mockHandler.Object);
-                opt.Events = new Auth0OptionsEvents
+                opt.OpenIdConnectEvents = new Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectEvents
                 {
                     OnTokenValidated = (context) =>
                     {
