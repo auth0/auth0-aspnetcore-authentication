@@ -210,7 +210,7 @@ public void ConfigureServices(IServiceCollection services)
 > :information_source: In order to use Refresh Tokens, the application needs to use an `Audience`, a `ClientSecret` and set the `ResponseType` to `OpenIdConnectResponseType.Code`.
 
 
-###### Detecting the absense of a Refresh Token
+##### Detecting the absense of a Refresh Token
 
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
