@@ -16,6 +16,12 @@
     <None Include="Auth0Icon.png" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Auth0.AuthenticationApi">
+      <HintPath>..\..\..\auth0.net\src\Auth0.AuthenticationApi\bin\Debug\netstandard2.0\Auth0.AuthenticationApi.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <PropertyGroup>
     <Product>Auth0.AspNetCore.Mvc</Product>
     <Description>Auth0 middleware for ASP.NET Core Mvc.</Description>

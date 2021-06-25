@@ -7,16 +7,59 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Auth0.AuthenticationApi;
+using Auth0.AuthenticationApi.Models;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Auth0.AspNetCore.Mvc
 {
+    public interface ITokenCacheProvider
+    {
+
+    }
+
+    public class TokenCacheEntry
+    {
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+    }
+
+    public class MemoryTokenCacheProvider : ITokenCacheProvider
+    {
+        /// <summary>
+        /// .NET Core Memory cache.
+        /// </summary>
+        private readonly IMemoryCache _memoryCache;
+
+        public MemoryTokenCacheProvider(IMemoryCache memoryCache)
+        {
+            _memoryCache = memoryCache;
+        }
+
+        public Task Remove(string key)
+        {
+            _memoryCache.Remove(key);
+
+            return Task.CompletedTask;
+        }
+
+        public Task<TokenCacheEntry> Get(string key)
+        {
+            return Task.FromResult(_memoryCache.Get<TokenCacheEntry>(key));
+        }
+
+        public Task Set(string key, TokenCacheEntry value)
+        {
+            _memoryCache.Set(key, value);
+            return Task.CompletedTask;
+        }
+    }
     /// <summary>
     /// Builder to add extra functionality when using Access Tokens. 
     /// </summary>
     public class Auth0WebAppWithAccessTokenAuthenticationBuilder
     {
-        private readonly IServiceCollection services;
-        private readonly Action<Auth0WebAppWithAccessTokenOptions> configureOptions;
 
         private static readonly IList<string> CodeResponseTypes = new List<string>() {
             OpenIdConnectResponseType.Code,
@@ -30,20 +73,24 @@ namespace Auth0.AspNetCore.Mvc
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
         public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
         {
-            this.services = services;
-            this.configureOptions = configureOptions;
+            Services = services;
+            ConfigureOptions = configureOptions;
 
             EnableWithAccessToken();
         }
+
+        public IServiceCollection Services { get; private set; }
+        public Action<Auth0WebAppWithAccessTokenOptions> ConfigureOptions { get; private set; }
 
         private void EnableWithAccessToken()
         {
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
-            this.configureOptions(auth0WithAccessTokensOptions);
+            ConfigureOptions(auth0WithAccessTokensOptions);
+            
 
-            this.services.AddSingleton(auth0WithAccessTokensOptions);
-            this.services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
+            Services.AddSingleton(auth0WithAccessTokensOptions);
+            Services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
                 .Configure<IServiceProvider>((options, serviceProvider) =>
                 {
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -60,13 +107,24 @@ namespace Auth0.AspNetCore.Mvc
                     }
 
                     options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(auth0WithAccessTokensOptions), options.Events.OnRedirectToIdentityProvider);
+
+                    options.Events.OnAuthorizationCodeReceived = Utils.ProxyEvent(CreateOnAuthorizationCodeReceived(auth0WithAccessTokensOptions), options.Events.OnAuthorizationCodeReceived);
                 });
 
-            this.services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+            Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure<IServiceProvider>((options, serviceProvider) =>
                 {
                     options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(auth0WithAccessTokensOptions), options.Events.OnValidatePrincipal);
                 });
+        }
+
+        public void WithInMemoryStorage()
+        {
+            Services.AddMemoryCache();
+            Services.AddHttpContextAccessor();
+
+
+            // Services.AddSingleton<TokenCacheProvider, MemoryTokenCacheProvider>();
         }
 
         private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppWithAccessTokenOptions auth0Options)
@@ -84,6 +142,49 @@ namespace Auth0.AspNetCore.Mvc
                 }
 
                 return Task.CompletedTask;
+            };
+        }
+
+        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(Auth0WebAppWithAccessTokenOptions auth0Options)
+        {
+            return async (context) =>
+            {
+
+                var options = context.HttpContext.RequestServices.GetRequiredService<Auth0WebAppOptions>();
+
+                // Exchange Code for a Token
+                var idToken = "";
+
+                //string codeVerifier = "";
+                context.TokenEndpointRequest.Parameters.TryGetValue("code", out string code);
+                context.TokenEndpointRequest.Parameters.TryGetValue(OAuthConstants.CodeVerifierKey, out string codeVerifier);
+                context.TokenEndpointRequest.Parameters.TryGetValue("redirect_uri", out string redirectUri);
+
+                context.Properties.Items.TryGetValue(Auth0AuthenticationParameters.Organization, out string organization);
+                
+
+                using (var authClient = new AuthenticationApiClient(options.Domain))
+                {
+                    try
+                    {
+                        var result = await authClient.GetTokenAsync(new AuthorizationCodePkceTokenRequest()
+                        {
+                            ClientId = options.ClientId,
+                            ClientSecret = options.ClientSecret,
+                            Code = code,
+                            CodeVerifier = codeVerifier,
+                            Organization = organization,
+                            RedirectUri = redirectUri 
+
+                        }).ConfigureAwait(false);
+
+                        context.HandleCodeRedemption(null, result.IdToken);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                }
             };
         }
 

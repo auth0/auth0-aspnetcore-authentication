@@ -13,7 +13,7 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
     {
         public async Task Login(string returnUrl = "/")
         {
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl).Build();
+            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl).WithOrganization("org_3QtG7N9n7jb2RG1l").Build();
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
 

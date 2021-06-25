@@ -40,7 +40,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
                         await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
                     }
                 };
-            });
+            }).WithInMemoryStorage();
 
             services.AddControllersWithViews();
         }
