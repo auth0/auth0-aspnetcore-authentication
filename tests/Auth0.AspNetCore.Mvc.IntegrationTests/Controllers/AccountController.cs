@@ -20,7 +20,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
             string invitation = null,
             string audience = null)
         {
-            var authenticationPropertiesBuilder = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl);
+            var authenticationPropertiesBuilder = new LoginAuthenticationPropertiesBuilder().WithRedirectUri(returnUrl);
 
             if (!string.IsNullOrWhiteSpace(scope))
             {
@@ -30,7 +30,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
             {
                 foreach (KeyValuePair<string, string> entry in extraParameters)
                 {
-                    authenticationPropertiesBuilder = authenticationPropertiesBuilder.WithExtraParameter(entry.Key, entry.Value);
+                    authenticationPropertiesBuilder = authenticationPropertiesBuilder.WithParameter(entry.Key, entry.Value);
                 }
 
             }
@@ -55,14 +55,23 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests.Controllers
         }
 
         [Authorize]
-        public async Task Logout()
+        public async Task Logout([FromQuery(Name = "extraParameters")] Dictionary<string, string> extraParameters = null)
         {
             // Indicate here where Auth0 should redirect the user after a logout.
             // Note that the resulting absolute Uri must be whitelisted in the
             // **Allowed Logout URLs** settings for the client.
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(Url.Action("Index", "Home")).Build();
+            var authenticationPropertiesBuilder = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri(Url.Action("Index", "Home"));
 
-            await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            if (extraParameters != null)
+            {
+                foreach (KeyValuePair<string, string> entry in extraParameters)
+                {
+                    authenticationPropertiesBuilder = authenticationPropertiesBuilder.WithParameter(entry.Key, entry.Value);
+                }
+
+            }
+
+            await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationPropertiesBuilder.Build());
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
