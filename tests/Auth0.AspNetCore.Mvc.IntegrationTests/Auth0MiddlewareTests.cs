@@ -221,7 +221,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
 
-                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Logout}?extraParameters[0].Key=Test&extraParameters[0].Value=123");
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Logout}?extraParameters[0].Key=Test&extraParameters[0].Value=123&extraParameters[1].Key=federated&extraParameters[1].Value=");
 
                     response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
 
@@ -232,6 +232,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     redirectUri.AbsolutePath.Should().Be("/v2/logout");
 
                     queryParameters["Test"].Should().Be("123");
+                    queryParameters["federated"].Should().BeEmpty();
                 }
             }
         }
