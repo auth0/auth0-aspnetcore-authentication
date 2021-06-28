@@ -93,7 +93,14 @@ namespace Auth0.AspNetCore.Mvc
 
                 foreach (var parameter in parameters)
                 {
-                    logoutUri += $"&{parameter.Key}={ Uri.EscapeDataString(parameter.Value)}";
+                    if (!string.IsNullOrEmpty(parameter.Value))
+                    {
+                        logoutUri += $"&{parameter.Key}={ Uri.EscapeDataString(parameter.Value)}";
+                    }
+                    else
+                    {
+                        logoutUri += $"&{parameter.Key}";
+                    }
                 }
 
                 context.Response.Redirect(logoutUri);

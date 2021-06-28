@@ -288,6 +288,19 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
 
+#### Extra parameters when logging out
+The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
+
+```csharp
+var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+    .WithParameter("federated", "")
+    .Build();
+
+await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+```
+> :information_source: The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
+
 ### Roles
 
 Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
