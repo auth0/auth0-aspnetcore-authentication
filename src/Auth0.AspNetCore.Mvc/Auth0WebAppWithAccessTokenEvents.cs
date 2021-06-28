@@ -10,7 +10,7 @@ namespace Auth0.AspNetCore.Mvc
     public class Auth0WebAppWithAccessTokenEvents
     {
         /// <summary>
-        /// Executed when an Access Token is missing while it was expected, allowing you to react accordingly.
+        /// Executed when an Access Token is missing where one was expected, allowing you to react accordingly.
         /// </summary>
         /// <example>
         /// <code>
@@ -31,7 +31,7 @@ namespace Auth0.AspNetCore.Mvc
         public Func<HttpContext, Task> OnMissingAccessToken { get; set; }
 
         /// <summary>
-        /// Executed when a Refresh Token is missing while it was expected, allowing you to react accordingly.
+        /// Executed when a Refresh Token is missing where one was expected, allowing you to react accordingly.
         /// </summary>
         /// <example>
         /// <code>

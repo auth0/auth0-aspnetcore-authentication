@@ -18,9 +18,6 @@
         /// <summary>
         /// Define whether or not Refresh Tokens should be used internally when the access token is expired.
         /// </summary>
-        /// <remarks>
-        /// When set, ensure to specify an Audience.
-        /// </remarks>
         public bool UseRefreshTokens { get; set; }
 
         /// <summary>
