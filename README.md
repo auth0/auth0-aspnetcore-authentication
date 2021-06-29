@@ -1,7 +1,7 @@
 # Auth0 SDK for ASP.NET Core MVC (Beta)
 [![Build status](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_apis/build/status/Auth0.AspNetCore.MVC)](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_build/latest?definitionId=8)
 
-This library supports .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core 5 application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
+This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core  application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
 
 > :information_source: This SDK is designed to support the most common use-cases. If you have more complex needs, you can still integrate Auth0 using `Microsoft.AspNetCore.Authentication.OpenIdConnect` directly.
 
@@ -143,7 +143,7 @@ var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
+> :information_source: Specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
 
 ### Calling an API
 
@@ -176,7 +176,7 @@ var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
+> :information_source: Specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
 
 #### Retrieving the Access Token
 
@@ -221,9 +221,6 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-> :information_source: In order to use Refresh Tokens, the application needs to use an `Audience`, a `ClientSecret` and set the `ResponseType` to `OpenIdConnectResponseType.Code`.
-
-
 ##### Detecting the absense of a Refresh Token
 
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
@@ -250,9 +247,6 @@ services
 The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
-
-
-
 
 ### Organization
 
@@ -295,7 +289,7 @@ var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
+> :information_source: Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
 #### Accept user invitations
 Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
@@ -313,7 +307,6 @@ public class InvitationController : Controller {
         await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     }
 }
-
 ```
 
 ### Extra Parameters
@@ -345,7 +338,7 @@ var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
-> :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
+> :information_source: Specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
 
 #### Extra parameters when logging out
 The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
