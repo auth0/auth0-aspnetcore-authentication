@@ -176,7 +176,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         public async Task Should_Allow_Configuring_Scope_When_Calling_WithAccessToken()
         {
             var scope = "ScopeA ScopeB";
-            using (var server = TestServerBuilder.CreateServer(null, opts => { opts.Scope = scope; }))
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+            }, opts => { opts.Scope = scope; }))
             {
                 using (var client = server.CreateClient())
                 {
@@ -445,6 +448,19 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             act.Should()
                 .Throw<ArgumentNullException>()
                 .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");
+        }
+
+        [Fact]
+        public void Should_Not_Allow_Configuring_WithAccessToken_Without_ClientSecret()
+        {
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(null, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .Throw<ArgumentNullException>()
+                .Which.Message.Should().Be("Client Secret can not be null when requesting an access token. (Parameter 'ClientSecret')");
         }
 
         [Fact]
@@ -915,6 +931,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
+                opts.ClientSecret = "123";
                 opts.Backchannel = new HttpClient(mockHandler.Object);
 
             }, opts =>
