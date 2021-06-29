@@ -31,7 +31,7 @@ namespace Auth0.AspNetCore.Mvc
             }
         }
 
-        public async Task<AccessTokenResponse> Refresh(Auth0Options options, string refreshToken)
+        public async Task<AccessTokenResponse> Refresh(Auth0WebAppOptions options, string refreshToken)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },

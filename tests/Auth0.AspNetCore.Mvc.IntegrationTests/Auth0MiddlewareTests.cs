@@ -11,6 +11,7 @@ using Xunit;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
@@ -27,7 +28,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         [Fact]
         public async Task Should_Redirect_To_Login_When_Using_Service_Collection_Extensions()
         {
-            using (var server = TestServerBuilder.CreateServer(null, false, true))
+            using (var server = TestServerBuilder.CreateServer(null, null, false, true))
             {
                 using (var client = server.CreateClient())
                 {
@@ -151,6 +152,47 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Allow_Configuring_Scope()
+        {
+            var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer(opts => { opts.Scope = scope; }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"{scope} openid");
+                }
+            }
+        }
+
+
+        [Fact]
+        public async Task Should_Allow_Configuring_Scope_When_Calling_WithAccessToken()
+        {
+            var scope = "ScopeA ScopeB";
+            using (var server = TestServerBuilder.CreateServer(null, opts => { opts.Scope = scope; }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["scope"].Should().Be($"openid profile {scope}");
+                }
+            }
+        }
+
+        [Fact]
         public async Task Should_Allow_Configuring_Scope_When_Calling_ChallengeAsync()
         {
             var scope = "openid ScopeA ScopeB";
@@ -195,7 +237,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         [Fact]
         public async void Should_Redirect_To_Logout_Endpoint()
         {
-            using (var server = TestServerBuilder.CreateServer(null, true))
+            using (var server = TestServerBuilder.CreateServer(null, null, true))
             {
                 using (var client = server.CreateClient())
                 {
@@ -215,7 +257,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         [Fact]
         public async void Should_Allow_Configuring_Parameters_To_Logout_Endpoint()
         {
-            using (var server = TestServerBuilder.CreateServer(null, true))
+            using (var server = TestServerBuilder.CreateServer(null, null, true))
             {
                 using (var client = server.CreateClient())
                 {
@@ -393,25 +435,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_Configuring_Audience_Without_Code()
-        {
-
-            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
-            {
-                options.Audience = "http://local.auth0";
-            });
-
-            act.Should()
-                .Throw<InvalidOperationException>()
-                .Which.Message.Should().Be("Using Audience is only supported when using `code` or `code id_token` as the response_type.");
-        }
-
-        [Fact]
-        public void Should_Not_Allow_Configuring_Audience_Without_ClientSecret()
+        public void Should_Not_Allow_ResponseType_Code_Without_ClientSecret()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
             {
-                options.Audience = "http://local.auth0";
                 options.ResponseType = OpenIdConnectResponseType.Code;
             });
 
@@ -425,9 +452,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         {
             using (var server = TestServerBuilder.CreateServer(options =>
             {
-                options.Audience = "http://local.auth0";
-                options.ResponseType = OpenIdConnectResponseType.Code;
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
             }))
             {
                 using (var client = server.CreateClient())
@@ -462,9 +490,11 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         {
             using (var server = TestServerBuilder.CreateServer(options =>
             {
-                options.Audience = "http://local.auth0";
                 options.ResponseType = "code";
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
             }))
             {
                 using (var client = server.CreateClient())
@@ -700,20 +730,6 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_Configuring_RefreshTokens_Without_Audience()
-        {
-
-            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
-            {
-                options.UseRefreshTokens = true;
-            });
-
-            act.Should()
-                .Throw<InvalidOperationException>()
-                .Which.Message.Should().Be("Using Refresh Tokens is only supported when using `code` or `code id_token` as the response_type.");
-        }
-
-        [Fact]
         public async void Should_Refresh_Access_Token_When_Expired()
         {
             var nonce = "";
@@ -730,16 +746,16 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
                 opts.ClientSecret = "123";
-                opts.ResponseType = OpenIdConnectResponseType.Code;
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
                 opts.Audience = "123";
                 opts.UseRefreshTokens = true;
-                opts.Backchannel = new HttpClient(mockHandler.Object);
             }))
             {
 
                 using (var client = server.CreateClient())
                 {
-                    // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Cookie");
                     var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
                     var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
 
@@ -769,6 +785,64 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             }
         }
 
+        [Fact]
+        public async void Should_Clear_Refresh_Token_When_Refresh_fails()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, true, HttpStatusCode.BadRequest)
+                .Build();
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    var content = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    mockHandler.Verify();
+
+                    content.GetValue("RefreshToken").Value<string>().Should().BeNull();
+                }
+            }
+        }
+
 
         [Fact]
         public async void Should_Not_Refresh_Access_Token_When_Not_Expired()
@@ -786,10 +860,11 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
                 opts.ClientSecret = "123";
-                opts.ResponseType = OpenIdConnectResponseType.Code;
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
                 opts.Audience = "123";
                 opts.UseRefreshTokens = true;
-                opts.Backchannel = new HttpClient(mockHandler.Object);
             }))
             {
 
@@ -841,7 +916,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
                 opts.Backchannel = new HttpClient(mockHandler.Object);
-                opts.Events = new Auth0OptionsEvents
+
+            }, opts =>
+            {
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
                     OnMissingAccessToken = async (context) =>
                     {
@@ -877,7 +955,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
 
-                    var opts = server.Services.GetRequiredService<Auth0Options>();
+                    var opts = server.Services.GetRequiredService<Auth0WebAppOptions>();
 
                     opts.ResponseType = OpenIdConnectResponseType.Code;
 
@@ -904,11 +982,12 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
-                opts.Audience = "123";
                 opts.ClientSecret = "123";
-                opts.ResponseType = OpenIdConnectResponseType.Code;
                 opts.Backchannel = new HttpClient(mockHandler.Object);
-                opts.Events = new Auth0OptionsEvents
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
                     OnMissingRefreshToken = async (context) =>
                     {
@@ -938,7 +1017,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
 
-                    var opts = server.Services.GetRequiredService<Auth0Options>();
+                    var opts = server.Services.GetRequiredService<Auth0WebAppWithAccessTokenOptions>();
 
                     opts.UseRefreshTokens = true;
 

@@ -81,10 +81,10 @@ app.UseAuthorization();
 ...
 ```
 
-Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureServices` method:
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0WebAppAuthentication` in your `Startup.ConfigureServices` method:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -125,7 +125,7 @@ By default, this SDK requests the `openid profile` scopes, if needed you can con
 As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -149,17 +149,20 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
 As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
-Next, To obtain the token to access an external API, set the `audience` to the API Identifier when calling `AddAuth0Mvc`. You can get the API Identifier from the API Settings for the API you want to use.
+Next, To obtain the token to access an external API, call `WithAccessToken` and set the `audience` to the API Identifier. You can get the API Identifier from the API Settings for the API you want to use.
 
 ```csharp
-services.AddAuth0Mvc(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.ClientSecret = Configuration["Auth0:ClientSecret"];
-    options.ResponseType = OpenIdConnectResponseType.Code;
-    options.Audience = Configuration["Auth0:Audience"];
-});
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+    });
 ```
 
 Apart from being able to configure the audience globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
@@ -203,15 +206,18 @@ In the case where the application needs to use an Access Token to access an API,
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddAuth0Mvc(options =>
-    {
-        options.Domain = Configuration["Auth0:Domain"];
-        options.ClientId = Configuration["Auth0:ClientId"];
-        options.ClientSecret = Configuration["Auth0:ClientSecret"];
-        options.Audience = Configuration["Auth0:Audience"];
-        options.ResponseType = OpenIdConnectResponseType.Code;
-        options.UseRefreshTokens = true;
-    });
+    services
+        .AddAuth0WebAppAuthentication(options =>
+        {
+            options.Domain = Configuration["Auth0:Domain"];
+            options.ClientId = Configuration["Auth0:ClientId"];
+            options.ClientSecret = Configuration["Auth0:ClientSecret"];
+        })
+        .WithAccessToken(options =>
+        {
+            options.Audience = Configuration["Auth0:Audience"];
+            options.UseRefreshTokens = true;
+        });
 }
 ```
 
@@ -223,18 +229,22 @@ public void ConfigureServices(IServiceCollection services)
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
 ```
-services.AddAuth0Mvc(options =>
-{
-    options.Events = new Auth0OptionsEvents
+services
+    .AddAuth0WebAppAuthentication(options => {})
+    .WithAccessToken(options =>
     {
-        OnMissingRefreshToken = async (context) =>
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        options.Events = new Auth0WebAppWithAccessTokenEvents
         {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        }
-    };
-});
+            OnMissingRefreshToken = async (context) =>
+            {
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            }
+        };
+    });
 ```
 
 The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
@@ -264,10 +274,10 @@ Note that Organizations is currently only available to customers on our Enterpri
 
 #### Log in to an organization
 
-Log in to an organization by specifying the `Organization` when calling `AddAuth0Mvc`:
+Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -312,12 +322,12 @@ Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring pa
 
 #### Extra parameters when logging in
 
-In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0Mvc`.
+In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0WebAppAuthentication`.
 
 An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];

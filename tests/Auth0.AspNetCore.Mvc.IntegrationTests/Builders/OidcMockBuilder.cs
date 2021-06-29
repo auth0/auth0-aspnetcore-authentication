@@ -59,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
         /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
         /// <returns></returns>
-        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, bool includeRefreshToken = true)
+        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, bool includeRefreshToken = true, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             _mockHandler
               .Protected()
@@ -72,7 +72,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
               {
                   return new HttpResponseMessage()
                   {
-                      StatusCode = HttpStatusCode.OK,
+                      StatusCode = statusCode,
                       Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
                   };
               })

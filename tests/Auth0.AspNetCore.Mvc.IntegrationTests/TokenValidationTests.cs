@@ -585,7 +585,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             Action act = () =>
             {
                 // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
-                IdTokenValidator.Validate(new Auth0Options(), token);
+                IdTokenValidator.Validate(new Auth0WebAppOptions(), token);
             };
 
             var innerException = act
@@ -637,7 +637,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                NotBefore = expired ? DateTime.UtcNow.Subtract(new TimeSpan(0, 2, 0, 0)) : null,
+                NotBefore = expired ? DateTime.UtcNow.Subtract(new TimeSpan(0, 2, 0, 0)) : (DateTime?) null,
                 Expires = expired ? DateTime.UtcNow.Subtract(new TimeSpan(0, 1, 0, 0)) : DateTime.UtcNow.AddDays(7),
                 Issuer = issuer,
                 Audience = audience,

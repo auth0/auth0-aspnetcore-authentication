@@ -17,7 +17,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         {
             var client = new TokenClient();
             client.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => client.Refresh(new Auth0Options { Domain = "local.auth0.com" }, ""));
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com" }, ""));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
            
             var client = new TokenClient(new HttpClient(mockHandler.Object));
-            var result = await client.Refresh(new Auth0Options { Domain = "local.auth0.com" }, "123");
+            var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com" }, "123");
 
             result.Should().BeNull();
         }

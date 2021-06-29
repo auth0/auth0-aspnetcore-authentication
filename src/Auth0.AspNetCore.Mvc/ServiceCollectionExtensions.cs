@@ -14,9 +14,9 @@ namespace Auth0.AspNetCore.Mvc
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
         /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
-        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0Options"/></param>
-        /// <returns>The <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance that has been created.</returns>
-        public static AuthenticationBuilder AddAuth0Mvc(this IServiceCollection services, Action<Auth0Options> configureOptions)
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppOptions"/></param>
+        /// <returns>The <see cref="Auth0WebAppAuthenticationBuilder"/> instance that has been created.</returns>
+        public static Auth0WebAppAuthenticationBuilder AddAuth0WebAppAuthentication(this IServiceCollection services, Action<Auth0WebAppOptions> configureOptions)
         {
             return services
                 .AddAuthentication(options =>
@@ -25,8 +25,7 @@ namespace Auth0.AspNetCore.Mvc
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-                .AddAuth0Mvc(configureOptions);
+                .AddAuth0WebAppAuthentication(configureOptions);
         }
-
     }
 }

@@ -21,15 +21,17 @@ namespace Auth0.AspNetCore.Mvc.Playground
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuth0Mvc(options =>
+            services.AddAuth0WebAppAuthentication(options =>
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
+            }).WithAccessToken(options =>
+            {
                 options.Audience = Configuration["Auth0:Audience"];
-                options.ResponseType = OpenIdConnectResponseType.Code;
                 options.UseRefreshTokens = true;
-                options.Events = new Auth0OptionsEvents
+
+                options.Events = new Auth0WebAppWithAccessTokenEvents
                 {
                     OnMissingRefreshToken = async (context) =>
                     {

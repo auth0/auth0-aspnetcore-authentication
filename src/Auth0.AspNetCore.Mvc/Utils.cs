@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -11,7 +12,7 @@ namespace Auth0.AspNetCore.Mvc
         {
             foreach (var item in rangeToAdd)
             {
-                collection.Add(item);
+                collection.AddSafe(item);
             }
         }
 
@@ -28,6 +29,15 @@ namespace Auth0.AspNetCore.Mvc
             var sdkVersion = typeof(AuthenticationBuilderExtensions).GetTypeInfo().Assembly.GetName().Version;
             var agentJson = $"{{\"name\":\"aspnetcore-mvc\",\"version\":\"{sdkVersion.Major}.{sdkVersion.Minor}.{sdkVersion.Revision}\"}}";
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(agentJson));
+        }
+
+        public static Func<T, Task> ProxyEvent<T>(Func<T, Task> newHandler, Func<T, Task> originalHandler)
+        {
+            return (context) =>
+            {
+                newHandler(context);
+                return originalHandler != null ? originalHandler(context) : Task.CompletedTask;
+            };
         }
     }
 }

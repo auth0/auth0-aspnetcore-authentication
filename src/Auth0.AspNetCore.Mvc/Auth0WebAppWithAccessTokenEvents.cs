@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
 
@@ -8,10 +7,10 @@ namespace Auth0.AspNetCore.Mvc
     /// <summary>
     /// Events allowing you to hook into specific moments in the Auth0 middleware.
     /// </summary>
-    public class Auth0OptionsEvents
+    public class Auth0WebAppWithAccessTokenEvents
     {
         /// <summary>
-        /// Executed when an Access Token is missing while it was expected, allowing you to react accordingly.
+        /// Executed when an Access Token is missing where one was expected, allowing you to react accordingly.
         /// </summary>
         /// <example>
         /// <code>
@@ -22,7 +21,7 @@ namespace Auth0.AspNetCore.Mvc
         ///         OnMissingAccessToken = async (context) =>
         ///         {
         ///             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        ///             var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+        ///             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
         ///             await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         ///         }
         ///     };
@@ -32,7 +31,7 @@ namespace Auth0.AspNetCore.Mvc
         public Func<HttpContext, Task> OnMissingAccessToken { get; set; }
 
         /// <summary>
-        /// Executed when a Refresh Token is missing while it was expected, allowing you to react accordingly.
+        /// Executed when a Refresh Token is missing where one was expected, allowing you to react accordingly.
         /// </summary>
         /// <example>
         /// <code>
@@ -43,7 +42,7 @@ namespace Auth0.AspNetCore.Mvc
         ///         OnMissingRefreshToken = async (context) =>
         ///         {
         ///             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        ///             var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+        ///             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
         ///             await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         ///         }
         ///     };
