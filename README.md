@@ -293,7 +293,7 @@ The same as with the login request, you can send parameters to the `logout` endp
 
 ```csharp
 var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-    .WithParameter("federated", "")
+    .WithParameter("federated")
     .Build();
 
 await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
