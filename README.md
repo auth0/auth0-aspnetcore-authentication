@@ -97,16 +97,24 @@ Triggering login or logout is done using ASP.NET's `HttpContext`:
 ```csharp
 public async Task Login(string returnUrl = "/")
 {
-    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = returnUrl });
+    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri(returnUrl)
+        .Build();
+
+    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 }
 
 [Authorize]
 public async Task Logout()
 {
-    // Indicate here where Auth0 should redirect the user after a logout.
-    // Note that the resulting absolute Uri must be added in the
-    // **Allowed Logout URLs** settings for the client.
-    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action("Index", "Home") });
+    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+        // Indicate here where Auth0 should redirect the user after a logout.
+        // Note that the resulting absolute Uri must be added in the
+        // **Allowed Logout URLs** settings for the client.
+        .WithRedirectUri(Url.Action("Index", "Home"))
+        .Build();
+
+    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 }
 ```
@@ -125,10 +133,10 @@ services.AddAuth0Mvc(options =>
 });
 ```
 
-Apart from being able to configure the used scopes globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the used scopes globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithScope("openid profile scope1 scope2")
     .Build();
 
@@ -154,10 +162,10 @@ services.AddAuth0Mvc(options =>
 });
 ```
 
-Apart from being able to configure the audience globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the audience globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithRedirectUri("/") // "/" is the default value used for RedirectUri, so this can be omitted.
     .WithAudience("YOUR_AUDIENCE")
     .Build();
@@ -222,7 +230,7 @@ services.AddAuth0Mvc(options =>
         OnMissingRefreshToken = async (context) =>
         {
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
             await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
     };
@@ -267,10 +275,10 @@ services.AddAuth0Mvc(options =>
 });
 ```
 
-Apart from being able to configure the organization globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the organization globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithOrganization("YOUR_ORGANIZATION")
     .Build();
 
@@ -287,7 +295,7 @@ public class InvitationController : Controller {
 
     public async Task Accept(string organization, string invitation)
     {
-        var authenticationProperties = new AuthenticationPropertiesBuilder()
+        var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
             .WithOrganization(organization)
             .WithInvitation(invitation)
             .Build();
@@ -300,7 +308,11 @@ public class InvitationController : Controller {
 
 ### Extra Parameters
 
-Auth0's `/authorize` endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the `ExtraParameters` when calling `AddAuth0Mvc`.
+Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the SDK to do so.
+
+#### Extra parameters when logging in
+
+In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0Mvc`.
 
 An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
 
@@ -309,21 +321,34 @@ services.AddAuth0Mvc(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ExtraParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
+    options.LoginParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
 });
 ```
 
-Apart from being able to configure these globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure these globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithExtraParameter("screen_hint", "signup")
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+    .WithParameter("screen_hint", "signup")
     .Build();
 
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
+
+#### Extra parameters when logging out
+The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
+
+```csharp
+var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+    .WithParameter("federated")
+    .Build();
+
+await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+```
+> :information_source: The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
 
 ### Roles
 

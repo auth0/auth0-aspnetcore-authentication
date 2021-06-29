@@ -77,6 +77,7 @@ namespace Auth0.AspNetCore.Mvc
             {
                 var logoutUri = $"https://{auth0Options.Domain}/v2/logout?client_id={auth0Options.ClientId}";
                 var postLogoutUri = context.Properties.RedirectUri;
+                var parameters = GetExtraParameters(context.Properties.Items);
 
                 if (!string.IsNullOrEmpty(postLogoutUri))
                 {
@@ -88,6 +89,18 @@ namespace Auth0.AspNetCore.Mvc
                     }
 
                     logoutUri += $"&returnTo={ Uri.EscapeDataString(postLogoutUri)}";
+                }
+
+                foreach (var parameter in parameters)
+                {
+                    if (!string.IsNullOrEmpty(parameter.Value))
+                    {
+                        logoutUri += $"&{parameter.Key}={ Uri.EscapeDataString(parameter.Value)}";
+                    }
+                    else
+                    {
+                        logoutUri += $"&{parameter.Key}";
+                    }
                 }
 
                 context.Response.Redirect(logoutUri);
@@ -124,19 +137,19 @@ namespace Auth0.AspNetCore.Mvc
             }
 
             // Extra Parameters
-            if (auth0Options.ExtraParameters != null)
+            if (auth0Options.LoginParameters != null)
             {
-                foreach (var extraParam in auth0Options.ExtraParameters)
+                foreach (var extraParam in auth0Options.LoginParameters)
                 {
                     parameters[extraParam.Key] = extraParam.Value;
                 }
             }
 
             // Any Auth0 specific parameter
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
+            foreach (var item in GetExtraParameters(authSessionItems))
             {
                 var value = item.Value;
-                if (item.Key == Auth0AuthenticationParameters.Scope)
+                if (item.Key == "scope")
                 {
                     // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
                     if (value.IndexOf("openid", StringComparison.CurrentCultureIgnoreCase) == -1)
@@ -145,7 +158,19 @@ namespace Auth0.AspNetCore.Mvc
                     }
                 }
 
-                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
+                parameters[item.Key] = value;
+            }
+
+            return parameters;
+        }
+
+        private static IDictionary<string, string> GetExtraParameters(IDictionary<string, string> authSessionItems)
+        {
+            var parameters = new Dictionary<string, string>();
+
+            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
+            {
+                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
             }
 
             return parameters;

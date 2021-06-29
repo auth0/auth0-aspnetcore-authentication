@@ -9,11 +9,15 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc.Playground.Controllers
 {
+    
     public class AccountController : Controller
     {
         public async Task Login(string returnUrl = "/")
         {
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(returnUrl).Build();
+            var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+                .WithRedirectUri(returnUrl)
+                .Build();
+
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
 
@@ -23,7 +27,9 @@ namespace Auth0.AspNetCore.Mvc.Playground.Controllers
             // Indicate here where Auth0 should redirect the user after a logout.
             // Note that the resulting absolute Uri must be whitelisted in the
             // **Allowed Logout URLs** settings for the client.
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(Url.Action("Index", "Home")).Build();
+            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+                .WithRedirectUri(Url.Action("Index", "Home"))
+                .Build();
 
             await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

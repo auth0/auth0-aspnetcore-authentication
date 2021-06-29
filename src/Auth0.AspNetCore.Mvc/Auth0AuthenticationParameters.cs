@@ -28,7 +28,7 @@
         /// Generate a key for any extra parameter entry in AuthenticationProperties.Items
         /// </summary>
         /// <returns>The key used for the extra parameter entry in AuthenticationProperties.Items</returns>
-        public static string ExtraParameter(string key)
+        public static string Parameter(string key)
         {
             return $"{Prefix}:{key}";
         }
