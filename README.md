@@ -206,15 +206,18 @@ In the case where the application needs to use an Access Token to access an API,
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddAuth0Mvc(options =>
-    {
-        options.Domain = Configuration["Auth0:Domain"];
-        options.ClientId = Configuration["Auth0:ClientId"];
-        options.ClientSecret = Configuration["Auth0:ClientSecret"];
-        options.Audience = Configuration["Auth0:Audience"];
-        options.ResponseType = OpenIdConnectResponseType.Code;
-        options.UseRefreshTokens = true;
-    });
+    services
+        .AddAuth0WebAppAuthentication(options =>
+        {
+            options.Domain = Configuration["Auth0:Domain"];
+            options.ClientId = Configuration["Auth0:ClientId"];
+            options.ClientSecret = Configuration["Auth0:ClientSecret"];
+        })
+        .WithAccessToken(options =>
+        {
+            options.Audience = Configuration["Auth0:Audience"];
+            options.UseRefreshTokens = true;
+        });
 }
 ```
 
@@ -226,18 +229,22 @@ public void ConfigureServices(IServiceCollection services)
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
 ```
-services.AddAuth0Mvc(options =>
-{
-    options.Events = new Auth0OptionsEvents
+services
+    .AddAuth0WebAppAuthentication(options => {})
+    .WithAccessToken(options =>
     {
-        OnMissingRefreshToken = async (context) =>
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        options.Events = new Auth0WebAppWithAccessTokenEvents
         {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        }
-    };
-});
+            OnMissingRefreshToken = async (context) =>
+            {
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            }
+        };
+    });
 ```
 
 The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
@@ -315,7 +322,7 @@ Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring pa
 
 #### Extra parameters when logging in
 
-In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0Mvc`.
+In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0WebAppAuthentication`.
 
 An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
 
