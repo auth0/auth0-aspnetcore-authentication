@@ -7,49 +7,49 @@ references:
   commentId: N:Auth0.AspNetCore.Mvc
   fullName: Auth0.AspNetCore.Mvc
   nameWithType: Auth0.AspNetCore.Mvc
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters
-  name: Auth0AuthenticationParmeters
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html
-  commentId: T:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters
-  nameWithType: Auth0AuthenticationParmeters
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Audience
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters
+  name: Auth0AuthenticationParameters
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters
+  nameWithType: Auth0AuthenticationParameters
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Audience
   name: Audience
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Audience
-  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Audience
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Audience
-  nameWithType: Auth0AuthenticationParmeters.Audience
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter(System.String)
-  name: ExtraParameter(String)
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_ExtraParameter_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter(System.String)
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter(System.String)
-  nameWithType: Auth0AuthenticationParmeters.ExtraParameter(String)
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter*
-  name: ExtraParameter
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_ExtraParameter_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter
-  isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter
-  nameWithType: Auth0AuthenticationParmeters.ExtraParameter
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Invitation
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Audience
+  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Audience
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Audience
+  nameWithType: Auth0AuthenticationParameters.Audience
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Invitation
   name: Invitation
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Invitation
-  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Invitation
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Invitation
-  nameWithType: Auth0AuthenticationParmeters.Invitation
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Organization
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Invitation
+  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Invitation
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Invitation
+  nameWithType: Auth0AuthenticationParameters.Invitation
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Organization
   name: Organization
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Organization
-  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Organization
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Organization
-  nameWithType: Auth0AuthenticationParmeters.Organization
-- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Scope
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Organization
+  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Organization
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Organization
+  nameWithType: Auth0AuthenticationParameters.Organization
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter(System.String)
+  name: Parameter(String)
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Parameter_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter(System.String)
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter(System.String)
+  nameWithType: Auth0AuthenticationParameters.Parameter(String)
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter*
+  name: Parameter
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Parameter_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Parameter
+  nameWithType: Auth0AuthenticationParameters.Parameter
+- uid: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Scope
   name: Scope
-  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Scope
-  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Scope
-  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Scope
-  nameWithType: Auth0AuthenticationParmeters.Scope
+  href: api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Mvc_Auth0AuthenticationParameters_Scope
+  commentId: F:Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Scope
+  fullName: Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.Scope
+  nameWithType: Auth0AuthenticationParameters.Scope
 - uid: Auth0.AspNetCore.Mvc.Auth0Constants
   name: Auth0Constants
   href: api/Auth0.AspNetCore.Mvc.Auth0Constants.html
@@ -62,325 +62,536 @@ references:
   commentId: F:Auth0.AspNetCore.Mvc.Auth0Constants.AuthenticationScheme
   fullName: Auth0.AspNetCore.Mvc.Auth0Constants.AuthenticationScheme
   nameWithType: Auth0Constants.AuthenticationScheme
-- uid: Auth0.AspNetCore.Mvc.Auth0Options
-  name: Auth0Options
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html
-  commentId: T:Auth0.AspNetCore.Mvc.Auth0Options
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options
-  nameWithType: Auth0Options
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Audience
-  name: Audience
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Audience
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Audience
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Audience
-  nameWithType: Auth0Options.Audience
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Audience*
-  name: Audience
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Audience_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Audience
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder
+  name: Auth0WebAppAuthenticationBuilder
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder
+  nameWithType: Auth0WebAppAuthenticationBuilder
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  name: Auth0WebAppAuthenticationBuilder(IServiceCollection)
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_
+  commentId: M:Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection)
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor*
+  name: Auth0WebAppAuthenticationBuilder
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Audience
-  nameWithType: Auth0Options.Audience
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Backchannel
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder
+  nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions})
+  name: WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions>)
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder_WithAccessToken_Action_Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions__
+  commentId: M:Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions})
+  name.vb: WithAccessToken(Action(Of Auth0WebAppWithAccessTokenOptions))
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action<Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions>)
+  fullName.vb: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action(Of Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions))
+  nameWithType: Auth0WebAppAuthenticationBuilder.WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions>)
+  nameWithType.vb: Auth0WebAppAuthenticationBuilder.WithAccessToken(Action(Of Auth0WebAppWithAccessTokenOptions))
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken*
+  name: WithAccessToken
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder_WithAccessToken_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken
+  nameWithType: Auth0WebAppAuthenticationBuilder.WithAccessToken
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions
+  name: Auth0WebAppOptions
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0WebAppOptions
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions
+  nameWithType: Auth0WebAppOptions
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel
   name: Backchannel
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Backchannel
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Backchannel
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Backchannel
-  nameWithType: Auth0Options.Backchannel
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Backchannel*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Backchannel
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel
+  nameWithType: Auth0WebAppOptions.Backchannel
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel*
   name: Backchannel
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Backchannel_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Backchannel
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Backchannel_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Backchannel
-  nameWithType: Auth0Options.Backchannel
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel
+  nameWithType: Auth0WebAppOptions.Backchannel
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath
   name: CallbackPath
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_CallbackPath
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath
-  nameWithType: Auth0Options.CallbackPath
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_CallbackPath
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath
+  nameWithType: Auth0WebAppOptions.CallbackPath
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath*
   name: CallbackPath
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_CallbackPath_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_CallbackPath_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.CallbackPath
-  nameWithType: Auth0Options.CallbackPath
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ClientId
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath
+  nameWithType: Auth0WebAppOptions.CallbackPath
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId
   name: ClientId
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ClientId
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.ClientId
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ClientId
-  nameWithType: Auth0Options.ClientId
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ClientId*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientId
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId
+  nameWithType: Auth0WebAppOptions.ClientId
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId*
   name: ClientId
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ClientId_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.ClientId
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientId_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ClientId
-  nameWithType: Auth0Options.ClientId
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId
+  nameWithType: Auth0WebAppOptions.ClientId
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret
   name: ClientSecret
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ClientSecret
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret
-  nameWithType: Auth0Options.ClientSecret
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientSecret
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret
+  nameWithType: Auth0WebAppOptions.ClientSecret
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret*
   name: ClientSecret
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ClientSecret_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientSecret_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ClientSecret
-  nameWithType: Auth0Options.ClientSecret
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Domain
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret
+  nameWithType: Auth0WebAppOptions.ClientSecret
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain
   name: Domain
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Domain
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Domain
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Domain
-  nameWithType: Auth0Options.Domain
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Domain*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Domain
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain
+  nameWithType: Auth0WebAppOptions.Domain
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain*
   name: Domain
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Domain_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Domain
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Domain_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Domain
-  nameWithType: Auth0Options.Domain
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Events
-  name: Events
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Events
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Events
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Events
-  nameWithType: Auth0Options.Events
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Events*
-  name: Events
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Events_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Events
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain
+  nameWithType: Auth0WebAppOptions.Domain
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters
+  name: LoginParameters
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_LoginParameters
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters
+  nameWithType: Auth0WebAppOptions.LoginParameters
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters*
+  name: LoginParameters
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_LoginParameters_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Events
-  nameWithType: Auth0Options.Events
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters
-  name: ExtraParameters
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ExtraParameters
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters
-  nameWithType: Auth0Options.ExtraParameters
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters*
-  name: ExtraParameters
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ExtraParameters_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters
+  nameWithType: Auth0WebAppOptions.LoginParameters
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge
+  name: MaxAge
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_MaxAge
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge
+  nameWithType: Auth0WebAppOptions.MaxAge
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge*
+  name: MaxAge
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_MaxAge_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ExtraParameters
-  nameWithType: Auth0Options.ExtraParameters
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Organization
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge
+  nameWithType: Auth0WebAppOptions.MaxAge
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents
+  name: OpenIdConnectEvents
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_OpenIdConnectEvents
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents
+  nameWithType: Auth0WebAppOptions.OpenIdConnectEvents
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents*
+  name: OpenIdConnectEvents
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_OpenIdConnectEvents_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents
+  nameWithType: Auth0WebAppOptions.OpenIdConnectEvents
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization
   name: Organization
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Organization
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Organization
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Organization
-  nameWithType: Auth0Options.Organization
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Organization*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Organization
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization
+  nameWithType: Auth0WebAppOptions.Organization
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization*
   name: Organization
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Organization_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Organization
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Organization_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Organization
-  nameWithType: Auth0Options.Organization
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ResponseType
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization
+  nameWithType: Auth0WebAppOptions.Organization
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType
   name: ResponseType
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ResponseType
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.ResponseType
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ResponseType
-  nameWithType: Auth0Options.ResponseType
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.ResponseType*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType
+  nameWithType: Auth0WebAppOptions.ResponseType
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType*
   name: ResponseType
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_ResponseType_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.ResponseType
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.ResponseType
-  nameWithType: Auth0Options.ResponseType
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Scope
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType
+  nameWithType: Auth0WebAppOptions.ResponseType
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope
   name: Scope
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Scope
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0Options.Scope
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Scope
-  nameWithType: Auth0Options.Scope
-- uid: Auth0.AspNetCore.Mvc.Auth0Options.Scope*
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Scope
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope
+  nameWithType: Auth0WebAppOptions.Scope
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope*
   name: Scope
-  href: api/Auth0.AspNetCore.Mvc.Auth0Options.html#Auth0_AspNetCore_Mvc_Auth0Options_Scope_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0Options.Scope
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Scope_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0Options.Scope
-  nameWithType: Auth0Options.Scope
-- uid: Auth0.AspNetCore.Mvc.Auth0OptionsEvents
-  name: Auth0OptionsEvents
-  href: api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.html
-  commentId: T:Auth0.AspNetCore.Mvc.Auth0OptionsEvents
-  fullName: Auth0.AspNetCore.Mvc.Auth0OptionsEvents
-  nameWithType: Auth0OptionsEvents
-- uid: Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated
-  name: OnTokenValidated
-  href: api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.html#Auth0_AspNetCore_Mvc_Auth0OptionsEvents_OnTokenValidated
-  commentId: P:Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated
-  fullName: Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated
-  nameWithType: Auth0OptionsEvents.OnTokenValidated
-- uid: Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated*
-  name: OnTokenValidated
-  href: api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.html#Auth0_AspNetCore_Mvc_Auth0OptionsEvents_OnTokenValidated_
-  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope
+  nameWithType: Auth0WebAppOptions.Scope
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  name: Auth0WebAppWithAccessTokenAuthenticationBuilder
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions})
+  name: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>)
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Action_Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions__
+  commentId: M:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions})
+  name.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions))
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action<Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions>)
+  fullName.vb: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action(Of Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions))
+  nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>)
+  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions))
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor*
+  name: Auth0WebAppWithAccessTokenAuthenticationBuilder
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated
-  nameWithType: Auth0OptionsEvents.OnTokenValidated
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents
+  name: Auth0WebAppWithAccessTokenEvents
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents
+  nameWithType: Auth0WebAppWithAccessTokenEvents
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+  name: OnMissingAccessToken
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+  nameWithType: Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken*
+  name: OnMissingAccessToken
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+  nameWithType: Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+  name: OnMissingRefreshToken
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+  nameWithType: Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken*
+  name: OnMissingRefreshToken
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+  nameWithType: Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions
+  name: Auth0WebAppWithAccessTokenOptions
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html
+  commentId: T:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions
+  nameWithType: Auth0WebAppWithAccessTokenOptions
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience
+  name: Audience
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Audience
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Audience
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience*
+  name: Audience
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Audience_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Audience
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events
+  name: Events
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Events
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Events
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events*
+  name: Events
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Events_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Events
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope
+  name: Scope
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Scope
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Scope
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope*
+  name: Scope
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Scope_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope
+  nameWithType: Auth0WebAppWithAccessTokenOptions.Scope
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+  name: UseRefreshTokens
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_UseRefreshTokens
+  commentId: P:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+  nameWithType: Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+- uid: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens*
+  name: UseRefreshTokens
+  href: api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_UseRefreshTokens_
+  commentId: Overload:Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
+  nameWithType: Auth0WebAppWithAccessTokenOptions.UseRefreshTokens
 - uid: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions
   name: AuthenticationBuilderExtensions
   href: api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html
   commentId: T:Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions
   fullName: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions
   nameWithType: AuthenticationBuilderExtensions
-- uid: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Auth0.AspNetCore.Mvc.Auth0Options})
-  name: AddAuth0Mvc(AuthenticationBuilder, Action<Auth0Options>)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0Mvc_Microsoft_AspNetCore_Authentication_AuthenticationBuilder_System_Action_Auth0_AspNetCore_Mvc_Auth0Options__
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Auth0.AspNetCore.Mvc.Auth0Options})
-  name.vb: AddAuth0Mvc(AuthenticationBuilder, Action(Of Auth0Options))
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, System.Action<Auth0.AspNetCore.Mvc.Auth0Options>)
-  fullName.vb: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, System.Action(Of Auth0.AspNetCore.Mvc.Auth0Options))
-  nameWithType: AuthenticationBuilderExtensions.AddAuth0Mvc(AuthenticationBuilder, Action<Auth0Options>)
-  nameWithType.vb: AuthenticationBuilderExtensions.AddAuth0Mvc(AuthenticationBuilder, Action(Of Auth0Options))
-- uid: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc*
-  name: AddAuth0Mvc
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0Mvc_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc
+- uid: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,Action{Auth0.AspNetCore.Mvc.Auth0WebAppOptions})
+  name: AddAuth0WebAppAuthentication(AuthenticationBuilder, Action<Auth0WebAppOptions>)
+  href: api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_Microsoft_AspNetCore_Authentication_AuthenticationBuilder_Action_Auth0_AspNetCore_Mvc_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,Action{Auth0.AspNetCore.Mvc.Auth0WebAppOptions})
+  name.vb: AddAuth0WebAppAuthentication(AuthenticationBuilder, Action(Of Auth0WebAppOptions))
+  fullName: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, Action<Auth0.AspNetCore.Mvc.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, Action(Of Auth0.AspNetCore.Mvc.Auth0WebAppOptions))
+  nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action<Auth0WebAppOptions>)
+  nameWithType.vb: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action(Of Auth0WebAppOptions))
+- uid: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication*
+  name: AddAuth0WebAppAuthentication
+  href: api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_
+  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0Mvc
-  nameWithType: AuthenticationBuilderExtensions.AddAuth0Mvc
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder
-  name: AuthenticationPropertiesBuilder
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html
-  commentId: T:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder
-  nameWithType: AuthenticationPropertiesBuilder
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
-  name: AuthenticationPropertiesBuilder(AuthenticationProperties)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.AuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
-  nameWithType: AuthenticationPropertiesBuilder.AuthenticationPropertiesBuilder(AuthenticationProperties)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.#ctor*
-  name: AuthenticationPropertiesBuilder
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder__ctor_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.#ctor
+  fullName: Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication
+  nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication
+- uid: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder
+  name: BaseAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html
+  commentId: T:Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder
+  fullName: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder
+  nameWithType: BaseAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: BaseAuthenticationPropertiesBuilder(AuthenticationProperties)
+  href: api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_BaseAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(AuthenticationProperties)
+- uid: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.#ctor*
+  name: BaseAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_BaseAuthenticationPropertiesBuilder__ctor_
+  commentId: Overload:Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.#ctor
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.AuthenticationPropertiesBuilder
-  nameWithType: AuthenticationPropertiesBuilder.AuthenticationPropertiesBuilder
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build
+  fullName: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder
+  nameWithType: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
+  name: AuthenticationProperties
+  href: api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_BaseAuthenticationPropertiesBuilder_AuthenticationProperties
+  commentId: F:Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
+  fullName: Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
+  nameWithType: BaseAuthenticationPropertiesBuilder.AuthenticationProperties
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder
+  name: LoginAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html
+  commentId: T:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder
+  nameWithType: LoginAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: LoginAuthenticationPropertiesBuilder(AuthenticationProperties)
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(AuthenticationProperties)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.#ctor*
+  name: LoginAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder__ctor_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.#ctor
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder
+  nameWithType: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build
   name: Build()
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_Build
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build()
-  nameWithType: AuthenticationPropertiesBuilder.Build()
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_Build
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build()
+  nameWithType: LoginAuthenticationPropertiesBuilder.Build()
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build*
   name: Build
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_Build_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_Build_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.Build
-  nameWithType: AuthenticationPropertiesBuilder.Build
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.Build
+  nameWithType: LoginAuthenticationPropertiesBuilder.Build
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
   name: WithAudience(String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithAudience_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience(System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience(System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithAudience(String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithAudience_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithAudience(String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience*
   name: WithAudience
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithAudience_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithAudience_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithAudience
-  nameWithType: AuthenticationPropertiesBuilder.WithAudience
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter(System.String,System.String)
-  name: WithExtraParameter(String, String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithExtraParameter_System_String_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter(System.String,System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter(System.String, System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithExtraParameter(String, String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter*
-  name: WithExtraParameter
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithExtraParameter_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter
-  isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithExtraParameter
-  nameWithType: AuthenticationPropertiesBuilder.WithExtraParameter
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithAudience
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithAudience
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
   name: WithInvitation(String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithInvitation_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation(System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation(System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithInvitation(String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithInvitation_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithInvitation(String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation*
   name: WithInvitation
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithInvitation_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithInvitation_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithInvitation
-  nameWithType: AuthenticationPropertiesBuilder.WithInvitation
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithInvitation
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithInvitation
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
   name: WithOrganization(String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithOrganization_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization(System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization(System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithOrganization(String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithOrganization_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithOrganization(String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization*
   name: WithOrganization
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithOrganization_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithOrganization_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithOrganization
-  nameWithType: AuthenticationPropertiesBuilder.WithOrganization
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithOrganization
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithOrganization
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  name: WithParameter(String, String)
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter(System.String, System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithParameter(String, String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter*
+  name: WithParameter
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithParameter_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithParameter
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithParameter
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
   name: WithRedirectUri(String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithRedirectUri_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithRedirectUri(String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithRedirectUri_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithRedirectUri(String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri*
   name: WithRedirectUri
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithRedirectUri_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithRedirectUri_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithRedirectUri
-  nameWithType: AuthenticationPropertiesBuilder.WithRedirectUri
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithRedirectUri
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithRedirectUri
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
   name: WithScope(String)
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithScope_System_String_
-  commentId: M:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope(System.String)
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope(System.String)
-  nameWithType: AuthenticationPropertiesBuilder.WithScope(String)
-- uid: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope*
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithScope_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithScope(String)
+- uid: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope*
   name: WithScope
-  href: api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_AuthenticationPropertiesBuilder_WithScope_
-  commentId: Overload:Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope
+  href: api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LoginAuthenticationPropertiesBuilder_WithScope_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.WithScope
-  nameWithType: AuthenticationPropertiesBuilder.WithScope
+  fullName: Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.WithScope
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithScope
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder
+  name: LogoutAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html
+  commentId: T:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder
+  nameWithType: LogoutAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: LogoutAuthenticationPropertiesBuilder(AuthenticationProperties)
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(AuthenticationProperties)
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor*
+  name: LogoutAuthenticationPropertiesBuilder
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder__ctor_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder
+  nameWithType: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build
+  name: Build()
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_Build
+  commentId: M:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build()
+  nameWithType: LogoutAuthenticationPropertiesBuilder.Build()
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build*
+  name: Build
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_Build_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build
+  nameWithType: LogoutAuthenticationPropertiesBuilder.Build
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  name: WithParameter(String, String)
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String, System.String)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithParameter(String, String)
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter*
+  name: WithParameter
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithParameter_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithParameter
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  name: WithRedirectUri(String)
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_
+  commentId: M:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithRedirectUri(String)
+- uid: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri*
+  name: WithRedirectUri
+  href: api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_
+  commentId: Overload:Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithRedirectUri
 - uid: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions
   name: ServiceCollectionExtensions
   href: api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html
   commentId: T:Auth0.AspNetCore.Mvc.ServiceCollectionExtensions
   fullName: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions
   nameWithType: ServiceCollectionExtensions
-- uid: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Mvc.Auth0Options})
-  name: AddAuth0Mvc(IServiceCollection, Action<Auth0Options>)
-  href: api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html#Auth0_AspNetCore_Mvc_ServiceCollectionExtensions_AddAuth0Mvc_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Auth0_AspNetCore_Mvc_Auth0Options__
-  commentId: M:Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Mvc.Auth0Options})
-  name.vb: AddAuth0Mvc(IServiceCollection, Action(Of Auth0Options))
-  fullName: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Auth0.AspNetCore.Mvc.Auth0Options>)
-  fullName.vb: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Auth0.AspNetCore.Mvc.Auth0Options))
-  nameWithType: ServiceCollectionExtensions.AddAuth0Mvc(IServiceCollection, Action<Auth0Options>)
-  nameWithType.vb: ServiceCollectionExtensions.AddAuth0Mvc(IServiceCollection, Action(Of Auth0Options))
-- uid: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc*
-  name: AddAuth0Mvc
-  href: api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html#Auth0_AspNetCore_Mvc_ServiceCollectionExtensions_AddAuth0Mvc_
-  commentId: Overload:Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc
+- uid: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppOptions})
+  name: AddAuth0WebAppAuthentication(IServiceCollection, Action<Auth0WebAppOptions>)
+  href: api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html#Auth0_AspNetCore_Mvc_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_Microsoft_Extensions_DependencyInjection_IServiceCollection_Action_Auth0_AspNetCore_Mvc_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppOptions})
+  name.vb: AddAuth0WebAppAuthentication(IServiceCollection, Action(Of Auth0WebAppOptions))
+  fullName: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action<Auth0.AspNetCore.Mvc.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, Action(Of Auth0.AspNetCore.Mvc.Auth0WebAppOptions))
+  nameWithType: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action<Auth0WebAppOptions>)
+  nameWithType.vb: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action(Of Auth0WebAppOptions))
+- uid: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication*
+  name: AddAuth0WebAppAuthentication
+  href: api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html#Auth0_AspNetCore_Mvc_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_
+  commentId: Overload:Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication
   isSpec: "True"
-  fullName: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0Mvc
-  nameWithType: ServiceCollectionExtensions.AddAuth0Mvc
+  fullName: Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.AddAuth0WebAppAuthentication
+  nameWithType: ServiceCollectionExtensions.AddAuth0WebAppAuthentication

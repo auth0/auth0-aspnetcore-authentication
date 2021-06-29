@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Class Auth0AuthenticationParmeters
+    <title>Class Auth0WebAppWithAccessTokenOptions
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Class Auth0AuthenticationParmeters
+    <meta name="title" content="Class Auth0WebAppWithAccessTokenOptions
    ">
     <meta name="generator" content="docfx 2.57.2.0">
     
@@ -68,59 +68,37 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters" class="text-break">Class Auth0AuthenticationParmeters
+  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions" class="text-break">Class Auth0WebAppWithAccessTokenOptions
   </h1>
-  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 summary"><p>Options used to configure the SDK when using Access Tokens</p>
+</div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">Auth0AuthenticationParmeters</span></div>
-  </div>
-  <div class="inheritedMembers">
-    <h5>Inherited Members</h5>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.GetHashCode()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.GetType()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.MemberwiseClone()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.ToString()</span>
-    </div>
+    <div class="level1"><span class="xref">Auth0WebAppWithAccessTokenOptions</span></div>
   </div>
   <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
   <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_syntax">Syntax</h5>
+  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static class Auth0AuthenticationParmeters</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0WebAppWithAccessTokenOptions : object</code></pre>
   </div>
-  <h3 id="fields">Fields
+  <h3 id="properties">Properties
   </h3>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Audience" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Audience">Audience</h4>
-  <div class="markdown level1 summary"><p>The key used for the audience entry in AuthenticationProperties.Items</p>
+  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Audience_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience*"></a>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Audience" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Audience">Audience</h4>
+  <div class="markdown level1 summary"><p>The audience to be used for requesting API access.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static readonly string Audience</code></pre>
+    <pre><code class="lang-csharp hljs">public string Audience { get; set; }</code></pre>
   </div>
-  <h5 class="fieldValue">Field Value</h5>
+  <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
       <tr>
@@ -135,15 +113,40 @@
       </tr>
     </tbody>
   </table>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Invitation" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Invitation">Invitation</h4>
-  <div class="markdown level1 summary"><p>The key used for the invitation entry in AuthenticationProperties.Items</p>
+  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Events_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events*"></a>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Events" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Events">Events</h4>
+  <div class="markdown level1 summary"><p>Events allowing you to hook into specific moments in the Auth0 middleware.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static readonly string Invitation</code></pre>
+    <pre><code class="lang-csharp hljs">public Auth0WebAppWithAccessTokenEvents Events { get; set; }</code></pre>
   </div>
-  <h5 class="fieldValue">Field Value</h5>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html">Auth0WebAppWithAccessTokenEvents</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Scope_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope*"></a>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_Scope" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.Scope">Scope</h4>
+  <div class="markdown level1 summary"><p>Scopes to be used to request token(s). (e.g. &quot;Scope1 Scope2 Scope3&quot;)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Scope { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
       <tr>
@@ -158,15 +161,16 @@
       </tr>
     </tbody>
   </table>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Organization" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Organization">Organization</h4>
-  <div class="markdown level1 summary"><p>The key used for the organization entry in AuthenticationProperties.Items</p>
+  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_UseRefreshTokens_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens*"></a>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions_UseRefreshTokens" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.UseRefreshTokens">UseRefreshTokens</h4>
+  <div class="markdown level1 summary"><p>Define whether or not Refresh Tokens should be used internally when the access token is expired.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static readonly string Organization</code></pre>
+    <pre><code class="lang-csharp hljs">public bool UseRefreshTokens { get; set; }</code></pre>
   </div>
-  <h5 class="fieldValue">Field Value</h5>
+  <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
       <tr>
@@ -176,75 +180,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.String</span></td>
+        <td><span class="xref">System.Boolean</span></td>
         <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_Scope" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.Scope">Scope</h4>
-  <div class="markdown level1 summary"><p>The key used for the scope entry in AuthenticationProperties.Items</p>
-</div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static readonly string Scope</code></pre>
-  </div>
-  <h5 class="fieldValue">Field Value</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.String</span></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <h3 id="methods">Methods
-  </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_ExtraParameter_" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0AuthenticationParmeters_ExtraParameter_System_String_" data-uid="Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.ExtraParameter(System.String)">ExtraParameter(String)</h4>
-  <div class="markdown level1 summary"><p>Generate a key for any extra parameter entry in AuthenticationProperties.Items</p>
-</div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static string ExtraParameter(string key)</code></pre>
-  </div>
-  <h5 class="parameters">Parameters</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Name</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.String</span></td>
-        <td><span class="parametername">key</span></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <h5 class="returns">Returns</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.String</span></td>
-        <td><p>The key used for the extra parameter entry in AuthenticationProperties.Items</p>
-</td>
       </tr>
     </tbody>
   </table>
