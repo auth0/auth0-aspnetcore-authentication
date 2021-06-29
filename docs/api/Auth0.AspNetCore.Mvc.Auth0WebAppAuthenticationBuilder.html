@@ -90,13 +90,13 @@
   <h3 id="constructors">Constructors
   </h3>
   <a id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection)">Auth0WebAppAuthenticationBuilder(IServiceCollection)</h4>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Auth0_AspNetCore_Mvc_Auth0WebAppOptions_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Auth0.AspNetCore.Mvc.Auth0WebAppOptions)">Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0WebAppOptions)</h4>
   <div class="markdown level1 summary"><p>Constructs an instance of <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html">Auth0WebAppAuthenticationBuilder</a></p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Auth0WebAppAuthenticationBuilder(IServiceCollection services)</code></pre>
+    <pre><code class="lang-csharp hljs">public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -112,6 +112,12 @@
         <td><span class="xref">Microsoft.Extensions.DependencyInjection.IServiceCollection</span></td>
         <td><span class="parametername">services</span></td>
         <td><p>The original <see cref="!:https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a> used when calling AddAuth0WebAppAuthentication.</p>
 </td>
       </tr>
     </tbody>

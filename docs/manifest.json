@@ -34,7 +34,7 @@
           "hash": "ApsThk9XGNutulIZTxIhCQFdqp6qlGMtFHiWX0ZCzWM="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -67,7 +67,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html",
-          "hash": "1H1OAbhbWxRQK9zWGBOHkOMbk6tI1b7qXDmcRF3muWU="
+          "hash": "O/H76P0/SwO0MALo01TrTAxQz+fmHS0+7l+QrQRila4="
         }
       },
       "is_incremental": false,
@@ -91,7 +91,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
-          "hash": "JUqq55hBUgzdx4cYUPav8ZsZ+XeUPE0XYC4TavlmcU8="
+          "hash": "Tr9+4u6Pexbxj7NG14MMWKcZF/1KXCXgIX4wzSfKNUk="
         }
       },
       "is_incremental": false,
@@ -231,13 +231,13 @@
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 13,
-          "skipped_file_count": 1
+          "skipped_file_count": 8
         },
         "ResourceDocumentProcessor": {
           "can_incremental": false,
