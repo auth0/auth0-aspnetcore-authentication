@@ -36,7 +36,7 @@ namespace Auth0.AspNetCore.Mvc.Playground
                     OnMissingRefreshToken = async (context) =>
                     {
                         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                        var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
                         await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
                     }
                 };

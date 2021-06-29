@@ -4,22 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.AspNetCore.Http;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
-using System.Security.Principal;
-using Microsoft.AspNetCore.Builder;
-using System.Linq;
 using System.Net;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
@@ -264,11 +255,36 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public async void Should_Allow_Configuring_ExtraParameters()
+        public async void Should_Allow_Configuring_Parameters_To_Logout_Endpoint()
+        {
+            using (var server = TestServerBuilder.CreateServer(null, null, true))
+            {
+                using (var client = server.CreateClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
+
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Logout}?extraParameters[0].Key=Test&extraParameters[0].Value=123&extraParameters[1].Key=federated&extraParameters[1].Value=");
+
+                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    redirectUri.Authority.Should().Be(Configuration["Auth0:Domain"]);
+                    redirectUri.AbsolutePath.Should().Be("/v2/logout");
+
+                    queryParameters["Test"].Should().Be("123");
+                    queryParameters["federated"].Should().BeEmpty();
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Parameters()
         {
             using (var server = TestServerBuilder.CreateServer(options =>
             {
-                options.ExtraParameters = new Dictionary<string, string>() { { "Test", "123" } };
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "123" } };
             }))
             {
                 using (var client = server.CreateClient())
@@ -283,7 +299,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public async void Should_Allow_Configuring_ExtraParameters_When_Calling_ChallengeAsync()
+        public async void Should_Allow_Configuring_Parameters_When_Calling_ChallengeAsync()
         {
             using (var server = TestServerBuilder.CreateServer())
             {
@@ -299,11 +315,11 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         }
 
         [Fact]
-        public async void Should_Override_Global_ExtraParameters_When_Calling_ChallengeAsync()
+        public async void Should_Override_Global_Parameters_When_Calling_ChallengeAsync()
         {
             using (var server = TestServerBuilder.CreateServer(options =>
             {
-                options.ExtraParameters = new Dictionary<string, string>() { { "Test", "123" } };
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "123" } };
             }))
             {
                 using (var client = server.CreateClient())

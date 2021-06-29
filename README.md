@@ -97,16 +97,24 @@ Triggering login or logout is done using ASP.NET's `HttpContext`:
 ```csharp
 public async Task Login(string returnUrl = "/")
 {
-    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = returnUrl });
+    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri(returnUrl)
+        .Build();
+
+    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 }
 
 [Authorize]
 public async Task Logout()
 {
-    // Indicate here where Auth0 should redirect the user after a logout.
-    // Note that the resulting absolute Uri must be added in the
-    // **Allowed Logout URLs** settings for the client.
-    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, new AuthenticationProperties() { RedirectUri = Url.Action("Index", "Home") });
+    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+        // Indicate here where Auth0 should redirect the user after a logout.
+        // Note that the resulting absolute Uri must be added in the
+        // **Allowed Logout URLs** settings for the client.
+        .WithRedirectUri(Url.Action("Index", "Home"))
+        .Build();
+
+    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 }
 ```
@@ -125,10 +133,10 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
-Apart from being able to configure the used scopes globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the used scopes globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithScope("openid profile scope1 scope2")
     .Build();
 
@@ -157,10 +165,10 @@ services
     });
 ```
 
-Apart from being able to configure the audience globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the audience globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithRedirectUri("/") // "/" is the default value used for RedirectUri, so this can be omitted.
     .WithAudience("YOUR_AUDIENCE")
     .Build();
@@ -190,6 +198,55 @@ public async Task<IActionResult> Profile()
     });
 }
 ```
+
+#### Refresh Tokens
+
+In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure you have a valid Access Token at all times, you can configure the SDK to use Refresh Tokens:
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuth0Mvc(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+        options.Audience = Configuration["Auth0:Audience"];
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.UseRefreshTokens = true;
+    });
+}
+```
+
+> :information_source: In order to use Refresh Tokens, the application needs to use an `Audience`, a `ClientSecret` and set the `ResponseType` to `OpenIdConnectResponseType.Code`.
+
+
+##### Detecting the absense of a Refresh Token
+
+In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
+
+```
+services.AddAuth0Mvc(options =>
+{
+    options.Events = new Auth0OptionsEvents
+    {
+        OnMissingRefreshToken = async (context) =>
+        {
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        }
+    };
+});
+```
+
+The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
+
+> :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
+
+
+
+
 ### Organization
 
 [Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
@@ -221,10 +278,10 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
-Apart from being able to configure the organization globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure the organization globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
     .WithOrganization("YOUR_ORGANIZATION")
     .Build();
 
@@ -241,7 +298,7 @@ public class InvitationController : Controller {
 
     public async Task Accept(string organization, string invitation)
     {
-        var authenticationProperties = new AuthenticationPropertiesBuilder()
+        var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
             .WithOrganization(organization)
             .WithInvitation(invitation)
             .Build();
@@ -254,7 +311,11 @@ public class InvitationController : Controller {
 
 ### Extra Parameters
 
-Auth0's `/authorize` endpoint supports additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the `ExtraParameters` when calling `AddAuth0WebAppAuthentication`.
+Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the SDK to do so.
+
+#### Extra parameters when logging in
+
+In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0Mvc`.
 
 An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
 
@@ -263,21 +324,34 @@ services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
-    options.ExtraParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
+    options.LoginParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
 });
 ```
 
-Apart from being able to configure these globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
+Apart from being able to configure these globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
 
 ```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithExtraParameter("screen_hint", "signup")
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+    .WithParameter("screen_hint", "signup")
     .Build();
 
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 ```
 
 > :information_source: specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
+
+#### Extra parameters when logging out
+The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
+
+```csharp
+var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+    .WithParameter("federated")
+    .Build();
+
+await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+```
+> :information_source: The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
 
 ### Roles
 
@@ -299,6 +373,17 @@ function (user, context, callback) {
 ```
 
 > :information_source: As this SDK uses the OpenId Connect middleware, it expects roles to exist in the `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` claim.
+
+#### Integrate roles in your ASP.NET application
+You can use the [Role based authorization](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles) mechanism to make sure that only the users with specific roles can access certain actions. Add the `[Authorize(Roles = "...")]` attribute to your controller action.
+
+```csharp
+[Authorize(Roles = "admin")]
+public IActionResult Admin()
+{
+    return View();
+}
+```
 
 ## Contributing
 

@@ -45,20 +45,15 @@ namespace Auth0.AspNetCore.Mvc
         public string Organization { get; set; }
 
         /// <summary>
-        /// Extra parameters to be send to `/authorize`.
+        /// Parameters to be send to Auth0's `/authorize` endpoint.
         /// </summary>
         /// <example>
         /// services.AddAuth0WebAppAuthentication(options =>
         /// {
-        ///     options.ExtraParameters = new Dictionary<string, string>() { {"Test", "123" } };
+        ///     options.LoginParameters = new Dictionary<string, string>() { {"Test", "123" } };
         /// });
         /// </example>
-        public IDictionary<string, string> ExtraParameters { get; set; } = new Dictionary<string, string>();
-
-        /// <summary>
-        /// Events allowing you to hook into specific moments in the Auth0 middleware.
-        /// </summary>
-        public Auth0OptionsEvents Events { get; set; }
+        public IDictionary<string, string> LoginParameters { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Events allowing you to hook into specific moments in the OpenID Connect pipeline.
