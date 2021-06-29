@@ -17,6 +17,7 @@ namespace Auth0.AspNetCore.Mvc
     {
         private readonly IServiceCollection services;
         private readonly Action<Auth0WebAppWithAccessTokenOptions> configureOptions;
+        private readonly Auth0WebAppOptions options;
 
         private static readonly IList<string> CodeResponseTypes = new List<string>() {
             OpenIdConnectResponseType.Code,
@@ -28,10 +29,12 @@ namespace Auth0.AspNetCore.Mvc
         /// </summary>
         /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
-        public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
+        /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
+        public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options)
         {
             this.services = services;
             this.configureOptions = configureOptions;
+            this.options = options;
 
             EnableWithAccessToken();
         }
@@ -40,14 +43,15 @@ namespace Auth0.AspNetCore.Mvc
         {
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
-            this.configureOptions(auth0WithAccessTokensOptions);
+            configureOptions(auth0WithAccessTokensOptions);
+            
+            ValidateOptions(options);
 
             this.services.AddSingleton(auth0WithAccessTokensOptions);
             this.services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
                 .Configure<IServiceProvider>((options, serviceProvider) =>
                 {
                     options.ResponseType = OpenIdConnectResponseType.Code;
-
 
                     if (!string.IsNullOrEmpty(auth0WithAccessTokensOptions.Scope))
                     {
@@ -154,6 +158,14 @@ namespace Auth0.AspNetCore.Mvc
             using (var tokenClient = new TokenClient(httpClient))
             {
                 return await tokenClient.Refresh(options, refreshToken);
+            }
+        }
+
+        private static void ValidateOptions(Auth0WebAppOptions options)
+        {
+            if (string.IsNullOrWhiteSpace(options.ClientSecret))
+            {
+                throw new ArgumentNullException(nameof(options.ClientSecret), "Client Secret can not be null when requesting an access token.");
             }
         }
 

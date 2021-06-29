@@ -14,18 +14,20 @@ namespace Auth0.AspNetCore.Mvc
         /// </summary>
         /// <example>
         /// <code>
-        /// services.AddAuth0Mvc(options =>
-        /// {
-        ///     options.Events = new Auth0OptionsEvents
-        ///     {
-        ///         OnMissingAccessToken = async (context) =>
-        ///         {
-        ///             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        ///             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-        ///             await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        ///         }
-        ///     };
-        /// });
+        /// services
+        ///   .AddAuth0WebAppAuthentication(options => {})
+        ///   .WithAccessToken(options =>
+        ///   {
+        ///       options.Events = new Auth0WebAppWithAccessTokenEvents
+        ///       {
+        ///           OnMissingAccessToken = async (context) =>
+        ///           {
+        ///               await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        ///               var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+        ///               await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        ///           }
+        ///       };
+        ///   });
         /// </code>
         /// </example>
         public Func<HttpContext, Task> OnMissingAccessToken { get; set; }
@@ -35,18 +37,20 @@ namespace Auth0.AspNetCore.Mvc
         /// </summary>
         /// <example>
         /// <code>
-        /// services.AddAuth0Mvc(options =>
-        /// {
-        ///     options.Events = new Auth0OptionsEvents
-        ///     {
-        ///         OnMissingRefreshToken = async (context) =>
-        ///         {
-        ///             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        ///             var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-        ///             await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        ///         }
-        ///     };
-        /// });
+        /// services
+        ///   .AddAuth0WebAppAuthentication(options => {})
+        ///   .WithAccessToken(options =>
+        ///   {
+        ///       options.Events = new Auth0WebAppWithAccessTokenEvents
+        ///       {
+        ///           OnMissingRefreshToken = async (context) =>
+        ///           {
+        ///               await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        ///               var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+        ///               await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        ///           }
+        ///       };
+        ///   });
         /// </code>
         /// </example>
         public Func<HttpContext, Task> OnMissingRefreshToken { get; set; }

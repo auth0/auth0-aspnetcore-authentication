@@ -8,10 +8,10 @@ Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
 
 **Usage**
 
-Integrate the SDK in your ASP.NET Core application by calling `AddAuth0Mvc` in your `Startup.ConfigureService` method:
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0WebAppAuthentication` in your `Startup.ConfigureService` method:
 
 ```csharp
-services.AddAuth0Mvc(options =>
+services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = Configuration["Auth0:Domain"];
     options.ClientId = Configuration["Auth0:ClientId"];
@@ -31,3 +31,7 @@ services.AddAuth0Mvc(options =>
 - Save tokens to be able to retrieve them [#17](https://github.com/auth0/auth0-aspnetcore-mvc/pull/17) ([frederikprijck](https://github.com/frederikprijck)
 - Use Implicit flow instead of Code flow [#21](https://github.com/auth0/auth0-aspnetcore-mvc/pull/21) ([frederikprijck](https://github.com/frederikprijck))
 - Re-add support for Code Flow to be able to retrieve Access Tokens [#22](https://github.com/auth0/auth0-aspnetcore-mvc/pull/22) ([frederikprijck](https://github.com/frederikprijck)
+- Support Refresh Tokens [#31](https://github.com/auth0/auth0-aspnetcore-mvc/pull/31) ([frederikprijck](https://github.com/frederikprijck)
+- Proxy all OpenId Connect Events [#34](https://github.com/auth0/auth0-aspnetcore-mvc/pull/34) ([frederikprijck](https://github.com/frederikprijck)
+- Rework to move Access Token to `WithAccessToken()` [#35](https://github.com/auth0/auth0-aspnetcore-mvc/pull/35) ([frederikprijck](https://github.com/frederikprijck)
+- Rework Extra Parameters and support logout endpoint [#37](https://github.com/auth0/auth0-aspnetcore-mvc/pull/37) ([frederikprijck](https://github.com/frederikprijck)

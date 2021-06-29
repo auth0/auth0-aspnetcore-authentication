@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Class Auth0OptionsEvents
+    <title>Class Auth0WebAppWithAccessTokenAuthenticationBuilder
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Class Auth0OptionsEvents
+    <meta name="title" content="Class Auth0WebAppWithAccessTokenAuthenticationBuilder
    ">
     <meta name="generator" content="docfx 2.57.2.0">
     
@@ -68,95 +68,66 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0OptionsEvents">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0OptionsEvents" data-uid="Auth0.AspNetCore.Mvc.Auth0OptionsEvents" class="text-break">Class Auth0OptionsEvents
+  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder" class="text-break">Class Auth0WebAppWithAccessTokenAuthenticationBuilder
   </h1>
-  <div class="markdown level0 summary"><p>Events allowing you to hook into specific moments in the OpenID Connect pipeline.</p>
+  <div class="markdown level0 summary"><p>Builder to add extra functionality when using Access Tokens.</p>
 </div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">Auth0OptionsEvents</span></div>
-  </div>
-  <div class="inheritedMembers">
-    <h5>Inherited Members</h5>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.GetHashCode()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.GetType()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.MemberwiseClone()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.ToString()</span>
-    </div>
+    <div class="level1"><span class="xref">Auth0WebAppWithAccessTokenAuthenticationBuilder</span></div>
   </div>
   <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
   <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0OptionsEvents_syntax">Syntax</h5>
+  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0OptionsEvents</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0WebAppWithAccessTokenAuthenticationBuilder : object</code></pre>
   </div>
-  <h3 id="properties">Properties
+  <h3 id="constructors">Constructors
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0OptionsEvents_OnTokenValidated_" data-uid="Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0OptionsEvents_OnTokenValidated" data-uid="Auth0.AspNetCore.Mvc.Auth0OptionsEvents.OnTokenValidated">OnTokenValidated</h4>
-  <div class="markdown level1 summary"><p>Executed when the ID Token has been validated internally,
-allowing you to implement any additional validation.</p>
+  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor*"></a>
+  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Action_Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Mvc_Auth0WebAppOptions_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Mvc.Auth0WebAppOptions)">Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action&lt;Auth0WebAppWithAccessTokenOptions&gt;, Auth0WebAppOptions)</h4>
+  <div class="markdown level1 summary"><p>Constructs an instance of <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Func&lt;TokenValidatedContext, Task&gt; OnTokenValidated { get; set; }</code></pre>
+    <pre><code class="lang-csharp hljs">public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action&lt;Auth0WebAppWithAccessTokenOptions&gt; configureOptions, Auth0WebAppOptions options)</code></pre>
   </div>
-  <h5 class="propertyValue">Property Value</h5>
+  <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
       <tr>
         <th>Type</th>
+        <th>Name</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.Func</span>&lt;<span class="xref">Microsoft.AspNetCore.Authentication.OpenIdConnect.TokenValidatedContext</span>, <span class="xref">System.Threading.Tasks.Task</span>&gt;</td>
-        <td></td>
+        <td><span class="xref">Microsoft.Extensions.DependencyInjection.IServiceCollection</span></td>
+        <td><span class="parametername">services</span></td>
+        <td><p>The original <see cref="!:https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Action</span>&lt;<a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a>&gt;</td>
+        <td><span class="parametername">configureOptions</span></td>
+        <td><p>A delegate used to configure the <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a> used when calling AddAuth0WebAppAuthentication.</p>
+</td>
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0OptionsEvents_OnTokenValidated_examples">Examples</h5>
-  <pre><code>services.AddAuth0Mvc(options =>
-{
-    options.Events = new Auth0OptionsEvents
-    {
-        OnTokenValidated = context =>
-        {
-            var someClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == &quot;claim_name&quot;)?.Value;
-
-            if (string.IsNullOrWhiteSpace(someClaimValue))
-            {
-                context.Fail(&quot;Custom claim must be a string present in the ID token.&quot;);
-            }
-
-            return Task.CompletedTask;
-        }
-    };
-});</code></pre>
-
 </article>
           </div>
           

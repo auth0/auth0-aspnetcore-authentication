@@ -1,6 +1,6 @@
 {
   "homepages": [],
-  "source_base_path": "C:/Dev/Auth0/auth0-aspnetcore-mvc/docs-source",
+  "source_base_path": "C:/Development/Auth0/auth0-aspnetcore-mvc/docs-source",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -31,19 +31,19 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "v7IQ5p9zhzzK8OWODKnGFo9CswdPCvo8HNgGbfIonE0="
+          "hash": "ApsThk9XGNutulIZTxIhCQFdqp6qlGMtFHiWX0ZCzWM="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParmeters.html",
-          "hash": "97HDhyyxIVd0ca31iL6JaHDSZtLWtqAGWx7GAcHX/hk="
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html",
+          "hash": "hVs8KJgjTi4issLRkiUNjWjJL50UOSEDdpiXs27K878="
         }
       },
       "is_incremental": false,
@@ -55,7 +55,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0Constants.html",
-          "hash": "C/SNdMLHKvmkYT7oFtKjGMLfpF+ToQEQFE3cTNQXJ1M="
+          "hash": "BIMLLut/Mk0VtgNxFaQhe8e/iz1X9iZJufFRDJuw3Aw="
         }
       },
       "is_incremental": false,
@@ -63,11 +63,11 @@
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0Options.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0Options.html",
-          "hash": "GvhXCfjC//TH8mpdj3mzH77V2IG8ZQbqPjFSFqdbN+Q="
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html",
+          "hash": "O/H76P0/SwO0MALo01TrTAxQz+fmHS0+7l+QrQRila4="
         }
       },
       "is_incremental": false,
@@ -75,11 +75,47 @@
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0OptionsEvents.html",
-          "hash": "lErzNbYDJUoAW64bOtwoGEVM9+HfqTglq/sDnWl2iBk="
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html",
+          "hash": "pROE4JMKrSM8d7OQiIT6Os9Ssfp/bvmQgwZQhVTv6qI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
+          "hash": "Tr9+4u6Pexbxj7NG14MMWKcZF/1KXCXgIX4wzSfKNUk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html",
+          "hash": "zG2Q/FnIx2ZOCMRsXMfFHSmU0mlSkfrcav1R+/L6wFQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html",
+          "hash": "ZrCj5eUny8VnD+p6v2PFL3x+goUe0/ydCAOLxPMKUuQ="
         }
       },
       "is_incremental": false,
@@ -91,7 +127,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html",
-          "hash": "HaMHaV8HoJpDv5I8hmTFOrZnjHV3rUubYZBQFUmSnog="
+          "hash": "9jXI+H+No6eKculVYMmYj0w19OcCauCZ1UBSg4XsmgM="
         }
       },
       "is_incremental": false,
@@ -99,11 +135,35 @@
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.AuthenticationPropertiesBuilder.html",
-          "hash": "lLgx02jbVTpNN7DsL077kR0DnvxtmzG8qHw7Oy5QQqw="
+          "relative_path": "api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html",
+          "hash": "Vq2uph7cIefIcyeWnSWQdQ+dmkG18lufb63uyY9DuHI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html",
+          "hash": "m9DYtK9GaCKsmZdOk4pafclKhBOjyZ16oGgE/in7p9c="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html",
+          "hash": "nACArSOpUgdOeEw1CdVm4clHpq7I4/8vH2ogo5JUX4E="
         }
       },
       "is_incremental": false,
@@ -115,7 +175,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html",
-          "hash": "XSe72ErwlB5NltZbs4b43ATy/NODUbQG/JkkW+q6DcU="
+          "hash": "6GGhvvnUrGYIoZn+y2Dt/lE9K6BvQAJPkB7I5vc39to="
         }
       },
       "is_incremental": false,
@@ -127,7 +187,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Mvc.html",
-          "hash": "lKKk0KYuSOYycYWywXRciqvKyPDnv2dxg6Nq3/czOQ8="
+          "hash": "3XGW+r+9kB5dNQ8wkLuiEHrAk9SLjFMwDvbBRqbHyaA="
         }
       },
       "is_incremental": false,
@@ -139,7 +199,7 @@
       "output": {
         ".html": {
           "relative_path": "api/toc.html",
-          "hash": "9xPq9lz3aQzj9WV0URgEpidSFzo7BMYWIwegpRgp1xk="
+          "hash": "WstVPg5E4VdbtugBu3smdih83KKqed3eA5BbcwSReP8="
         }
       },
       "is_incremental": false,
@@ -161,25 +221,23 @@
   "incremental_info": [
     {
       "status": {
-        "can_incremental": false,
-        "details": "Cannot build incrementally because last build info is missing.",
+        "can_incremental": true,
         "incrementalPhase": "build",
         "total_file_count": 0,
-        "skipped_file_count": 0,
-        "full_build_reason_code": "NoAvailableBuildCache"
+        "skipped_file_count": 0
       },
       "processors": {
         "ConceptualDocumentProcessor": {
-          "can_incremental": false,
+          "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
-          "can_incremental": false,
+          "can_incremental": true,
           "incrementalPhase": "build",
-          "total_file_count": 8,
-          "skipped_file_count": 0
+          "total_file_count": 13,
+          "skipped_file_count": 8
         },
         "ResourceDocumentProcessor": {
           "can_incremental": false,
@@ -199,8 +257,8 @@
     },
     {
       "status": {
-        "can_incremental": false,
-        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "can_incremental": true,
+        "details": "Can support incremental post processing.",
         "incrementalPhase": "postProcessing",
         "total_file_count": 0,
         "skipped_file_count": 0
