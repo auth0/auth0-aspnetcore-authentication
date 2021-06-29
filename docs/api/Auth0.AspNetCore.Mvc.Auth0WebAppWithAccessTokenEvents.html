@@ -114,18 +114,20 @@
     </tbody>
   </table>
   <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_examples">Examples</h5>
-  <pre><code>services.AddAuth0Mvc(options =>
-{
-    options.Events = new Auth0OptionsEvents
-    {
-        OnMissingAccessToken = async (context) =>
-        {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(&quot;/&quot;).Build();
-            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        }
-    };
-});</code></pre>
+  <pre><code>services
+  .AddAuth0WebAppAuthentication(options => {})
+  .WithAccessToken(options =>
+  {
+      options.Events = new Auth0WebAppWithAccessTokenEvents
+      {
+          OnMissingAccessToken = async (context) =>
+          {
+              await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+              var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(&quot;/&quot;).Build();
+              await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+          }
+      };
+  });</code></pre>
 
   <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken*"></a>
   <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken">OnMissingRefreshToken</h4>
@@ -152,18 +154,20 @@
     </tbody>
   </table>
   <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_examples">Examples</h5>
-  <pre><code>services.AddAuth0Mvc(options =>
-{
-    options.Events = new Auth0OptionsEvents
-    {
-        OnMissingRefreshToken = async (context) =>
-        {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(&quot;/&quot;).Build();
-            await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-        }
-    };
-});</code></pre>
+  <pre><code>services
+  .AddAuth0WebAppAuthentication(options => {})
+  .WithAccessToken(options =>
+  {
+      options.Events = new Auth0WebAppWithAccessTokenEvents
+      {
+          OnMissingRefreshToken = async (context) =>
+          {
+              await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+              var authenticationProperties = new AuthenticationPropertiesBuilder().WithRedirectUri(&quot;/&quot;).Build();
+              await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+          }
+      };
+  });</code></pre>
 
 </article>
           </div>

@@ -260,7 +260,7 @@ public async Task&lt;IActionResult&gt; Profile()
 </ul>
 <p>Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.</p>
 <h4 id="log-in-to-an-organization">Log in to an organization</h4>
-<p>Log in to an organization by specifying the <code>Organization</code> when calling <code>AddAuth0Mvc</code>:</p>
+<p>Log in to an organization by specifying the <code>Organization</code> when calling <code>AddAuth0WebAppAuthentication</code>:</p>
 <pre><code class="lang-csharp">services.AddAuth0WebAppAuthentication(options =&gt;
 {
     options.Domain = Configuration[&quot;Auth0:Domain&quot;];

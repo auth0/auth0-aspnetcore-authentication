@@ -246,7 +246,7 @@ Note that Organizations is currently only available to customers on our Enterpri
 
 #### Log in to an organization
 
-Log in to an organization by specifying the `Organization` when calling `AddAuth0Mvc`:
+Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
 
 ```csharp
 services.AddAuth0WebAppAuthentication(options =>
