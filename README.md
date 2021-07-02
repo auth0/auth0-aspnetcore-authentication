@@ -323,7 +323,6 @@ services.AddAuth0WebAppAuthentication(options =>
 
             return Task.CompletedTask;
         }
-
     };
 }).
 ```
