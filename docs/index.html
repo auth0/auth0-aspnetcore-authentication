@@ -280,12 +280,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 <p>Specifying the Organization when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured Organization.</p>
 </div>
 <h4 id="organization-claim-validation">Organization Claim Validation</h4>
-<p>Even though the SDK takes care of validating the <code>org_id</code> claim in some common scenario's, it is unable to cover all scenario's.</p>
-<p>If no <code>organization</code> parameter was given to the authorization endpoint, but an <code>org_id</code> claim is present in the ID Token, then the claim should be validated by the application to ensure that the value received is expected or known.</p>
-<p>Normally, validating the issuer would be enough to ensure that the token was issued by Auth0, and this check is performed by the SDK. In the case of organizations, additional checks should be made so that the organization within an Auth0 tenant is expected.</p>
-<p>In particular, the <code>org_id</code> claim should be checked to ensure it is a value that is already known to the application. This could be validated against a known list of organization IDs, or perhaps checked in conjunction with the current request URL. e.g. the sub-domain may hint at what organization should be used to validate the ID Token.</p>
-<p>If the claim cannot be validated, then the application should deem the token invalid.</p>
-<p>The following example demonstrates how you can add custom validation by comparing the <code>org_id</code> claim to a pre-configured list of expected organization IDs:</p>
+<p>If you don't provide an <code>organization</code> parameter at login, the SDK can't validate the <code>org_id</code> claim you get back in the ID Token. In that case, you should validate the <code>org_id</code> claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).</p>
 <pre><code>services.AddAuth0WebAppAuthentication(options =&gt;
 {
     options.Domain = Configuration[&quot;Auth0:Domain&quot;];
