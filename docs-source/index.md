@@ -270,6 +270,34 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 > [!NOTE]
 > Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
+#### Organization Claim Validation
+
+If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID Token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
+
+```
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+    options.OpenIdConnectEvents = new OpenIdConnectEvents
+    {
+        OnTokenValidated = (context) =>
+        {
+            var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
+            var expectedOrganizationIds = new List<string> {"123", "456"};
+            if (!string.IsNullOrEmpty(organizationClaimValue) && !expectedOrganizationIds.Contains(organizationClaimValue))
+            {
+                context.Fail("Unexpected org_id claim detected.");
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+}).
+```
+
+For more information, please read [Work with Tokens and Organizations](https://auth0.com/docs/organizations/using-tokens) on Auth0 Docs.
+
 #### Accept user invitations
 Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
 

@@ -279,6 +279,29 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 <h5>Note</h5>
 <p>Specifying the Organization when calling <code>HttpContext.ChallengeAsync</code> will take precedence over any globally configured Organization.</p>
 </div>
+<h4 id="organization-claim-validation">Organization Claim Validation</h4>
+<p>If you don't provide an <code>organization</code> parameter at login, the SDK can't validate the <code>org_id</code> claim you get back in the ID Token. In that case, you should validate the <code>org_id</code> claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).</p>
+<pre><code>services.AddAuth0WebAppAuthentication(options =&gt;
+{
+    options.Domain = Configuration[&quot;Auth0:Domain&quot;];
+    options.ClientId = Configuration[&quot;Auth0:ClientId&quot;];
+    options.OpenIdConnectEvents = new OpenIdConnectEvents
+    {
+        OnTokenValidated = (context) =&gt;
+        {
+            var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim =&gt; claim.Type == &quot;org_id&quot;)?.Value;
+            var expectedOrganizationIds = new List&lt;string&gt; {&quot;123&quot;, &quot;456&quot;};
+            if (!string.IsNullOrEmpty(organizationClaimValue) &amp;&amp; !expectedOrganizationIds.Contains(organizationClaimValue))
+            {
+                context.Fail(&quot;Unexpected org_id claim detected.&quot;);
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+}).
+</code></pre>
+<p>For more information, please read <a href="https://auth0.com/docs/organizations/using-tokens">Work with Tokens and Organizations</a> on Auth0 Docs.</p>
 <h4 id="accept-user-invitations">Accept user invitations</h4>
 <p>Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the <code>organization</code> and <code>invitation</code> parameters from this URL.</p>
 <pre><code class="lang-csharp">public class InvitationController : Controller {
