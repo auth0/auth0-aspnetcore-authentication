@@ -23,7 +23,7 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 ## Documentation
 
 - [API Reference](https://auth0.github.io/auth0-aspnetcore-mvc/)
-- Quickstart Guide
+- [Quickstart Guide](https://auth0.com/docs/quickstart/webapp/aspnet-core-beta)
 
 ## Installation
 
