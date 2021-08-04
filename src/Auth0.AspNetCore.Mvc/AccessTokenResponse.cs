@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -10,25 +10,25 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Identifier token.
         /// </summary>
-        [JsonProperty("id_token")]
+        [JsonPropertyName("id_token")]
         public string IdToken { get; set; }
 
         /// <summary>
         /// Expiration time in seconds.
         /// </summary>
-        [JsonProperty("expires_in")]
+        [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
 
         /// <summary>
         /// Refresh token.
         /// </summary>
-        [JsonProperty("refresh_token")]
+        [JsonPropertyName("refresh_token")]
         public string RefreshToken { get; set; }
 
         /// <summary>
         /// Access token.
         /// </summary>
-        [JsonProperty("access_token")]
+        [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }
     }
 }

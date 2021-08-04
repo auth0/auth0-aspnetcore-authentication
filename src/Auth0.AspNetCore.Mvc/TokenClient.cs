@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
@@ -11,10 +11,9 @@ namespace Auth0.AspNetCore.Mvc
     {
         private readonly HttpClient _httpClient;
         private readonly bool _isHttpClientOwner;
-        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
         {
-            NullValueHandling = NullValueHandling.Ignore,
-            DateParseHandling = DateParseHandling.DateTime
+            IgnoreNullValues = true,
         };
 
         public TokenClient(HttpClient httpClient = null)
@@ -51,9 +50,9 @@ namespace Auth0.AspNetCore.Mvc
                         return null;
                     }
 
-                    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                    return JsonConvert.DeserializeObject<AccessTokenResponse>(responseContent, _jsonSerializerSettings);
+                    return await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
                 }
             }
         }
