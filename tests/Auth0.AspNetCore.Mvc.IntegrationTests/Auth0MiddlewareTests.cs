@@ -12,6 +12,10 @@ using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Builders;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Extensions;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Infrastructure;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Utils;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
 {
@@ -33,7 +37,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Protected}"));
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Found);
+                    response.StatusCode.Should().Be(HttpStatusCode.Found);
                     response.Headers.Location.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
                 }
             }
@@ -47,7 +51,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Protected}"));
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Found);
+                    response.StatusCode.Should().Be(HttpStatusCode.Found);
                     response.Headers.Location.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
                 }
             }
@@ -61,7 +65,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
                     response.Headers.Location.AbsoluteUri.Should().Contain(Configuration["Auth0:Domain"]);
                 }
             }
@@ -75,7 +79,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -93,7 +97,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -120,7 +124,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -140,7 +144,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scope={scope}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -160,7 +164,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -184,7 +188,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -204,7 +208,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scope={scope}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -226,7 +230,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -247,7 +251,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
 
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Logout}");
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -268,7 +272,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
                     var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Logout}?extraParameters[0].Key=Test&extraParameters[0].Value=123&extraParameters[1].Key=federated&extraParameters[1].Value=");
 
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
@@ -308,7 +312,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?extraParameters[0].Key=Test&extraParameters[0].Value=123", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var response = await client.GetAsync(
+                        $"{TestServerBuilder.Host}/{TestServerBuilder.Login}?extraParameters[0].Key=Test&extraParameters[0].Value=123");
                     var redirectUri = response.Headers.Location;
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
@@ -327,7 +332,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?extraParameters[0].Key=Test&extraParameters[0].Value=456", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var response = await client.GetAsync(
+                        $"{TestServerBuilder.Host}/{TestServerBuilder.Login}?extraParameters[0].Key=Test&extraParameters[0].Value=456");
                     var redirectUri = response.Headers.Location;
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
@@ -384,8 +390,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?organization={1}", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}", "123"));
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    var response = await client.GetAsync(
+                        $"{TestServerBuilder.Host}/{TestServerBuilder.Login}?organization={"123"}");
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -406,8 +413,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?organization={1}", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}", "456"));
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    var response = await client.GetAsync(
+                        $"{$"{TestServerBuilder.Host}/{TestServerBuilder.Login}"}?organization={"456"}");
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -425,8 +433,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?invitation={1}", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}", "123"));
-                    response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+                    var response = await client.GetAsync(
+                        $"{$"{TestServerBuilder.Host}/{TestServerBuilder.Login}"}?invitation={"123"}");
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
 
                     var redirectUri = response.Headers.Location;
 
@@ -492,7 +501,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?audience={1}", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}", "http://local.auth0"));
+                    var response = await client.GetAsync(
+                        $"{$"{TestServerBuilder.Host}/{TestServerBuilder.Login}"}?audience={"http://local.auth0"}");
                     var redirectUri = response.Headers.Location;
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
@@ -515,7 +525,8 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync(string.Format("{0}?audience={1}", $"{TestServerBuilder.Host}/{TestServerBuilder.Login}", "http://remote.auth0"));
+                    var response = await client.GetAsync(
+                        $"{$"{TestServerBuilder.Host}/{TestServerBuilder.Login}"}?audience={"http://remote.auth0"}");
                     var redirectUri = response.Headers.Location;
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
@@ -919,7 +930,6 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         [Fact]
         public async void Should_Call_On_Access_Token_Missing()
         {
-            var nonce = "";
             var configuration = TestConfiguration.GetConfiguration();
             var domain = configuration["Auth0:Domain"];
             var clientId = configuration["Auth0:ClientId"];
@@ -938,9 +948,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             {
                 opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
-                    OnMissingAccessToken = async (context) =>
+                    OnMissingAccessToken = (context) =>
                     {
                         context.Response.Redirect("http://missing.at/");
+                        return Task.CompletedTask;
                     }
                 };
             }))
@@ -956,16 +967,20 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                     // Keep track of the nonce as we need to:
                     // - Send it to the `/oauth/token` endpoint
                     // - Include it in the generated ID Token
-                    nonce = queryParameters["nonce"];
+                    var nonce = queryParameters["nonce"];
 
                     // Keep track of the state as we need to:
                     // - Send it to the `/oauth/token` endpoint
                     var state = queryParameters["state"];
 
-                    var nvc = new List<KeyValuePair<string, string>>();
-                    nvc.Add(new KeyValuePair<string, string>("state", state));
-                    nvc.Add(new KeyValuePair<string, string>("nonce", nonce));
-                    nvc.Add(new KeyValuePair<string, string>("id_token", JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20))));
+                    var nvc = new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("state", state),
+                        new KeyValuePair<string, string>("nonce", nonce),
+                        new KeyValuePair<string, string>("id_token",
+                            JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce,
+                                DateTime.Now.AddSeconds(20)))
+                    };
 
                     var message = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}") { Content = new FormUrlEncodedContent(nvc) };
 
@@ -1006,9 +1021,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 opts.Audience = "123";
                 opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
-                    OnMissingRefreshToken = async (context) =>
+                    OnMissingRefreshToken = (context) =>
                     {
                         context.Response.Redirect("http://missing.rt/");
+                        return Task.CompletedTask;
                     }
                 };
             }))

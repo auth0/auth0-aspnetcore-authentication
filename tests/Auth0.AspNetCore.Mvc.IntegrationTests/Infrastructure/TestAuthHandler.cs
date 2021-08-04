@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Infrastructure
 {
     /// <summary>
     ///  AuthenticationHandler used to Mock the Authentication in Integration Tests that an authenticated user to be available

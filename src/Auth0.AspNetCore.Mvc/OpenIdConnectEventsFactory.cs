@@ -31,7 +31,7 @@ namespace Auth0.AspNetCore.Mvc
 
         private static Func<T, Task> ProxyEvent<T>(Func<T, Task> originalHandler, Func<T, Task> newHandler = null)
         {
-            return async (T context) =>
+            return async (context) =>
             {
                 if (newHandler != null)
                 {
@@ -134,9 +134,9 @@ namespace Auth0.AspNetCore.Mvc
             // Extra Parameters
             if (auth0Options.LoginParameters != null)
             {
-                foreach (var extraParam in auth0Options.LoginParameters)
+                foreach (var (key, value) in auth0Options.LoginParameters)
                 {
-                    parameters[extraParam.Key] = extraParam.Value;
+                    parameters[key] = value;
                 }
             }
 

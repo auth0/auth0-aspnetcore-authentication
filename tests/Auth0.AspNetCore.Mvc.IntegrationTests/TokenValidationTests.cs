@@ -7,6 +7,10 @@ using Xunit;
 using System.Net.Http;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Builders;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Extensions;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Infrastructure;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Utils;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Auth0.AspNetCore.Mvc.IntegrationTests
@@ -596,7 +600,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
         }
 
-        private string GenerateToken(int userId, string issuer, string audience, string nonce, string subject, string org_id = null, bool expired = false, string extraAudience = null, string azp = null, DateTime? authTime = null)
+        private string GenerateToken(int userId, string issuer, string audience, string nonce, string subject, string orgId = null, bool expired = false, string extraAudience = null, string azp = null, DateTime? authTime = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new List<Claim>
@@ -614,9 +618,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 claims.Add(new Claim(JwtRegisteredClaimNames.Aud, extraAudience));
             }
 
-            if (!string.IsNullOrWhiteSpace(org_id))
+            if (!string.IsNullOrWhiteSpace(orgId))
             {
-                claims.Add(new Claim("org_id", org_id));
+                claims.Add(new Claim("org_id", orgId));
             }
 
             if (!string.IsNullOrWhiteSpace(nonce))

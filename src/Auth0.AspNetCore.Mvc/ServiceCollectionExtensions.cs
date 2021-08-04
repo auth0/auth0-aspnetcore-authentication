@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -13,7 +12,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
-        /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppOptions"/></param>
         /// <returns>The <see cref="Auth0WebAppAuthenticationBuilder"/> instance that has been created.</returns>
         public static Auth0WebAppAuthenticationBuilder AddAuth0WebAppAuthentication(this IServiceCollection services, Action<Auth0WebAppOptions> configureOptions)

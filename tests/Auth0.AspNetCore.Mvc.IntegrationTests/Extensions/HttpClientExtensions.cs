@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Extensions
 {
     /// <summary>
     /// HttpClient Extensions to support a URL as a string as well as cookie headers.

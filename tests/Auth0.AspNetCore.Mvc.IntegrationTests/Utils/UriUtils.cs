@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Utils
 {
     /// <summary>
     /// Utils class for Uri's
