@@ -83,7 +83,7 @@ namespace Auth0.AspNetCore.Mvc
 
         private static void ValidateOptions(Auth0WebAppOptions auth0Options)
         {
-            if (CodeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
+            if (CodeResponseTypes.Contains(auth0Options.ResponseType!) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
             {
                 throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
             }

@@ -11,7 +11,7 @@ namespace Auth0.AspNetCore.Mvc
     public class LoginAuthenticationPropertiesBuilder: BaseAuthenticationPropertiesBuilder
     {
 
-        public LoginAuthenticationPropertiesBuilder(AuthenticationProperties properties = null): base(properties)
+        public LoginAuthenticationPropertiesBuilder(AuthenticationProperties? properties = null): base(properties)
         {
         }
 

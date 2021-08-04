@@ -16,7 +16,7 @@ namespace Auth0.AspNetCore.Mvc
             IgnoreNullValues = true,
         };
 
-        public TokenClient(HttpClient httpClient = null)
+        public TokenClient(HttpClient? httpClient = null)
         {
             _isHttpClientOwner = httpClient == null;
             _httpClient = httpClient ?? new HttpClient();
@@ -30,16 +30,16 @@ namespace Auth0.AspNetCore.Mvc
             }
         }
 
-        public async Task<AccessTokenResponse> Refresh(Auth0WebAppOptions options, string refreshToken)
+        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
                 { "client_id", options.ClientId },
-                { "client_secret", options.ClientSecret },
+                { "client_secret", options.ClientSecret! },
                 { "refresh_token", refreshToken }
             };
 
-            var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string, string>(p.Key, p.Value ?? "")));
+            var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{options.Domain}/oauth/token") { Content = requestContent })
             {

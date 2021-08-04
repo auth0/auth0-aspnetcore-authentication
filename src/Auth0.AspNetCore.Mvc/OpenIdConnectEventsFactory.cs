@@ -29,7 +29,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static Func<T, Task> ProxyEvent<T>(Func<T, Task> originalHandler, Func<T, Task> newHandler = null)
+        private static Func<T, Task> ProxyEvent<T>(Func<T, Task>? originalHandler, Func<T, Task>? newHandler = null)
         {
             return async (context) =>
             {
@@ -86,15 +86,15 @@ namespace Auth0.AspNetCore.Mvc
                     logoutUri += $"&returnTo={ Uri.EscapeDataString(postLogoutUri)}";
                 }
 
-                foreach (var parameter in parameters)
+                foreach (var (key, value) in parameters)
                 {
-                    if (!string.IsNullOrEmpty(parameter.Value))
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        logoutUri += $"&{parameter.Key}={ Uri.EscapeDataString(parameter.Value)}";
+                        logoutUri += $"&{key}={ Uri.EscapeDataString(value)}";
                     }
                     else
                     {
-                        logoutUri += $"&{parameter.Key}";
+                        logoutUri += $"&{key}";
                     }
                 }
 
@@ -122,9 +122,9 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static IDictionary<string, string> GetAuthorizeParameters(Auth0WebAppOptions auth0Options, IDictionary<string, string> authSessionItems)
+        private static IDictionary<string, string?> GetAuthorizeParameters(Auth0WebAppOptions auth0Options, IDictionary<string, string?> authSessionItems)
         {
-            var parameters = new Dictionary<string, string>();
+            var parameters = new Dictionary<string, string?>();
 
             if (!string.IsNullOrEmpty(auth0Options.Organization))
             {
@@ -144,10 +144,10 @@ namespace Auth0.AspNetCore.Mvc
             foreach (var item in GetExtraParameters(authSessionItems))
             {
                 var value = item.Value;
-                if (item.Key == "scope")
+                if (item.Key == "scope" && value != null)
                 {
                     // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
-                    if (value.IndexOf("openid", StringComparison.CurrentCultureIgnoreCase) == -1)
+                    if (!value.Contains("openid", StringComparison.CurrentCultureIgnoreCase))
                     {
                         value += " openid";
                     }
@@ -159,13 +159,13 @@ namespace Auth0.AspNetCore.Mvc
             return parameters;
         }
 
-        private static IDictionary<string, string> GetExtraParameters(IDictionary<string, string> authSessionItems)
+        private static IDictionary<string, string?> GetExtraParameters(IDictionary<string, string?> authSessionItems)
         {
-            var parameters = new Dictionary<string, string>();
+            var parameters = new Dictionary<string, string?>();
 
-            foreach (var item in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
+            foreach (var (key, value) in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
-                parameters[item.Key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = item.Value;
+                parameters[key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
             }
 
             return parameters;

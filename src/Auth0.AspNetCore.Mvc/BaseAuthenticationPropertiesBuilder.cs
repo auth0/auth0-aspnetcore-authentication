@@ -6,10 +6,10 @@ namespace Auth0.AspNetCore.Mvc
     {
         protected readonly AuthenticationProperties AuthenticationProperties;
 
-        protected BaseAuthenticationPropertiesBuilder(AuthenticationProperties properties = null)
+        protected BaseAuthenticationPropertiesBuilder(AuthenticationProperties? properties = null)
         {
             AuthenticationProperties = properties ?? new AuthenticationProperties();
-            AuthenticationProperties.RedirectUri = AuthenticationProperties.RedirectUri ?? "/";
+            AuthenticationProperties.RedirectUri ??= "/";
         }
     }
 }
