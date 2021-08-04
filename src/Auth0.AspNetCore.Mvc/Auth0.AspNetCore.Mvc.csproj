@@ -39,14 +39,14 @@
     <LangVersion>7.1</LangVersion>
     <Major>1</Major>
     <Minor>0</Minor>
-    <Patch>0</Patch>
+    <Revision>0</Revision>
     <Suffix>-beta.0</Suffix>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyVersion>$(Major).$(Minor).$(Patch)</AssemblyVersion>
-    <AssemblyFileVersion>$(Major).$(Minor).$(Patch)</AssemblyFileVersion>
-    <InformationalVersion>$(Major).$(Minor).$(Patch)$(Suffix)</InformationalVersion>
-    <PackageVersion>$(Major).$(Minor).$(Patch)$(Suffix)</PackageVersion>
+    <AssemblyVersion>$(Major).$(Minor).$(Revision)</AssemblyVersion>
+    <AssemblyFileVersion>$(Major).$(Minor).$(Revision)</AssemblyFileVersion>
+    <InformationalVersion>$(Major).$(Minor).$(Revision)$(Suffix)</InformationalVersion>
+    <PackageVersion>$(Major).$(Minor).$(Revision)$(Suffix)</PackageVersion>
   </PropertyGroup>
 
 </Project>
