@@ -45,7 +45,7 @@
   <PropertyGroup>
     <AssemblyVersion>$(Major).$(Minor).$(Revision)</AssemblyVersion>
     <AssemblyFileVersion>$(Major).$(Minor).$(Revision)</AssemblyFileVersion>
-    <InformationalVersion>$(Major).$(Minor).$(Revision)</InformationalVersion>
+    <InformationalVersion>$(Major).$(Minor).$(Revision)$(Suffix)</InformationalVersion>
     <PackageVersion>$(Major).$(Minor).$(Revision)$(Suffix)</PackageVersion>
   </PropertyGroup>
 
