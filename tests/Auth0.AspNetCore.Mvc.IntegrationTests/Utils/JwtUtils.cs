@@ -1,13 +1,12 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Utils
 {
     /// <summary>
     /// Utils class to generate a JWT token for testing purposes.
@@ -20,10 +19,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
         /// <param name="userId">The user's ID, used as Name and sub claim.</param>
         /// <param name="issuer">The token's Issuer.</param>
         /// <param name="audience">The token's Audience</param>
-        /// <param name="org_id">The (optional) org_id claim to be used.</param>
+        /// <param name="orgId">The (optional) org_id claim to be used.</param>
         /// <param name="nonce">The (optional) nonce to be used.</param>
         /// <returns>The generated JWT token.</returns>
-        public static string GenerateToken(int userId, string issuer, string audience, string org_id = null, string nonce = null, DateTime? expires = null)
+        public static string GenerateToken(int userId, string issuer, string audience, string orgId = null, string nonce = null, DateTime? expires = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new List<Claim>
@@ -32,9 +31,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             };
 
-            if (!string.IsNullOrWhiteSpace(org_id))
+            if (!string.IsNullOrWhiteSpace(orgId))
             {
-                claims.Add(new Claim("org_id", org_id));
+                claims.Add(new Claim("org_id", orgId));
             }
 
             if (!string.IsNullOrWhiteSpace(nonce))
@@ -47,7 +46,7 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = expires != null ? expires : DateTime.UtcNow.AddDays(7),
+                Expires = expires ?? DateTime.UtcNow.AddDays(7),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(keys.Keys[0], SecurityAlgorithms.RsaSha256)

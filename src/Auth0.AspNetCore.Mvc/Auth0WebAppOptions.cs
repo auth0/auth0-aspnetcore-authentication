@@ -50,7 +50,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <example>
         /// services.AddAuth0WebAppAuthentication(options =>
         /// {
-        ///     options.LoginParameters = new Dictionary<string, string>() { {"Test", "123" } };
+        ///     options.LoginParameters = new Dictionary{string, string}() { {"Test", "123" } };
         /// });
         /// </example>
         public IDictionary<string, string> LoginParameters { get; set; } = new Dictionary<string, string>();

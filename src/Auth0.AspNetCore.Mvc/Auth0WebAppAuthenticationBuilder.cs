@@ -8,18 +8,18 @@ namespace Auth0.AspNetCore.Mvc
     /// </summary>
     public class Auth0WebAppAuthenticationBuilder
     {
-        private readonly IServiceCollection services;
-        private readonly Auth0WebAppOptions options;
+        private readonly IServiceCollection _services;
+        private readonly Auth0WebAppOptions _options;
 
         /// <summary>
         /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
         /// </summary>
-        /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
         public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options)
         {
-            this.services = services;
-            this.options = options;
+            _services = services;
+            _options = options;
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <returns>An instance of <see cref="Auth0WebAppWithAccessTokenAuthenticationBuilder"/></returns>
         public Auth0WebAppWithAccessTokenAuthenticationBuilder WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
         {
-            return new Auth0WebAppWithAccessTokenAuthenticationBuilder(this.services, configureOptions, this.options);
+            return new Auth0WebAppWithAccessTokenAuthenticationBuilder(_services, configureOptions, _options);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Infrastructure
 {
     /// <summary>
     /// Helper class to load the Configuration from the appsettings.json file.
@@ -11,14 +11,9 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
 
         public static IConfiguration GetConfiguration()
         {
-            if (_configuration == null)
-            {
-                _configuration = new ConfigurationBuilder()
+            return _configuration ??= new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
-            }
-
-            return _configuration;
         }
     }
 }

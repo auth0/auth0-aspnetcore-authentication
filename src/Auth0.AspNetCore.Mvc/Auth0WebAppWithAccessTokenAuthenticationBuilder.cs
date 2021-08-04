@@ -15,9 +15,9 @@ namespace Auth0.AspNetCore.Mvc
     /// </summary>
     public class Auth0WebAppWithAccessTokenAuthenticationBuilder
     {
-        private readonly IServiceCollection services;
-        private readonly Action<Auth0WebAppWithAccessTokenOptions> configureOptions;
-        private readonly Auth0WebAppOptions options;
+        private readonly IServiceCollection _services;
+        private readonly Action<Auth0WebAppWithAccessTokenOptions> _configureOptions;
+        private readonly Auth0WebAppOptions _options;
 
         private static readonly IList<string> CodeResponseTypes = new List<string>() {
             OpenIdConnectResponseType.Code,
@@ -27,14 +27,14 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Constructs an instance of <see cref="Auth0WebAppWithAccessTokenAuthenticationBuilder"/>
         /// </summary>
-        /// <param name="services">The original <see cref="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
         public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options)
         {
-            this.services = services;
-            this.configureOptions = configureOptions;
-            this.options = options;
+            _services = services;
+            _configureOptions = configureOptions;
+            _options = options;
 
             EnableWithAccessToken();
         }
@@ -43,12 +43,12 @@ namespace Auth0.AspNetCore.Mvc
         {
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
-            configureOptions(auth0WithAccessTokensOptions);
+            _configureOptions(auth0WithAccessTokensOptions);
             
-            ValidateOptions(options);
+            ValidateOptions(_options);
 
-            this.services.AddSingleton(auth0WithAccessTokensOptions);
-            this.services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
+            _services.AddSingleton(auth0WithAccessTokensOptions);
+            _services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
                 .Configure<IServiceProvider>((options, serviceProvider) =>
                 {
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -66,7 +66,7 @@ namespace Auth0.AspNetCore.Mvc
                     options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(auth0WithAccessTokensOptions), options.Events.OnRedirectToIdentityProvider);
                 });
 
-            this.services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+            _services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure<IServiceProvider>((options, serviceProvider) =>
                 {
                     options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(auth0WithAccessTokensOptions), options.Events.OnValidatePrincipal);
@@ -97,13 +97,11 @@ namespace Auth0.AspNetCore.Mvc
             {
                 var options = context.HttpContext.RequestServices.GetRequiredService<Auth0WebAppOptions>();
 
-                string accessToken;
-                if (context.Properties.Items.TryGetValue(".Token.access_token", out accessToken))
+                if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
                 {
                     if (auth0Options.UseRefreshTokens)
                     {
-                        string refreshToken;
-                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out refreshToken))
+                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
                         {
                             var now = DateTimeOffset.Now;
                             var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
@@ -144,7 +142,7 @@ namespace Auth0.AspNetCore.Mvc
                 {
                     if (CodeResponseTypes.Contains(options.ResponseType))
                     {
-                        if (auth0Options.Events != null && auth0Options.Events.OnMissingAccessToken != null)
+                        if (auth0Options.Events?.OnMissingAccessToken != null)
                         {
                             await auth0Options.Events.OnMissingAccessToken(context.HttpContext);
                         }

@@ -9,9 +9,9 @@ namespace Auth0.AspNetCore.Mvc
 {
     internal class TokenClient : IDisposable
     {
-        private readonly HttpClient httpClient;
-        private readonly bool isHttpClientOwner;
-        private readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        private readonly HttpClient _httpClient;
+        private readonly bool _isHttpClientOwner;
+        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
             DateParseHandling = DateParseHandling.DateTime
@@ -19,15 +19,15 @@ namespace Auth0.AspNetCore.Mvc
 
         public TokenClient(HttpClient httpClient = null)
         {
-            this.isHttpClientOwner = httpClient == null;
-            this.httpClient = httpClient ?? new HttpClient();
+            _isHttpClientOwner = httpClient == null;
+            _httpClient = httpClient ?? new HttpClient();
         }
 
         public void Dispose()
         {
-            if (this.isHttpClientOwner)
+            if (_isHttpClientOwner)
             {
-                this.httpClient.Dispose();
+                _httpClient.Dispose();
             }
         }
 
@@ -44,7 +44,7 @@ namespace Auth0.AspNetCore.Mvc
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{options.Domain}/oauth/token") { Content = requestContent })
             {
-                using (var response = await httpClient.SendAsync(request).ConfigureAwait(false))
+                using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                     {
@@ -53,7 +53,7 @@ namespace Auth0.AspNetCore.Mvc
 
                     var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    return JsonConvert.DeserializeObject<AccessTokenResponse>(responseContent, jsonSerializerSettings);
+                    return JsonConvert.DeserializeObject<AccessTokenResponse>(responseContent, _jsonSerializerSettings);
                 }
             }
         }

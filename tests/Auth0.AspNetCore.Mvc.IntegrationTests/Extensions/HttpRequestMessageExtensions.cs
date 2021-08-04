@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Extensions
 {
     /// <summary>
     /// HttpRequestMessage Extensions to be able to easily filter certain requests.

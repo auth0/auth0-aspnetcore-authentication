@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,9 +8,6 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Mvc
 {
@@ -20,7 +16,7 @@ namespace Auth0.AspNetCore.Mvc
     /// </summary>
     public static class AuthenticationBuilderExtensions
     {
-        private static IList<string> codeResponseTypes = new List<string>() {
+        private static readonly IList<string> CodeResponseTypes = new List<string>() {
             OpenIdConnectResponseType.Code,
             OpenIdConnectResponseType.CodeIdToken
         };
@@ -51,7 +47,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Configure Open ID Connect based on the provided <see cref="Auth0WebAppOptions"/>.
         /// </summary>
-        /// <param name="oidcOptions">A reference to the <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.openidconnect.openidconnectoptions">OpenIdConnectOptions</see> that needs to be configured./param>
+        /// <param name="oidcOptions">A reference to the <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.openidconnect.openidconnectoptions">OpenIdConnectOptions</see> that needs to be configured.</param>
         /// <param name="auth0Options">The provided <see cref="Auth0WebAppOptions"/>.</param>
         private static void ConfigureOpenIdConnect(OpenIdConnectOptions oidcOptions, Auth0WebAppOptions auth0Options)
         {
@@ -87,7 +83,7 @@ namespace Auth0.AspNetCore.Mvc
 
         private static void ValidateOptions(Auth0WebAppOptions auth0Options)
         {
-            if (codeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
+            if (CodeResponseTypes.Contains(auth0Options.ResponseType) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
             {
                 throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
             }

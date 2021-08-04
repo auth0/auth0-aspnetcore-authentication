@@ -1,21 +1,22 @@
-﻿using Moq;
-using Moq.Protected;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Auth0.AspNetCore.Mvc.IntegrationTests.Extensions;
+using Moq;
+using Moq.Protected;
 
-namespace Auth0.AspNetCore.Mvc.IntegrationTests
+namespace Auth0.AspNetCore.Mvc.IntegrationTests.Builders
 {
     /// <summary>
-    /// Builder used to set up a Mock<HttpMessageHandler> that handles the Oidc and OAuth requests.
+    /// Builder used to set up a Mock{HttpMessageHandler} that handles the Oidc and OAuth requests.
     /// </summary>
     public class OidcMockBuilder
     {
-        private Mock<HttpMessageHandler> _mockHandler = new Mock<HttpMessageHandler>();
+        private readonly Mock<HttpMessageHandler> _mockHandler = new Mock<HttpMessageHandler>();
 
         /// <summary>
         /// Mock the `.well-known/openid-configuration` request.
@@ -68,13 +69,10 @@ namespace Auth0.AspNetCore.Mvc.IntegrationTests
                  ItExpr.Is<HttpRequestMessage>(me => me.IsTokenEndPoint() && (matcher == null || matcher(me))),
                  ItExpr.IsAny<CancellationToken>()
               )
-              .ReturnsAsync(() =>
+              .ReturnsAsync(() => new HttpResponseMessage()
               {
-                  return new HttpResponseMessage()
-                  {
-                      StatusCode = statusCode,
-                      Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
-                  };
+                  StatusCode = statusCode,
+                  Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
               })
               .Verifiable();
 
