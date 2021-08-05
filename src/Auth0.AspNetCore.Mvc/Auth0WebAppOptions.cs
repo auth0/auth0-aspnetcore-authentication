@@ -71,7 +71,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <summary>
         /// Backchannel used to communicate with the Identity Provider.
         /// </summary>
-        public HttpClient Backchannel { get; set; } = default!;
+        public HttpClient? Backchannel { get; set; }
 
         /// <summary>
         /// If provided, will set the 'max_age' parameter with the authentication request.

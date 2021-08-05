@@ -59,7 +59,7 @@ namespace Auth0.AspNetCore.Mvc
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Auth0Constants.DefaultCallbackPath);
             oidcOptions.SaveTokens = true;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
-            oidcOptions.Backchannel = auth0Options.Backchannel;
+            oidcOptions.Backchannel = auth0Options.Backchannel!;
             oidcOptions.MaxAge = auth0Options.MaxAge;
 
             if (!oidcOptions.Scope.Contains("openid"))
