@@ -144,10 +144,14 @@ namespace Auth0.AspNetCore.Mvc
             foreach (var item in GetExtraParameters(authSessionItems))
             {
                 var value = item.Value;
-                if (item.Key == "scope" && value != null)
+                if (item.Key == "scope")
                 {
                     // Openid is a required scope, meaning that when omitted we need to ensure it gets added.
-                    if (!value.Contains("openid", StringComparison.CurrentCultureIgnoreCase))
+                    if (value == null)
+                    {
+                        value = "openid";
+                    }
+                    else if (!value.Contains("openid", StringComparison.CurrentCultureIgnoreCase))
                     {
                         value += " openid";
                     }
