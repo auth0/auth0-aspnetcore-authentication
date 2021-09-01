@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,7 +49,7 @@ namespace Auth0.AspNetCore.Mvc
 
             _services.AddSingleton(auth0WithAccessTokensOptions);
             _services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
-                .Configure<IServiceProvider>((options, serviceProvider) =>
+                .Configure(options =>
                 {
                     options.ResponseType = OpenIdConnectResponseType.Code;
 
@@ -67,7 +67,7 @@ namespace Auth0.AspNetCore.Mvc
                 });
 
             _services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-                .Configure<IServiceProvider>((options, serviceProvider) =>
+                .Configure(options =>
                 {
                     options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(auth0WithAccessTokensOptions), options.Events.OnValidatePrincipal);
                 });
@@ -104,7 +104,7 @@ namespace Auth0.AspNetCore.Mvc
                         if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
                         {
                             var now = DateTimeOffset.Now;
-                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]);
+                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]!);
                             var leeway = 60;
                             var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
                             var isExpired = difference <= 0;
@@ -122,7 +122,7 @@ namespace Auth0.AspNetCore.Mvc
                                 }
                                 else
                                 {
-                                    context.Properties.UpdateTokenValue("refresh_token", null);
+                                    context.Properties.UpdateTokenValue("refresh_token", null!);
                                 }
 
                                 context.ShouldRenew = true;
@@ -131,7 +131,7 @@ namespace Auth0.AspNetCore.Mvc
                         }
                         else
                         {
-                            if (auth0Options.Events != null && auth0Options.Events.OnMissingRefreshToken != null)
+                            if (auth0Options.Events?.OnMissingRefreshToken != null)
                             {
                                 await auth0Options.Events.OnMissingRefreshToken(context.HttpContext);
                             }
@@ -140,7 +140,7 @@ namespace Auth0.AspNetCore.Mvc
                 }
                 else
                 {
-                    if (CodeResponseTypes.Contains(options.ResponseType))
+                    if (CodeResponseTypes.Contains(options.ResponseType!))
                     {
                         if (auth0Options.Events?.OnMissingAccessToken != null)
                         {
@@ -151,7 +151,7 @@ namespace Auth0.AspNetCore.Mvc
             };
         }
 
-        private static async Task<AccessTokenResponse> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient httpClient = null)
+        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient? httpClient = null)
         {
             using (var tokenClient = new TokenClient(httpClient))
             {

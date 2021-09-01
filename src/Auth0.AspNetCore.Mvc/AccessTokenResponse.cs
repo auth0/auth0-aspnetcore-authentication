@@ -11,7 +11,7 @@ namespace Auth0.AspNetCore.Mvc
         /// Identifier token.
         /// </summary>
         [JsonPropertyName("id_token")]
-        public string IdToken { get; set; }
+        public string IdToken { get; set; } = null!;
 
         /// <summary>
         /// Expiration time in seconds.
@@ -23,12 +23,12 @@ namespace Auth0.AspNetCore.Mvc
         /// Refresh token.
         /// </summary>
         [JsonPropertyName("refresh_token")]
-        public string RefreshToken { get; set; }
+        public string RefreshToken { get; set; } = null!;
 
         /// <summary>
         /// Access token.
         /// </summary>
         [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; }
+        public string AccessToken { get; set; } = null!;
     }
 }

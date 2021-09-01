@@ -32,6 +32,7 @@
     </PackageReleaseNotes>
     <CLSCompliant>true</CLSCompliant>
     <ComVisible>false</ComVisible>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
     <Major>1</Major>

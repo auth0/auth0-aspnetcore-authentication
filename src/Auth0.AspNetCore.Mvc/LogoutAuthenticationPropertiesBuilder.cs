@@ -12,7 +12,7 @@ namespace Auth0.AspNetCore.Mvc
     public class LogoutAuthenticationPropertiesBuilder: BaseAuthenticationPropertiesBuilder
     {
 
-        public LogoutAuthenticationPropertiesBuilder(AuthenticationProperties properties = null): base(properties)
+        public LogoutAuthenticationPropertiesBuilder(AuthenticationProperties? properties = null): base(properties)
         {
                 
         }
@@ -34,7 +34,7 @@ namespace Auth0.AspNetCore.Mvc
         /// <param name="key">The key for the parameter.</param>
         /// <param name="value">The value for the parameter.</param>
         /// <returns>The current <see cref="LogoutAuthenticationPropertiesBuilder"/> instance.</returns>
-        public LogoutAuthenticationPropertiesBuilder WithParameter(string key, string value = null)
+        public LogoutAuthenticationPropertiesBuilder WithParameter(string key, string? value = null)
         {
             AuthenticationProperties.Items.Add(Auth0AuthenticationParameters.Parameter(key), value);
             return this;

@@ -30,7 +30,7 @@ namespace Auth0.AspNetCore.Mvc
         ///   });
         /// </code>
         /// </example>
-        public Func<HttpContext, Task> OnMissingAccessToken { get; set; }
+        public Func<HttpContext, Task>? OnMissingAccessToken { get; set; }
 
         /// <summary>
         /// Executed when a Refresh Token is missing where one was expected, allowing you to react accordingly.
@@ -53,6 +53,6 @@ namespace Auth0.AspNetCore.Mvc
         ///   });
         /// </code>
         /// </example>
-        public Func<HttpContext, Task> OnMissingRefreshToken { get; set; }
+        public Func<HttpContext, Task>? OnMissingRefreshToken { get; set; }
     }
 }

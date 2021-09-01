@@ -8,12 +8,12 @@
         /// <summary>
         /// The audience to be used for requesting API access.
         /// </summary>
-        public string Audience { get; set; }
+        public string? Audience { get; set; }
 
         /// <summary>
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")
         /// </summary>
-        public string Scope { get; set; }
+        public string? Scope { get; set; }
 
         /// <summary>
         /// Define whether or not Refresh Tokens should be used internally when the access token is expired.
@@ -23,6 +23,6 @@
         /// <summary>
         /// Events allowing you to hook into specific moments in the Auth0 middleware.
         /// </summary>
-        public Auth0WebAppWithAccessTokenEvents Events { get; set; }
+        public Auth0WebAppWithAccessTokenEvents? Events { get; set; }
     }
 }

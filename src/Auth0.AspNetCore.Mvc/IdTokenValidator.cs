@@ -11,7 +11,7 @@ namespace Auth0.AspNetCore.Mvc
 {
     internal static class IdTokenValidator
     {
-        public static void Validate(Auth0WebAppOptions auth0Options, JwtSecurityToken token, IDictionary<string, string> properties = null)
+        public static void Validate(Auth0WebAppOptions auth0Options, JwtSecurityToken token, IDictionary<string, string?>? properties = null)
         {
             var organization = properties != null && properties.ContainsKey(Auth0AuthenticationParameters.Organization) ? properties[Auth0AuthenticationParameters.Organization] : null;
 
