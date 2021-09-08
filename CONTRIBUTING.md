@@ -18,7 +18,7 @@ Please read [Auth0's contribution guidelines](https://github.com/auth0/open-sour
 
 ### Adding tests
 
-- Tests go inside [Auth0.AspNetCore.Mvc.UnitTests](https://github.com/auth0/auth0-aspnetcore-mvc/tree/main/tests/Auth0.AspNetCore.Mvc.UnitTests)
+- Tests go inside [Auth0.AspNetCore.Authentication.UnitTests](https://github.com/auth0/auth0-aspnetcore-mvc/tree/main/tests/Auth0.AspNetCore.Authentication.UnitTests)
 
 ### Running tests
 

@@ -6,7 +6,7 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:
 
 ```
-Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
+Install-Package Auth0.AspNetCore.Authentication -IncludePrerelease
 ```
 
 As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the `-IncludePrerelease` flag when using the Package Manager Console, or by checking the `Include prerelease` checkbox when installing the SDK through the Package Manager UI.

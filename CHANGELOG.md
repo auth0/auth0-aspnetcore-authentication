@@ -3,7 +3,7 @@
 **Install**
 
 ```
-Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
+Install-Package Auth0.AspNetCore.Authentication -IncludePrerelease
 ```
 
 **Usage**
