@@ -1,5 +1,6 @@
 ﻿using Auth0.AspNetCore.Authentication.Playground.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace Auth0.AspNetCore.Authentication.Playground.Controllers
