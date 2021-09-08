@@ -27,7 +27,7 @@ namespace Auth0.AspNetCore.Authentication
         public static string CreateAgentString()
         {
             var sdkVersion = typeof(AuthenticationBuilderExtensions).GetTypeInfo().Assembly.GetName().Version;
-            var agentJson = $"{{\"name\":\"aspnetcore-mvc\",\"version\":\"{sdkVersion?.Major}.{sdkVersion?.Minor}.{sdkVersion?.Revision}\"}}";
+            var agentJson = $"{{\"name\":\"aspnetcore-authentication\",\"version\":\"{sdkVersion?.Major}.{sdkVersion?.Minor}.{sdkVersion?.Revision}\"}}";
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(agentJson));
         }
 

@@ -1,4 +1,4 @@
-# Auth0 SDK for ASP.NET Core MVC (Beta)
+# Auth0 SDK for ASP.NET Core Authentication (Beta)
 [![Build status](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Authentication/_apis/build/status/Auth0.AspNetCore.Authentication)](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Authentication/_build/latest?definitionId=8)
 
 This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core application as seamlessly as possible.
@@ -421,7 +421,7 @@ We appreciate feedback and contribution to this repo! Before you get started, pl
 
 ## Support + Feedback
 
-For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-mvc/issues).
+For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-authentication/issues).
 
 ## Vulnerability Reporting
 

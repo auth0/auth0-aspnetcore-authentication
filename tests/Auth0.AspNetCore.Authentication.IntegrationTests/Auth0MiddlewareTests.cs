@@ -359,7 +359,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     auth0Client.Should().NotBeNull();
                     auth0ClientJObject.GetValue("name").Should().NotBeNull();
-                    auth0ClientJObject.GetValue("name").ToString().Should().Be("aspnetcore-mvc");
+                    auth0ClientJObject.GetValue("name").ToString().Should().Be("aspnetcore-authentication");
                 }
             }
         }

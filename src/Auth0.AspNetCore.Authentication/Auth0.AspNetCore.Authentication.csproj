@@ -16,19 +16,19 @@
 
   <PropertyGroup>
     <Product>Auth0.AspNetCore.Authentication</Product>
-    <Description>Auth0 middleware for ASP.NET Core Mvc.</Description>
+    <Description>Auth0 authentication middleware for ASP.NET Core.</Description>
     <Copyright>Auth0® Inc.</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Auth0</Authors>
     <PackageTags>auth0;authentication;openid connect;oidc;oauth2</PackageTags>
     <PackageIconUrl>https://secure.gravatar.com/avatar/805765c256ff8617fcad483b5476faf2</PackageIconUrl>
     <PackageIcon>Auth0Icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/auth0/auth0-aspnetcore-mvc</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/auth0/auth0-aspnetcore-authentication</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/auth0/auth0-aspnetcore-mvc</RepositoryUrl>
+    <RepositoryUrl>https://github.com/auth0/auth0-aspnetcore-authentication</RepositoryUrl>
     <PackageReleaseNotes>
-      https://github.com/auth0/auth0-aspnetcore-mvc/blob/master/CHANGELOG.md
+      https://github.com/auth0/auth0-aspnetcore-mauthenticationvc/blob/master/CHANGELOG.md
     </PackageReleaseNotes>
     <CLSCompliant>true</CLSCompliant>
     <ComVisible>false</ComVisible>
