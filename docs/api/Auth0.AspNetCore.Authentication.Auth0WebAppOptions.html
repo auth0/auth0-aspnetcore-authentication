@@ -68,10 +68,10 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions" class="text-break">Class Auth0WebAppOptions
+  <h1 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions" class="text-break">Class Auth0WebAppOptions
   </h1>
   <div class="markdown level0 summary"><p>Options used to configure the SDK</p>
 </div>
@@ -81,22 +81,46 @@
     <div class="level0"><span class="xref">System.Object</span></div>
     <div class="level1"><span class="xref">Auth0WebAppOptions</span></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0WebAppOptions : object</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0WebAppOptions</code></pre>
   </div>
   <h3 id="properties">Properties
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Backchannel_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Backchannel" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Backchannel">Backchannel</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Backchannel_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Backchannel*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Backchannel" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Backchannel">Backchannel</h4>
   <div class="markdown level1 summary"><p>Backchannel used to communicate with the Identity Provider.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public HttpClient Backchannel { get; set; }</code></pre>
+    <pre><code class="lang-csharp hljs">public HttpClient? Backchannel { get; set; }</code></pre>
   </div>
   <h5 class="propertyValue">Property Value</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -108,13 +132,13 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">HttpClient</span></td>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">HttpClient</span>&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_CallbackPath_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_CallbackPath" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.CallbackPath">CallbackPath</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CallbackPath_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CallbackPath*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CallbackPath" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CallbackPath">CallbackPath</h4>
   <div class="markdown level1 summary"><p>The path within the application to redirect the user to.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -137,11 +161,11 @@
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_CallbackPath_remarks">Remarks</h5>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CallbackPath_remarks">Remarks</h5>
   <div class="markdown level1 remarks"><p>Processed internally by the Open Id Connect middleware.</p>
 </div>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientId_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientId" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientId">ClientId</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientId_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientId*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientId" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientId">ClientId</h4>
   <div class="markdown level1 summary"><p>Client ID of the application.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -164,8 +188,8 @@
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientSecret_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientSecret" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ClientSecret">ClientSecret</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientSecret_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientSecret*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientSecret" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientSecret">ClientSecret</h4>
   <div class="markdown level1 summary"><p>Client Secret of the application.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -188,11 +212,11 @@
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ClientSecret_remarks">Remarks</h5>
-  <div class="markdown level1 remarks"><p>Required when using <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html#Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType">ResponseType</a> set to <code>code</code> or <code>code id_token</code>.</p>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientSecret_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Required when using <a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ResponseType">ResponseType</a> set to <code>code</code> or <code>code id_token</code>.</p>
 </div>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Domain_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Domain" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Domain">Domain</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Domain_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Domain*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Domain" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Domain">Domain</h4>
   <div class="markdown level1 summary"><p>Auth0 domain name, e.g. tenant.auth0.com.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -215,9 +239,10 @@
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_LoginParameters_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_LoginParameters" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.LoginParameters">LoginParameters</h4>
-  <div class="markdown level1 summary"></div>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_LoginParameters_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.LoginParameters*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_LoginParameters" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.LoginParameters">LoginParameters</h4>
+  <div class="markdown level1 summary"><p>Parameters to be send to Auth0's <code>/authorize</code> endpoint.</p>
+</div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
@@ -233,13 +258,19 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">IDictionary</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;</td>
+        <td><span class="xref">System.Collections.Generic.IDictionary</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_MaxAge_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_MaxAge" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.MaxAge">MaxAge</h4>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_LoginParameters_examples">Examples</h5>
+  <p>services.AddAuth0WebAppAuthentication(options =&gt;
+{
+options.LoginParameters = new Dictionary{string, string}() { {&quot;Test&quot;, &quot;123&quot; } };
+});</p>
+
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_MaxAge_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.MaxAge*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_MaxAge" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.MaxAge">MaxAge</h4>
   <div class="markdown level1 summary"><p>If provided, will set the 'max_age' parameter with the authentication request.
 If the identity provider has not actively authenticated the user within the length of time specified,
 the user will be prompted to re-authenticate.</p>
@@ -259,13 +290,13 @@ the user will be prompted to re-authenticate.</p>
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">TimeSpan</span>&gt;</td>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">System.TimeSpan</span>&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_OpenIdConnectEvents_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_OpenIdConnectEvents" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.OpenIdConnectEvents">OpenIdConnectEvents</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_OpenIdConnectEvents_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.OpenIdConnectEvents*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_OpenIdConnectEvents" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.OpenIdConnectEvents">OpenIdConnectEvents</h4>
   <div class="markdown level1 summary"><p>Events allowing you to hook into specific moments in the OpenID Connect pipeline.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -288,8 +319,8 @@ the user will be prompted to re-authenticate.</p>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Organization_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Organization" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Organization">Organization</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Organization_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Organization*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Organization" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Organization">Organization</h4>
   <div class="markdown level1 summary"><p>The Id of the organization to which the users should log in to.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -312,8 +343,8 @@ the user will be prompted to re-authenticate.</p>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.ResponseType">ResponseType</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ResponseType_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ResponseType*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ResponseType" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ResponseType">ResponseType</h4>
   <div class="markdown level1 summary"><p>Set the ResponseType to be used.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -336,11 +367,11 @@ the user will be prompted to re-authenticate.</p>
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_ResponseType_remarks">Remarks</h5>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ResponseType_remarks">Remarks</h5>
   <div class="markdown level1 remarks"><p>Supports <code>id_token</code>, <code>code</code> or <code>code id_token</code>, defaults to <code>id_token</code> when omitted.</p>
 </div>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Scope_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppOptions_Scope" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.Scope">Scope</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Scope_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Scope*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Scope" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Scope">Scope</h4>
   <div class="markdown level1 summary"><p>Scopes to be used to request token(s). (e.g. &quot;Scope1 Scope2 Scope3&quot;)</p>
 </div>
   <div class="markdown level1 conceptual"></div>

@@ -68,10 +68,10 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder" class="text-break">Class LogoutAuthenticationPropertiesBuilder
+  <h1 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder" class="text-break">Class LogoutAuthenticationPropertiesBuilder
   </h1>
   <div class="markdown level0 summary"><p>Builder class for <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</a> when calling logout.</p>
 </div>
@@ -79,33 +79,54 @@
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><a class="xref" href="Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html">BaseAuthenticationPropertiesBuilder</a></div>
+    <div class="level1"><a class="xref" href="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html">BaseAuthenticationPropertiesBuilder</a></div>
     <div class="level2"><span class="xref">LogoutAuthenticationPropertiesBuilder</span></div>
   </div>
   <div class="inheritedMembers">
     <h5>Inherited Members</h5>
     <div>
-      <a class="xref" href="Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_BaseAuthenticationPropertiesBuilder_AuthenticationProperties">BaseAuthenticationPropertiesBuilder.AuthenticationProperties</a>
+      <a class="xref" href="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_AuthenticationProperties">BaseAuthenticationPropertiesBuilder.AuthenticationProperties</a>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
     </div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_syntax">Syntax</h5>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_syntax">Syntax</h5>
   <div class="codewrapper">
     <pre><code class="lang-csharp hljs">public class LogoutAuthenticationPropertiesBuilder : BaseAuthenticationPropertiesBuilder</code></pre>
   </div>
-  <h5 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_remarks"><strong>Remarks</strong></h5>
+  <h5 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_remarks"><strong>Remarks</strong></h5>
   <div class="markdown level0 remarks"><p>Allows for Auth0 specific first-class properties when constructing an instance of <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</a>.</p>
 </div>
   <h3 id="constructors">Constructors
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder__ctor_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)">LogoutAuthenticationPropertiesBuilder(AuthenticationProperties)</h4>
+  <a id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder__ctor_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})">LogoutAuthenticationPropertiesBuilder(Nullable&lt;AuthenticationProperties&gt;)</h4>
   <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public LogoutAuthenticationPropertiesBuilder(AuthenticationProperties properties = null)</code></pre>
+    <pre><code class="lang-csharp hljs">public LogoutAuthenticationPropertiesBuilder(AuthenticationProperties? properties = default(AuthenticationProperties? ))</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -118,7 +139,7 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationProperties</span></td>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">AuthenticationProperties</span>&gt;</td>
         <td><span class="parametername">properties</span></td>
         <td></td>
       </tr>
@@ -126,8 +147,8 @@
   </table>
   <h3 id="methods">Methods
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_Build_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_Build" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.Build">Build()</h4>
+  <a id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_Build_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.Build*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_Build" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.Build">Build()</h4>
   <div class="markdown level1 summary"><p>Return the configured <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</a>.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -145,15 +166,15 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationProperties</span></td>
+        <td><span class="xref">AuthenticationProperties</span></td>
         <td><p>The configured <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationproperties">AuthenticationProperties</a></p>
 </td>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithParameter_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)">WithParameter(String, String)</h4>
-  <div class="markdown level1 summary"><p>Build the <span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationProperties</span> using a parameter that will be sent to Auth0's logout endpoint.</p>
+  <a id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithParameter_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)">WithParameter(String, String)</h4>
+  <div class="markdown level1 summary"><p>Build the <see cref="!:AuthenticationProperties"></see> using a parameter that will be sent to Auth0's logout endpoint.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
@@ -194,15 +215,15 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></td>
-        <td><p>The current <a class="xref" href="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a> instance.</p>
+        <td><a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></td>
+        <td><p>The current <a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a> instance.</p>
 </td>
       </tr>
     </tbody>
   </table>
-  <a id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_" data-uid="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)">WithRedirectUri(String)</h4>
-  <div class="markdown level1 summary"><p>Build the <span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationProperties</span> using the provided redirect URI</p>
+  <a id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_" data-uid="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)">WithRedirectUri(String)</h4>
+  <div class="markdown level1 summary"><p>Build the <see cref="!:AuthenticationProperties"></see> using the provided redirect URI</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
@@ -237,14 +258,14 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></td>
-        <td><p>The current <a class="xref" href="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a> instance.</p>
+        <td><a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></td>
+        <td><p>The current <a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a> instance.</p>
 </td>
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String__remarks">Remarks</h5>
-  <div class="markdown level1 remarks"><p>Defaults to &quot;/&quot; when <a class="xref" href="Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Mvc_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_">WithRedirectUri(String)</a> is not called while building the <span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationProperties</span>.</p>
+  <h5 id="Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Defaults to &quot;/&quot; when <a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_">WithRedirectUri(String)</a> is not called while building the <see cref="!:AuthenticationProperties"></see>.</p>
 </div>
 </article>
           </div>

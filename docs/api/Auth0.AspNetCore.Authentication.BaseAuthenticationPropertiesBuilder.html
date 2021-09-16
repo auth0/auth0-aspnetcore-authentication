@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Class Auth0WebAppWithAccessTokenAuthenticationBuilder
+    <title>Class BaseAuthenticationPropertiesBuilder
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Class Auth0WebAppWithAccessTokenAuthenticationBuilder
+    <meta name="title" content="Class BaseAuthenticationPropertiesBuilder
    ">
     <meta name="generator" content="docfx 2.57.2.0">
     
@@ -68,35 +68,59 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder" class="text-break">Class Auth0WebAppWithAccessTokenAuthenticationBuilder
+  <h1 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder" class="text-break">Class BaseAuthenticationPropertiesBuilder
   </h1>
-  <div class="markdown level0 summary"><p>Builder to add extra functionality when using Access Tokens.</p>
-</div>
+  <div class="markdown level0 summary"></div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">Auth0WebAppWithAccessTokenAuthenticationBuilder</span></div>
+    <div class="level1"><span class="xref">BaseAuthenticationPropertiesBuilder</span></div>
+      <div class="level2"><a class="xref" href="Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html">LoginAuthenticationPropertiesBuilder</a></div>
+      <div class="level2"><a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0WebAppWithAccessTokenAuthenticationBuilder : object</code></pre>
+    <pre><code class="lang-csharp hljs">public abstract class BaseAuthenticationPropertiesBuilder</code></pre>
   </div>
   <h3 id="constructors">Constructors
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Action_Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Mvc_Auth0WebAppOptions_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Mvc.Auth0WebAppOptions)">Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action&lt;Auth0WebAppWithAccessTokenOptions&gt;, Auth0WebAppOptions)</h4>
-  <div class="markdown level1 summary"><p>Constructs an instance of <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></p>
-</div>
+  <a id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})">BaseAuthenticationPropertiesBuilder(Nullable&lt;AuthenticationProperties&gt;)</h4>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action&lt;Auth0WebAppWithAccessTokenOptions&gt; configureOptions, Auth0WebAppOptions options)</code></pre>
+    <pre><code class="lang-csharp hljs">protected BaseAuthenticationPropertiesBuilder(AuthenticationProperties? properties = default(AuthenticationProperties? ))</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -109,22 +133,33 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Microsoft.Extensions.DependencyInjection.IServiceCollection</span></td>
-        <td><span class="parametername">services</span></td>
-        <td><p>The original <see cref="!:https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</p>
-</td>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">AuthenticationProperties</span>&gt;</td>
+        <td><span class="parametername">properties</span></td>
+        <td></td>
       </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+  </h3>
+  <h4 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_AuthenticationProperties" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.AuthenticationProperties">AuthenticationProperties</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected readonly AuthenticationProperties AuthenticationProperties</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
       <tr>
-        <td><span class="xref">Action</span>&lt;<a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a>&gt;</td>
-        <td><span class="parametername">configureOptions</span></td>
-        <td><p>A delegate used to configure the <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a></p>
-</td>
+        <th>Type</th>
+        <th>Description</th>
       </tr>
+    </thead>
+    <tbody>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a></td>
-        <td><span class="parametername">options</span></td>
-        <td><p>The <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a> used when calling AddAuth0WebAppAuthentication.</p>
-</td>
+        <td><span class="xref">AuthenticationProperties</span></td>
+        <td></td>
       </tr>
     </tbody>
   </table>

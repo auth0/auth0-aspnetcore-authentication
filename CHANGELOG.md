@@ -1,4 +1,11 @@
-## [1.0.0-beta.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/v1.0.0-beta.0) (2021-05-27)
+## [1.0.0-beta.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.0...1.0.0-beta.1)
+
+**Changed**
+- Rename SDK to Auth0.AspNetCore.Authentication [#49](https://github.com/auth0/auth0-aspnetcore-authentication/pull/49) ([frederikprijck](https://github.com/frederikprijck))
+
+## [1.0.0-beta.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.0) (2021-05-27)
 
 **Install**
 
