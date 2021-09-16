@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -97,6 +98,7 @@ namespace Auth0.AspNetCore.Authentication
             return async (context) =>
             {
                 var options = context.HttpContext.RequestServices.GetRequiredService<Auth0WebAppOptions>();
+                var oidcOptionsSnapshot = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>();
 
                 if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
                 {
@@ -112,7 +114,7 @@ namespace Auth0.AspNetCore.Authentication
 
                             if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                             {
-                                var result = await RefreshTokens(options, refreshToken, options.Backchannel);
+                                var result = await RefreshTokens(options, refreshToken, oidcOptionsSnapshot.Get(Auth0Constants.AuthenticationScheme).Backchannel);
 
                                 if (result != null)
                                 {
