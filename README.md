@@ -1,5 +1,5 @@
-# Auth0 SDK for ASP.NET Core MVC (Beta)
-[![Build status](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_apis/build/status/Auth0.AspNetCore.MVC)](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Mvc/_build/latest?definitionId=8)
+# Auth0 SDK for ASP.NET Core Authentication (Beta)
+[![Build status](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Authentication/_apis/build/status/Auth0.AspNetCore.Authentication)](https://dev.azure.com/Auth0SDK/Auth0.AspNetCore.Authentication/_build/latest?definitionId=8)
 
 This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core application as seamlessly as possible.
 
@@ -22,7 +22,7 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 
 ## Documentation
 
-- [API Reference](https://auth0.github.io/auth0-aspnetcore-mvc/)
+- [API Reference](https://auth0.github.io/auth0-aspnetcore-authentication/)
 - [Quickstart Guide](https://auth0.com/docs/quickstart/webapp/aspnet-core-beta)
 
 ## Installation
@@ -30,7 +30,7 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:
 
 ```
-Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
+Install-Package Auth0.AspNetCore.Authentication -IncludePrerelease
 ```
 
 As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the `-IncludePrerelease` flag when using the Package Manager Console, or by checking the `Include prerelease` checkbox when installing the SDK through the Package Manager UI.
@@ -421,7 +421,7 @@ We appreciate feedback and contribution to this repo! Before you get started, pl
 
 ## Support + Feedback
 
-For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-mvc/issues).
+For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-authentication/issues).
 
 ## Vulnerability Reporting
 

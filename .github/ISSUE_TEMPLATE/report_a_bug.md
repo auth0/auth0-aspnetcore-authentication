@@ -49,7 +49,7 @@ By submitting an Issue to this repository, you agree to the terms within the Aut
 > Please provide the following:
 -->
 
-- **Version of `Auth0.AspNetCore.Mvc` used:**
+- **Version of `Auth0.AspNetCore.Authentication` used:**
 - **Version of `.NET` used:**
 - **Other modules/plugins/libraries that might be involved:**
 - **Any other relevant information you think would be useful:**

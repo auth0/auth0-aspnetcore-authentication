@@ -1,4 +1,4 @@
-# Auth0 ASP.NET MVC SDK (Beta)
+# Auth0 ASP.NET Authentication SDK (Beta)
 This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core  application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
 
 ## Installation
@@ -6,7 +6,7 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:
 
 ```
-Install-Package Auth0.AspNetCore.Mvc -IncludePrerelease
+Install-Package Auth0.AspNetCore.Authentication -IncludePrerelease
 ```
 
 As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the `-IncludePrerelease` flag when using the Package Manager Console, or by checking the `Include prerelease` checkbox when installing the SDK through the Package Manager UI.
@@ -402,11 +402,11 @@ We appreciate feedback and contribution to this SDK! Before you get started, ple
 
 - [Auth0's general contribution guidelines](https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md)
 - [Auth0's code of conduct guidelines](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md)
-- [This repo's contribution guide](https://github.com/auth0/auth0-aspnetcore-mvc/blob/main/CONTRIBUTING.md)
+- [This repo's contribution guide](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/CONTRIBUTING.md)
 
 ## Support + Feedback
 
-For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-mvc/issues).
+For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-authentication/issues).
 
 ## Vulnerability Reporting
 
@@ -427,4 +427,4 @@ Auth0 helps you to easily:
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](https://github.com/auth0/auth0-aspnetcore-mvc/blob/main/LICENSE) file for more info.
+This project is licensed under the MIT license. See the [LICENSE](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE) file for more info.
