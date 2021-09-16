@@ -28,7 +28,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/auth0/auth0-aspnetcore-authentication</RepositoryUrl>
     <PackageReleaseNotes>
-      https://github.com/auth0/auth0-aspnetcore-mauthenticationvc/blob/master/CHANGELOG.md
+      https://github.com/auth0/auth0-aspnetcore-authentication/blob/master/CHANGELOG.md
     </PackageReleaseNotes>
     <CLSCompliant>true</CLSCompliant>
     <ComVisible>false</ComVisible>
