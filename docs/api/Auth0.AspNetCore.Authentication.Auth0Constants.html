@@ -5,12 +5,12 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Class AuthenticationBuilderExtensions
+    <title>Class Auth0Constants
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Class AuthenticationBuilderExtensions
+    <meta name="title" content="Class Auth0Constants
    ">
-    <meta name="generator" content="docfx 2.57.2.0">
+    <meta name="generator" content="docfx 2.56.4.0">
     
     <link rel="shortcut icon" href="../images/logo.png">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -68,61 +68,60 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.Auth0Constants">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions" data-uid="Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions" class="text-break">Class AuthenticationBuilderExtensions
+  <h1 id="Auth0_AspNetCore_Authentication_Auth0Constants" data-uid="Auth0.AspNetCore.Authentication.Auth0Constants" class="text-break">Class Auth0Constants
   </h1>
-  <div class="markdown level0 summary"><p>Contains <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</a> extension(s) for registering Auth0.</p>
+  <div class="markdown level0 summary"><p>Class containing Auth0 specific constants used throughout the SDK</p>
 </div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">AuthenticationBuilderExtensions</span></div>
+    <div class="level1"><span class="xref">Auth0Constants</span></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0Constants_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static class AuthenticationBuilderExtensions : object</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0Constants</code></pre>
   </div>
-  <h3 id="methods">Methods
+  <h3 id="fields">Fields
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_" data-uid="Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_Microsoft_AspNetCore_Authentication_AuthenticationBuilder_Action_Auth0_AspNetCore_Mvc_Auth0WebAppOptions__" data-uid="Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,Action{Auth0.AspNetCore.Mvc.Auth0WebAppOptions})">AddAuth0WebAppAuthentication(AuthenticationBuilder, Action&lt;Auth0WebAppOptions&gt;)</h4>
-  <div class="markdown level1 summary"><p>Add Auth0 configuration using Open ID Connect</p>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0Constants_AuthenticationScheme" data-uid="Auth0.AspNetCore.Authentication.Auth0Constants.AuthenticationScheme">AuthenticationScheme</h4>
+  <div class="markdown level1 summary"><p>The Authentication Scheme, used when configuring OpenIdConnect</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static Auth0WebAppAuthenticationBuilder AddAuth0WebAppAuthentication(this AuthenticationBuilder builder, Action&lt;Auth0WebAppOptions&gt; configureOptions)</code></pre>
+    <pre><code class="lang-csharp hljs">public static string AuthenticationScheme</code></pre>
   </div>
-  <h5 class="parameters">Parameters</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Name</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">Microsoft.AspNetCore.Authentication.AuthenticationBuilder</span></td>
-        <td><span class="parametername">builder</span></td>
-        <td><p>The original <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</a> instance</p>
-</td>
-      </tr>
-      <tr>
-        <td><span class="xref">Action</span>&lt;<a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a>&gt;</td>
-        <td><span class="parametername">configureOptions</span></td>
-        <td><p>A delegate used to configure the <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a></p>
-</td>
-      </tr>
-    </tbody>
-  </table>
-  <h5 class="returns">Returns</h5>
+  <h5 class="fieldValue">Field Value</h5>
   <table class="table table-bordered table-striped table-condensed">
     <thead>
       <tr>
@@ -132,9 +131,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html">Auth0WebAppAuthenticationBuilder</a></td>
-        <td><p>The <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</a> instance that has been configured.</p>
-</td>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
       </tr>
     </tbody>
   </table>

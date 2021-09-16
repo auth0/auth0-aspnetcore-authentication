@@ -5,12 +5,12 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Class Auth0Constants
+    <title>Class BaseAuthenticationPropertiesBuilder
    </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Class Auth0Constants
+    <meta name="title" content="Class BaseAuthenticationPropertiesBuilder
    ">
-    <meta name="generator" content="docfx 2.57.2.0">
+    <meta name="generator" content="docfx 2.56.4.0">
     
     <link rel="shortcut icon" href="../images/logo.png">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -68,34 +68,85 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0Constants">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0Constants" data-uid="Auth0.AspNetCore.Mvc.Auth0Constants" class="text-break">Class Auth0Constants
+  <h1 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder" class="text-break">Class BaseAuthenticationPropertiesBuilder
   </h1>
-  <div class="markdown level0 summary"><p>Class containing Auth0 specific constants used throughout the SDK</p>
-</div>
+  <div class="markdown level0 summary"></div>
   <div class="markdown level0 conceptual"></div>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">Auth0Constants</span></div>
+    <div class="level1"><span class="xref">BaseAuthenticationPropertiesBuilder</span></div>
+      <div class="level2"><a class="xref" href="Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html">LoginAuthenticationPropertiesBuilder</a></div>
+      <div class="level2"><a class="xref" href="Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html">LogoutAuthenticationPropertiesBuilder</a></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0Constants_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0Constants : object</code></pre>
+    <pre><code class="lang-csharp hljs">public abstract class BaseAuthenticationPropertiesBuilder</code></pre>
   </div>
-  <h3 id="fields">Fields
+  <h3 id="constructors">Constructors
   </h3>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0Constants_AuthenticationScheme" data-uid="Auth0.AspNetCore.Mvc.Auth0Constants.AuthenticationScheme">AuthenticationScheme</h4>
-  <div class="markdown level1 summary"><p>The Authentication Scheme, used when configuring OpenIdConnect</p>
-</div>
+  <a id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})">BaseAuthenticationPropertiesBuilder(Nullable&lt;AuthenticationProperties&gt;)</h4>
+  <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public static string AuthenticationScheme</code></pre>
+    <pre><code class="lang-csharp hljs">protected BaseAuthenticationPropertiesBuilder(AuthenticationProperties? properties = default(AuthenticationProperties? ))</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">AuthenticationProperties</span>&gt;</td>
+        <td><span class="parametername">properties</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+  </h3>
+  <h4 id="Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_AuthenticationProperties" data-uid="Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.AuthenticationProperties">AuthenticationProperties</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected readonly AuthenticationProperties AuthenticationProperties</code></pre>
   </div>
   <h5 class="fieldValue">Field Value</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -107,7 +158,7 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">System.String</span></td>
+        <td><span class="xref">AuthenticationProperties</span></td>
         <td></td>
       </tr>
     </tbody>

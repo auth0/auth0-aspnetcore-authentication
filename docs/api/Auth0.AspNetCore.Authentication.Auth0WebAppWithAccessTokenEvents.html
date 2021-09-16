@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="title" content="Class Auth0WebAppWithAccessTokenEvents
    ">
-    <meta name="generator" content="docfx 2.57.2.0">
+    <meta name="generator" content="docfx 2.56.4.0">
     
     <link rel="shortcut icon" href="../images/logo.png">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -68,10 +68,10 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents" class="text-break">Class Auth0WebAppWithAccessTokenEvents
+  <h1 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents" class="text-break">Class Auth0WebAppWithAccessTokenEvents
   </h1>
   <div class="markdown level0 summary"><p>Events allowing you to hook into specific moments in the Auth0 middleware.</p>
 </div>
@@ -81,16 +81,40 @@
     <div class="level0"><span class="xref">System.Object</span></div>
     <div class="level1"><span class="xref">Auth0WebAppWithAccessTokenEvents</span></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0WebAppWithAccessTokenEvents : object</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0WebAppWithAccessTokenEvents</code></pre>
   </div>
   <h3 id="properties">Properties
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken">OnMissingAccessToken</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.OnMissingAccessToken">OnMissingAccessToken</h4>
   <div class="markdown level1 summary"><p>Executed when an Access Token is missing where one was expected, allowing you to react accordingly.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -108,12 +132,12 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Func</span>&lt;<span class="xref">Microsoft.AspNetCore.Http.HttpContext</span>, <span class="xref">Task</span>&gt;</td>
+        <td><span class="xref">System.Func</span>&lt;<span class="xref">HttpContext</span>, <span class="xref">System.Threading.Tasks.Task</span>&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_examples">Examples</h5>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingAccessToken_examples">Examples</h5>
   <pre><code>services
   .AddAuth0WebAppAuthentication(options => {})
   .WithAccessToken(options =>
@@ -129,8 +153,8 @@
       };
   });</code></pre>
 
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken">OnMissingRefreshToken</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.OnMissingRefreshToken">OnMissingRefreshToken</h4>
   <div class="markdown level1 summary"><p>Executed when a Refresh Token is missing where one was expected, allowing you to react accordingly.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -148,12 +172,12 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Func</span>&lt;<span class="xref">Microsoft.AspNetCore.Http.HttpContext</span>, <span class="xref">Task</span>&gt;</td>
+        <td><span class="xref">System.Func</span>&lt;<span class="xref">HttpContext</span>, <span class="xref">System.Threading.Tasks.Task</span>&gt;</td>
         <td></td>
       </tr>
     </tbody>
   </table>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_examples">Examples</h5>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenEvents_OnMissingRefreshToken_examples">Examples</h5>
   <pre><code>services
   .AddAuth0WebAppAuthentication(options => {})
   .WithAccessToken(options =>

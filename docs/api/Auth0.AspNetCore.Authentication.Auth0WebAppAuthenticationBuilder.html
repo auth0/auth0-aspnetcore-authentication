@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="title" content="Class Auth0WebAppAuthenticationBuilder
    ">
-    <meta name="generator" content="docfx 2.57.2.0">
+    <meta name="generator" content="docfx 2.56.4.0">
     
     <link rel="shortcut icon" href="../images/logo.png">
     <link rel="stylesheet" href="../styles/docfx.vendor.css">
@@ -68,10 +68,10 @@
         </div>
         <div class="article row grid-right">
           <div class="col-md-10">
-            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder">
+            <article class="content wrap" id="_content" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder">
   
   
-  <h1 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder" class="text-break">Class Auth0WebAppAuthenticationBuilder
+  <h1 id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder" class="text-break">Class Auth0WebAppAuthenticationBuilder
   </h1>
   <div class="markdown level0 summary"><p>Builder to add functionality on top of OpenId Connect authentication.</p>
 </div>
@@ -81,17 +81,41 @@
     <div class="level0"><span class="xref">System.Object</span></div>
     <div class="level1"><span class="xref">Auth0WebAppAuthenticationBuilder</span></div>
   </div>
-  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Mvc.html">Auth0.AspNetCore.Mvc</a></h6>
-  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Mvc.dll</h6>
-  <h5 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder_syntax">Syntax</h5>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Auth0.AspNetCore.Authentication.html">Auth0.AspNetCore.Authentication</a></h6>
+  <h6><strong>Assembly</strong>: Auth0.AspNetCore.Authentication.dll</h6>
+  <h5 id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class Auth0WebAppAuthenticationBuilder : object</code></pre>
+    <pre><code class="lang-csharp hljs">public class Auth0WebAppAuthenticationBuilder</code></pre>
   </div>
   <h3 id="constructors">Constructors
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Auth0_AspNetCore_Mvc_Auth0WebAppOptions_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Auth0.AspNetCore.Mvc.Auth0WebAppOptions)">Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0WebAppOptions)</h4>
-  <div class="markdown level1 summary"><p>Constructs an instance of <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html">Auth0WebAppAuthenticationBuilder</a></p>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_IServiceCollection_Auth0_AspNetCore_Authentication_Auth0WebAppOptions_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(IServiceCollection,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)">Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0WebAppOptions)</h4>
+  <div class="markdown level1 summary"><p>Constructs an instance of <a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html">Auth0WebAppAuthenticationBuilder</a></p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
@@ -109,23 +133,23 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Microsoft.Extensions.DependencyInjection.IServiceCollection</span></td>
+        <td><span class="xref">IServiceCollection</span></td>
         <td><span class="parametername">services</span></td>
-        <td><p>The original <see cref="!:https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</p>
+        <td><p>The original <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</a> instance</p>
 </td>
       </tr>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a></td>
+        <td><a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html">Auth0WebAppOptions</a></td>
         <td><span class="parametername">options</span></td>
-        <td><p>The <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html">Auth0WebAppOptions</a> used when calling AddAuth0WebAppAuthentication.</p>
+        <td><p>The <a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html">Auth0WebAppOptions</a> used when calling AddAuth0WebAppAuthentication.</p>
 </td>
       </tr>
     </tbody>
   </table>
   <h3 id="methods">Methods
   </h3>
-  <a id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder_WithAccessToken_" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken*"></a>
-  <h4 id="Auth0_AspNetCore_Mvc_Auth0WebAppAuthenticationBuilder_WithAccessToken_Action_Auth0_AspNetCore_Mvc_Auth0WebAppWithAccessTokenOptions__" data-uid="Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action{Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions})">WithAccessToken(Action&lt;Auth0WebAppWithAccessTokenOptions&gt;)</h4>
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithAccessToken_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken*"></a>
+  <h4 id="Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithAccessToken_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions})">WithAccessToken(Action&lt;Auth0WebAppWithAccessTokenOptions&gt;)</h4>
   <div class="markdown level1 summary"><p>Configures the use of Access Tokens</p>
 </div>
   <div class="markdown level1 conceptual"></div>
@@ -144,9 +168,9 @@
     </thead>
     <tbody>
       <tr>
-        <td><span class="xref">Action</span>&lt;<a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a>&gt;</td>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a>&gt;</td>
         <td><span class="parametername">configureOptions</span></td>
-        <td><p>A delegate used to configure the <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a></p>
+        <td><p>A delegate used to configure the <a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html">Auth0WebAppWithAccessTokenOptions</a></p>
 </td>
       </tr>
     </tbody>
@@ -161,8 +185,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></td>
-        <td><p>An instance of <a class="xref" href="Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></p>
+        <td><a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></td>
+        <td><p>An instance of <a class="xref" href="Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html">Auth0WebAppWithAccessTokenAuthenticationBuilder</a></p>
 </td>
       </tr>
     </tbody>

@@ -31,7 +31,115 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "FRNH/wY5k9gcYRCe7vp+5NJHryt2qc2YjYlTLz59N1k="
+          "hash": "BDIPpjSKwiuGPOpg0xDb/Q=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.html",
+          "hash": "pFeIV6EZjmfWhswPdEdSGA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0Constants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0Constants.html",
+          "hash": "HSu6oJdaV6E7qWEGbLHB8Q=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html",
+          "hash": "3L6vnBjRboE9iiwaWG7Kug=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html",
+          "hash": "b7d8FBq995bW2FSo6mjFgA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
+          "hash": "tA1cRr13yvXm8cDbBA5vVw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.html",
+          "hash": "SXEnJbEmK21tYJhsuYWRIw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html",
+          "hash": "OiKsqHlK1823CfuMHWTJ3Q=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html",
+          "hash": "9qQCQm3Bzm3Al9zjmHvtXA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html",
+          "hash": "zNTQGKBEr5IxWdQfGRRjMQ=="
         }
       },
       "is_incremental": false,
@@ -39,11 +147,35 @@
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0AuthenticationParameters.html",
-          "hash": "hVs8KJgjTi4issLRkiUNjWjJL50UOSEDdpiXs27K878="
+          "relative_path": "api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html",
+          "hash": "HgAzDpCTlZPEqEjNuz8KYQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html",
+          "hash": "2eiNlyaN4sQHQyiJ+ocixw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html",
+          "hash": "iTpsK+pI03uVRWyEcXRpPQ=="
         }
       },
       "is_incremental": true,
@@ -51,146 +183,14 @@
     },
     {
       "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0Constants.yml",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.yml",
       "output": {
         ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0Constants.html",
-          "hash": "BIMLLut/Mk0VtgNxFaQhe8e/iz1X9iZJufFRDJuw3Aw="
+          "relative_path": "api/Auth0.AspNetCore.Authentication.html",
+          "hash": "qMu3FbAPTpm1QXLJsY+2QQ=="
         }
       },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppAuthenticationBuilder.html",
-          "hash": "O/H76P0/SwO0MALo01TrTAxQz+fmHS0+7l+QrQRila4="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppOptions.html",
-          "hash": "pROE4JMKrSM8d7OQiIT6Os9Ssfp/bvmQgwZQhVTv6qI="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
-          "hash": "Tr9+4u6Pexbxj7NG14MMWKcZF/1KXCXgIX4wzSfKNUk="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenEvents.html",
-          "hash": "zG2Q/FnIx2ZOCMRsXMfFHSmU0mlSkfrcav1R+/L6wFQ="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.Auth0WebAppWithAccessTokenOptions.html",
-          "hash": "ZrCj5eUny8VnD+p6v2PFL3x+goUe0/ydCAOLxPMKUuQ="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.AuthenticationBuilderExtensions.html",
-          "hash": "9jXI+H+No6eKculVYMmYj0w19OcCauCZ1UBSg4XsmgM="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.BaseAuthenticationPropertiesBuilder.html",
-          "hash": "Vq2uph7cIefIcyeWnSWQdQ+dmkG18lufb63uyY9DuHI="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.LoginAuthenticationPropertiesBuilder.html",
-          "hash": "m9DYtK9GaCKsmZdOk4pafclKhBOjyZ16oGgE/in7p9c="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.LogoutAuthenticationPropertiesBuilder.html",
-          "hash": "nACArSOpUgdOeEw1CdVm4clHpq7I4/8vH2ogo5JUX4E="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.ServiceCollectionExtensions.html",
-          "hash": "6GGhvvnUrGYIoZn+y2Dt/lE9K6BvQAJPkB7I5vc39to="
-        }
-      },
-      "is_incremental": true,
-      "version": ""
-    },
-    {
-      "type": "ManagedReference",
-      "source_relative_path": "obj/api/Auth0.AspNetCore.Mvc.yml",
-      "output": {
-        ".html": {
-          "relative_path": "api/Auth0.AspNetCore.Mvc.html",
-          "hash": "3XGW+r+9kB5dNQ8wkLuiEHrAk9SLjFMwDvbBRqbHyaA="
-        }
-      },
-      "is_incremental": true,
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -199,7 +199,7 @@
       "output": {
         ".html": {
           "relative_path": "api/toc.html",
-          "hash": "WstVPg5E4VdbtugBu3smdih83KKqed3eA5BbcwSReP8="
+          "hash": "kaGwz00YNOYfr4xBroHyBg=="
         }
       },
       "is_incremental": false,
@@ -211,7 +211,7 @@
       "output": {
         ".html": {
           "relative_path": "toc.html",
-          "hash": "b/3ztO4NPRBkvYSGCrClDWdbjOrIC1nLsnGrLfz6g6A="
+          "hash": "KaK8Ru2p/CtTRFh136Cb1g=="
         }
       },
       "is_incremental": false,
@@ -231,13 +231,13 @@
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 13,
-          "skipped_file_count": 13
+          "skipped_file_count": 11
         },
         "ResourceDocumentProcessor": {
           "can_incremental": false,
