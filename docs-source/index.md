@@ -1,4 +1,4 @@
-# Auth0 ASP.NET Authentication SDK (Beta)
+# Auth0 ASP.NET Authentication SDK
 This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core  application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
 
 ## Installation
@@ -6,10 +6,8 @@ This library supports .NET Core 3.1 and .NET 5 and is a wrapper around `Microsof
 The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:
 
 ```
-Install-Package Auth0.AspNetCore.Authentication -IncludePrerelease
+Install-Package Auth0.AspNetCore.Authentication
 ```
-
-As the SDK is still in beta, you need to tell Nuget to also include prereleases, either by using the `-IncludePrerelease` flag when using the Package Manager Console, or by checking the `Include prerelease` checkbox when installing the SDK through the Package Manager UI.
 
 ## Getting Started
 
