@@ -1,3 +1,25 @@
+## [1.0.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.1...1.0.0)
+
+**Install**
+
+```
+Install-Package Auth0.AspNetCore.Authentication
+```
+
+**Usage**
+
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0WebAppAuthentication` in your `Startup.ConfigureService` method:
+
+```csharp
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+});
+```
+
 ## [1.0.0-beta.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.0...1.0.0-beta.1)
