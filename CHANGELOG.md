@@ -1,3 +1,36 @@
+## [1.0.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.1...1.0.0)
+
+**Install**
+
+```
+Install-Package Auth0.AspNetCore.Authentication
+```
+
+**Usage**
+
+Integrate the SDK in your ASP.NET Core application by calling `AddAuth0WebAppAuthentication` in your `Startup.ConfigureService` method:
+
+```csharp
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+});
+```
+
+**Features**
+- Cookie & OpenIdConnect Authentication (using [Implicit Flow with Form Post](https://auth0.com/docs/authorization/flows/implicit-flow-with-form-post) as the default)
+- Automatic Logout URL configuration
+- Retrieving Access Tokens to call an API (using [Authorization Code Flow with PKCE](https://auth0.com/docs/authorization/flows/authorization-code-flow-with-proof-key-for-code-exchange-pkce))
+- Refreshing the Access Token when expired using Refresh Tokens
+- Access to all native OpenIdConnect events
+
+**Migration Guide**
+
+When your application is currently using `Microsoft.AspNetCore.Authentication.OpenIdConnect`, migrating to our ASP.NET Core SDK is rather straightforward. Read our [Migration Guide](MIGRATION.md) for more information.
+
 ## [1.0.0-beta.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.0...1.0.0-beta.1)
