@@ -20,6 +20,13 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
+**Features**
+- Cookie & OpenIdConnect Authentication (using [Implicit Flow with Form Post](https://auth0.com/docs/authorization/flows/implicit-flow-with-form-post) as the default)
+- Automatic Logout URL configuration
+- Retrieving Access Tokens to call an API (using [Authorization Code Flow with PKCE](https://auth0.com/docs/authorization/flows/authorization-code-flow-with-proof-key-for-code-exchange-pkce))
+- Refreshing the Access Token when expired using Refresh Tokens
+- Access to all native OpenIdConnect events
+
 **Migration Guide**
 
 When your application is currently using `Microsoft.AspNetCore.Authentication.OpenIdConnect`, migrating to our ASP.NET Core SDK is rather straightforward. Read our [Migration Guide](MIGRATION.md) for more information.
