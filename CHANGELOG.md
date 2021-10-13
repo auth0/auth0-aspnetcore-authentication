@@ -20,6 +20,10 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
+**Migration Guide**
+
+When your application is currently using `Microsoft.AspNetCore.Authentication.OpenIdConnect`, migrating to our ASP.NET Core SDK is rather straightforward. Read our [Migration Guide](MIGRATION.md) for more information.
+
 ## [1.0.0-beta.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.0...1.0.0-beta.1)
