@@ -90,6 +90,24 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Redirect_To_Authorize_Endpoint_WhenConfiguring_TwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(addExtraProvider: true))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    redirectUri.Authority.Should().Be(Configuration["Auth0:ExtraProvider:Domain"]);
+                    redirectUri.AbsolutePath.Should().Be("/authorize");
+                }
+            }
+        }
+
+        [Fact]
         public async Task Should_Redirect_Using_Parameters()
         {
             using (var server = TestServerBuilder.CreateServer())
@@ -306,6 +324,28 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async void Should_Allow_Configuring_Parameters_WithTwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(options =>
+            {
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "123" } };
+            }, addExtraProvider: true, configureAdditionalOptions: options =>
+            {
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "456" } };
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["Test"].Should().Be("456");
+                }
+            }
+        }
+
+        [Fact]
         public async void Should_Allow_Configuring_Parameters_When_Calling_ChallengeAsync()
         {
             using (var server = TestServerBuilder.CreateServer())
@@ -379,6 +419,27 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
                     queryParameters["organization"].Should().Be("123");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Organization_WithTwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(options =>
+            {
+                options.Organization = "123";
+            }, addExtraProvider: true, configureAdditionalOptions: options => {
+                options.Organization = "456";
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["organization"].Should().Be("456");
                 }
             }
         }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
 {
@@ -22,6 +23,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         public static readonly string Process = "Process";
         public static readonly string Logout = "Account/Logout";
         public static readonly string Callback = "Callback";
+        public static readonly string ExtraProviderScheme = "ExtraProviderScheme";
 
         /// <summary>
         /// Create an instance of the TestServer to use for Integration Tests.
@@ -29,7 +31,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -80,7 +82,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                             }
                             else
                             {
-                                builder = services.AddAuthentication(options =>
+                                var authenticationBuilder = services.AddAuthentication(options =>
                                 {
                                     if (!mockAuthentication)
                                     {
@@ -88,13 +90,26 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                                         options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                                     }
-                                }).AddAuth0WebAppAuthentication(options =>
+                                });
+
+                                builder = authenticationBuilder.AddAuth0WebAppAuthentication(options =>
                                 {
                                     options.Domain = configuration["Auth0:Domain"];
                                     options.ClientId = configuration["Auth0:ClientId"];
 
                                     if (configureOptions != null) configureOptions(options);
                                 });
+
+                                if (addExtraProvider)
+                                {
+                                    authenticationBuilder.AddAuth0WebAppAuthentication(ExtraProviderScheme, options =>
+                                    {
+                                        options.Domain = configuration["Auth0:ExtraProvider:Domain"];
+                                        options.ClientId = configuration["Auth0:ExtraProvider:ClientId"];
+
+                                        if (configureAdditionalOptions != null) configureAdditionalOptions(options);
+                                    });
+                                }
                             }
 
                             if (configureWithAccessTokensOptions != null)
