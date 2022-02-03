@@ -17,11 +17,11 @@ namespace Auth0.AspNetCore.Authentication
         /// </summary>
         /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
-        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options, string? authenticationScheme)
+        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, string authenticationScheme, Auth0WebAppOptions options)
         {
             _services = services;
             _options = options;
-            _authenticationScheme = authenticationScheme ?? Auth0Constants.AuthenticationScheme;
+            _authenticationScheme = authenticationScheme;
         }
 
         /// <summary>

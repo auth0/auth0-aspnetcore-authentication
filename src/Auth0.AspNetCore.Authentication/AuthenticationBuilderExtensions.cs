@@ -58,7 +58,7 @@ namespace Auth0.AspNetCore.Authentication
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
-            return new Auth0WebAppAuthenticationBuilder(builder.Services, auth0Options, authenticationScheme);
+            return new Auth0WebAppAuthenticationBuilder(builder.Services, authenticationScheme, auth0Options);
         }
 
         /// <summary>

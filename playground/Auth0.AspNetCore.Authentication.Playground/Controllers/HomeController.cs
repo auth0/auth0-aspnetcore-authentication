@@ -8,11 +8,6 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly Auth0WebAppOptions _snapshotOptions;
-        public HomeController(IOptionsSnapshot<Auth0WebAppOptions> namedOptionsAccessor)
-        {
-            _snapshotOptions = namedOptionsAccessor.Get(Auth0Constants.AuthenticationScheme);
-        }
         public IActionResult Index()
         {
             return View();
