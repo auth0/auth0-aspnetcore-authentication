@@ -32,16 +32,16 @@ namespace Auth0.AspNetCore.Authentication
         /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
-        public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options)
+        public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options, string authenticationScheme)
         {
             _services = services;
             _configureOptions = configureOptions;
             _options = options;
 
-            EnableWithAccessToken();
+            EnableWithAccessToken(authenticationScheme);
         }
 
-        private void EnableWithAccessToken()
+        private void EnableWithAccessToken(string authenticationScheme)
         {
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
@@ -49,8 +49,8 @@ namespace Auth0.AspNetCore.Authentication
             
             ValidateOptions(_options);
 
-            _services.AddSingleton(auth0WithAccessTokensOptions);
-            _services.AddOptions<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme)
+            _services.Configure(authenticationScheme, _configureOptions);
+            _services.AddOptions<OpenIdConnectOptions>(authenticationScheme)
                 .Configure(options =>
                 {
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -65,23 +65,25 @@ namespace Auth0.AspNetCore.Authentication
                         options.Scope.AddSafe("offline_access");
                     }
 
-                    options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(auth0WithAccessTokensOptions), options.Events.OnRedirectToIdentityProvider);
+                    options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(authenticationScheme), options.Events.OnRedirectToIdentityProvider);
                 });
 
             _services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure(options =>
                 {
-                    options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(auth0WithAccessTokensOptions), options.Events.OnValidatePrincipal);
+                    options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(authenticationScheme), options.Events.OnValidatePrincipal);
                 });
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppWithAccessTokenOptions auth0Options)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(string authenticationScheme)
         {
             return (context) =>
             {
-                if (!string.IsNullOrWhiteSpace(auth0Options.Audience))
+                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
+
+                if (!string.IsNullOrWhiteSpace(optionsWithAccessToken.Audience))
                 {
-                    context.ProtocolMessage.SetParameter("audience", auth0Options.Audience);
+                    context.ProtocolMessage.SetParameter("audience", optionsWithAccessToken.Audience);
                 }
 
                 if (context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Audience))
@@ -93,16 +95,17 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(Auth0WebAppWithAccessTokenOptions auth0Options)
+        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(string authenticationScheme)
         {
             return async (context) =>
             {
-                var options = context.HttpContext.RequestServices.GetRequiredService<Auth0WebAppOptions>();
-                var oidcOptionsSnapshot = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>();
+                var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
+                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
+                var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
 
                 if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
                 {
-                    if (auth0Options.UseRefreshTokens)
+                    if (optionsWithAccessToken.UseRefreshTokens)
                     {
                         if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
                         {
@@ -114,7 +117,7 @@ namespace Auth0.AspNetCore.Authentication
 
                             if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                             {
-                                var result = await RefreshTokens(options, refreshToken, oidcOptionsSnapshot.Get(Auth0Constants.AuthenticationScheme).Backchannel);
+                                var result = await RefreshTokens(options, refreshToken, oidcOptions.Backchannel);
 
                                 if (result != null)
                                 {
@@ -134,9 +137,9 @@ namespace Auth0.AspNetCore.Authentication
                         }
                         else
                         {
-                            if (auth0Options.Events?.OnMissingRefreshToken != null)
+                            if (optionsWithAccessToken.Events?.OnMissingRefreshToken != null)
                             {
-                                await auth0Options.Events.OnMissingRefreshToken(context.HttpContext);
+                                await optionsWithAccessToken.Events.OnMissingRefreshToken(context.HttpContext);
                             }
                         }
                     }
@@ -145,9 +148,9 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     if (CodeResponseTypes.Contains(options.ResponseType!))
                     {
-                        if (auth0Options.Events?.OnMissingAccessToken != null)
+                        if (optionsWithAccessToken.Events?.OnMissingAccessToken != null)
                         {
-                            await auth0Options.Events.OnMissingAccessToken(context.HttpContext);
+                            await optionsWithAccessToken.Events.OnMissingAccessToken(context.HttpContext);
                         }
                     }
                 }

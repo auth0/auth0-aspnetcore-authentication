@@ -20,7 +20,13 @@ namespace Auth0.AspNetCore.Authentication.Playground
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuth0WebAppAuthentication(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+                .AddAuth0WebAppAuthentication("fdsfsd", options =>
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
@@ -36,7 +42,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
                     {
                         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                         var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                        await context.ChallengeAsync("fdsfsd", authenticationProperties);
                     }
                 };
             });

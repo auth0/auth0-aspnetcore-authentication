@@ -50,16 +50,15 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.AddOpenIdConnect(authenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
-            // Only add Cookie Authentication and Auth0WebAppOptions if configuring for the default Auth0 Scheme
-            if (authenticationScheme == Auth0Constants.AuthenticationScheme)
+            if (auth0Options.AddCookieMiddleware)
             {
                 builder.AddCookie();
-                builder.Services.AddSingleton(auth0Options);
             }
 
+            builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
-            return new Auth0WebAppAuthenticationBuilder(builder.Services, auth0Options);
+            return new Auth0WebAppAuthenticationBuilder(builder.Services, auth0Options, authenticationScheme);
         }
 
         /// <summary>

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Builders;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
@@ -1004,6 +1003,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             {
                 opts.ClientSecret = "123";
                 opts.Backchannel = new HttpClient(mockHandler.Object);
+                opts.ResponseType = OpenIdConnectResponseType.Code;
 
             }, opts =>
             {
@@ -1048,10 +1048,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
 
-                    var opts = server.Services.GetRequiredService<Auth0WebAppOptions>();
-
-                    opts.ResponseType = OpenIdConnectResponseType.Code;
-
                     var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
 
                     response.Headers.Location.AbsoluteUri.Should().Be("http://missing.at/");
@@ -1088,6 +1084,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                         return Task.CompletedTask;
                     }
                 };
+                opts.UseRefreshTokens = true;
             }))
             {
                 using (var client = server.CreateClient())
@@ -1110,10 +1107,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
-
-                    var opts = server.Services.GetRequiredService<Auth0WebAppWithAccessTokenOptions>();
-
-                    opts.UseRefreshTokens = true;
 
                     var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
 
