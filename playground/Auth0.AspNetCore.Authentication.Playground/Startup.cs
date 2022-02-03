@@ -26,7 +26,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
-                .AddAuth0WebAppAuthentication("fdsfsd", options =>
+                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
@@ -42,7 +42,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
                     {
                         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                         var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                        await context.ChallengeAsync("fdsfsd", authenticationProperties);
+                        await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
                     }
                 };
             });

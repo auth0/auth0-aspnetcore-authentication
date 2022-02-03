@@ -18,7 +18,7 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .WithRedirectUri(returnUrl)
                 .Build();
 
-            await HttpContext.ChallengeAsync("fdsfsd", authenticationProperties);
+            await HttpContext.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
         }
 
         [Authorize]
@@ -31,7 +31,7 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .WithRedirectUri(Url.Action("Index", "Home"))
                 .Build();
 
-            await HttpContext.SignOutAsync("fdsfsd", authenticationProperties);
+            await HttpContext.SignOutAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
