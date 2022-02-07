@@ -50,7 +50,7 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.AddOpenIdConnect(authenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
-            if (auth0Options.AddCookieMiddleware)
+            if (!auth0Options.SkipCookieMiddleware)
             {
                 builder.AddCookie();
             }

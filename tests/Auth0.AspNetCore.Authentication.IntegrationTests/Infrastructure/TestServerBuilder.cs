@@ -106,7 +106,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                     {
                                         options.Domain = configuration["Auth0:ExtraProvider:Domain"];
                                         options.ClientId = configuration["Auth0:ExtraProvider:ClientId"];
-                                        options.AddCookieMiddleware = false;
+                                        options.SkipCookieMiddleware = true;
 
                                         if (configureAdditionalOptions != null) configureAdditionalOptions(options);
                                     });

@@ -40,10 +40,10 @@ namespace Auth0.AspNetCore.Authentication
         public string? CallbackPath { get; set; }
 
         /// <summary>
-        /// Whether or not to add the Cookie Middleware.
+        /// Whether or not to skip adding the Cookie Middleware.
         /// </summary>
-        /// <remarks>Defaults to true.</remarks> 
-        public bool AddCookieMiddleware { get; set; } = true;
+        /// <remarks>Defaults to false.</remarks> 
+        public bool SkipCookieMiddleware { get; set; } = false;
 
         /// <summary>
         /// The Id of the organization to which the users should log in to.
