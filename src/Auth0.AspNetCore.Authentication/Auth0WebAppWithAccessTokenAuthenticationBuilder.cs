@@ -106,6 +106,13 @@ namespace Auth0.AspNetCore.Authentication
                 var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
                 var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
 
+                if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
+                {
+                    if (authScheme != authenticationScheme)
+                    {
+                        return;
+                    }
+                }
                 if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
                 {
                     if (optionsWithAccessToken.UseRefreshTokens)
