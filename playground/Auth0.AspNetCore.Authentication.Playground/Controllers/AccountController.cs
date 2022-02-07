@@ -41,7 +41,7 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .Build();
 
             await HttpContext.SignOutAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-            await HttpContext.SignOutAsync(PlaygroundConstants.CookieAuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         [Authorize]
@@ -55,7 +55,7 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .Build();
 
             await HttpContext.SignOutAsync(PlaygroundConstants.AuthenticationScheme2, authenticationProperties);
-            await HttpContext.SignOutAsync(PlaygroundConstants.CookieAuthenticationScheme2);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         [Authorize]
