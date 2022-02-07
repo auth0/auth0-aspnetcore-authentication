@@ -37,7 +37,7 @@ namespace Auth0.AspNetCore.Authentication
         /// Add Auth0 configuration using Open ID Connect
         /// </summary>
         /// <param name="builder">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance</param>
-        /// <param name="authenticationScheme">A delegate used to configure the <see cref="Auth0WebAppOptions"/></param>
+        /// <param name="authenticationScheme">The authentication scheme to use.</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppOptions"/></param>
         /// <returns>The <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance that has been configured.</returns>
 
