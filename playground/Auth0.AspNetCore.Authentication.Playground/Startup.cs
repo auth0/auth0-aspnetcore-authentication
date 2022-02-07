@@ -22,16 +22,17 @@ namespace Auth0.AspNetCore.Authentication.Playground
         {
             var authBuilder = services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            });
-                
+                options.DefaultAuthenticateScheme = PlaygroundConstants.CookieAuthenticationScheme;
+                options.DefaultSignInScheme = PlaygroundConstants.CookieAuthenticationScheme;
+                options.DefaultChallengeScheme = PlaygroundConstants.CookieAuthenticationScheme;
+            }).AddCookie(PlaygroundConstants.CookieAuthenticationScheme);
+
             authBuilder.AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
             {
                 options.Domain = Configuration["Auth0:Domain"];
                 options.ClientId = Configuration["Auth0:ClientId"];
                 options.ClientSecret = Configuration["Auth0:ClientSecret"];
+                options.AddCookieMiddleware = false;
             }).WithAccessToken(options =>
             {
                 options.Audience = Configuration["Auth0:Audience"];
@@ -48,7 +49,14 @@ namespace Auth0.AspNetCore.Authentication.Playground
                 };
             });
 
-            authBuilder.AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme2, options =>
+            var authBuilder2 = services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = PlaygroundConstants.CookieAuthenticationScheme2;
+                options.DefaultSignInScheme = PlaygroundConstants.CookieAuthenticationScheme2;
+                options.DefaultChallengeScheme = PlaygroundConstants.CookieAuthenticationScheme2;
+            }).AddCookie(PlaygroundConstants.CookieAuthenticationScheme2);
+
+            authBuilder2.AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme2, options =>
             {
                 options.Domain = Configuration["Auth02:Domain"];
                 options.ClientId = Configuration["Auth02:ClientId"];
