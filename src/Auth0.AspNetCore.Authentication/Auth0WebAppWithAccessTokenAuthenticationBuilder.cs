@@ -108,11 +108,12 @@ namespace Auth0.AspNetCore.Authentication
 
                 if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
                 {
-                    if (authScheme != authenticationScheme)
+                    if (!string.IsNullOrEmpty(authScheme) && authScheme != authenticationScheme)
                     {
                         return;
                     }
                 }
+
                 if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
                 {
                     if (optionsWithAccessToken.UseRefreshTokens)
