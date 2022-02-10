@@ -33,6 +33,17 @@ namespace Auth0.AspNetCore.Authentication
         /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
+        public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options) 
+            : this(services, configureOptions, options, Auth0Constants.AuthenticationScheme)
+        {
+        }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="Auth0WebAppWithAccessTokenAuthenticationBuilder"/>
+        /// </summary>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppWithAccessTokenOptions"/></param>
+        /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
         /// <param name="authenticationScheme">The authentication scheme to use.</param>
         public Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection services, Action<Auth0WebAppWithAccessTokenOptions> configureOptions, Auth0WebAppOptions options, string authenticationScheme)
         {
@@ -49,7 +60,7 @@ namespace Auth0.AspNetCore.Authentication
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
             _configureOptions(auth0WithAccessTokensOptions);
-            
+
             ValidateOptions(_options);
 
             _services.Configure(_authenticationScheme, _configureOptions);

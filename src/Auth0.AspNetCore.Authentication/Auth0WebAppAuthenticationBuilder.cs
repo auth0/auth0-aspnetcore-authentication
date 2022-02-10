@@ -16,6 +16,15 @@ namespace Auth0.AspNetCore.Authentication
         /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
         /// </summary>
         /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
+        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options) : this(services, Auth0Constants.AuthenticationScheme, options)
+        {
+        }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
+        /// </summary>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="authenticationScheme">The authentication scheme to use.</param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
         public Auth0WebAppAuthenticationBuilder(IServiceCollection services, string authenticationScheme, Auth0WebAppOptions options)
