@@ -18,7 +18,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
             [FromQuery(Name = "extraParameters")] Dictionary<string, string> extraParameters = null,
             string organization = null,
             string invitation = null,
-            string audience = null)
+            string audience = null,
+            string scheme = null)
         {
             var authenticationPropertiesBuilder = new LoginAuthenticationPropertiesBuilder().WithRedirectUri(returnUrl);
 
@@ -32,7 +33,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
                 {
                     authenticationPropertiesBuilder = authenticationPropertiesBuilder.WithParameter(entry.Key, entry.Value);
                 }
-
             }
 
             if (!string.IsNullOrWhiteSpace(organization))
@@ -51,7 +51,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
             }
 
             var authenticationProperties = authenticationPropertiesBuilder.Build();
-            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.ChallengeAsync(scheme ?? Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
 
         [Authorize]

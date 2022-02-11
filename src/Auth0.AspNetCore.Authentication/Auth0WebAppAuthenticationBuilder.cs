@@ -10,16 +10,28 @@ namespace Auth0.AspNetCore.Authentication
     {
         private readonly IServiceCollection _services;
         private readonly Auth0WebAppOptions _options;
+        private readonly string _authenticationScheme;
 
         /// <summary>
         /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
         /// </summary>
         /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
         /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
-        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options)
+        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, Auth0WebAppOptions options) : this(services, Auth0Constants.AuthenticationScheme, options)
+        {
+        }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
+        /// </summary>
+        /// <param name="services">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</see> instance</param>
+        /// <param name="authenticationScheme">The authentication scheme to use.</param>
+        /// <param name="options">The <see cref="Auth0WebAppOptions"/> used when calling AddAuth0WebAppAuthentication.</param>
+        public Auth0WebAppAuthenticationBuilder(IServiceCollection services, string authenticationScheme, Auth0WebAppOptions options)
         {
             _services = services;
             _options = options;
+            _authenticationScheme = authenticationScheme;
         }
 
         /// <summary>
@@ -29,7 +41,7 @@ namespace Auth0.AspNetCore.Authentication
         /// <returns>An instance of <see cref="Auth0WebAppWithAccessTokenAuthenticationBuilder"/></returns>
         public Auth0WebAppWithAccessTokenAuthenticationBuilder WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
         {
-            return new Auth0WebAppWithAccessTokenAuthenticationBuilder(_services, configureOptions, _options);
+            return new Auth0WebAppWithAccessTokenAuthenticationBuilder(_services, configureOptions, _options, _authenticationScheme);
         }
     }
 }

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Builders;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
@@ -84,6 +83,24 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     var redirectUri = response.Headers.Location;
 
                     redirectUri.Authority.Should().Be(Configuration["Auth0:Domain"]);
+                    redirectUri.AbsolutePath.Should().Be("/authorize");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Redirect_To_Authorize_Endpoint_WhenConfiguring_TwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(addExtraProvider: true))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+
+                    var redirectUri = response.Headers.Location;
+
+                    redirectUri.Authority.Should().Be(Configuration["Auth0:ExtraProvider:Domain"]);
                     redirectUri.AbsolutePath.Should().Be("/authorize");
                 }
             }
@@ -306,6 +323,28 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async void Should_Allow_Configuring_Parameters_WithTwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(options =>
+            {
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "123" } };
+            }, addExtraProvider: true, configureAdditionalOptions: options =>
+            {
+                options.LoginParameters = new Dictionary<string, string>() { { "Test", "456" } };
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["Test"].Should().Be("456");
+                }
+            }
+        }
+
+        [Fact]
         public async void Should_Allow_Configuring_Parameters_When_Calling_ChallengeAsync()
         {
             using (var server = TestServerBuilder.CreateServer())
@@ -379,6 +418,27 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     var queryParameters = UriUtils.GetQueryParams(redirectUri);
 
                     queryParameters["organization"].Should().Be("123");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Allow_Configuring_Organization_WithTwoAuth0Providers()
+        {
+            using (var server = TestServerBuilder.CreateServer(options =>
+            {
+                options.Organization = "123";
+            }, addExtraProvider: true, configureAdditionalOptions: options => {
+                options.Organization = "456";
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = await client.GetAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}?scheme={TestServerBuilder.ExtraProviderScheme}");
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+
+                    queryParameters["organization"].Should().Be("456");
                 }
             }
         }
@@ -943,6 +1003,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             {
                 opts.ClientSecret = "123";
                 opts.Backchannel = new HttpClient(mockHandler.Object);
+                opts.ResponseType = OpenIdConnectResponseType.Code;
 
             }, opts =>
             {
@@ -987,10 +1048,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
 
-                    var opts = server.Services.GetRequiredService<Auth0WebAppOptions>();
-
-                    opts.ResponseType = OpenIdConnectResponseType.Code;
-
                     var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
 
                     response.Headers.Location.AbsoluteUri.Should().Be("http://missing.at/");
@@ -1027,6 +1084,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                         return Task.CompletedTask;
                     }
                 };
+                opts.UseRefreshTokens = true;
             }))
             {
                 using (var client = server.CreateClient())
@@ -1049,10 +1107,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
-
-                    var opts = server.Services.GetRequiredService<Auth0WebAppWithAccessTokenOptions>();
-
-                    opts.UseRefreshTokens = true;
 
                     var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
 

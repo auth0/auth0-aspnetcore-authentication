@@ -30,18 +30,35 @@ namespace Auth0.AspNetCore.Authentication
 
         public static Auth0WebAppAuthenticationBuilder AddAuth0WebAppAuthentication(this AuthenticationBuilder builder, Action<Auth0WebAppOptions> configureOptions)
         {
+            return AddAuth0WebAppAuthentication(builder, Auth0Constants.AuthenticationScheme, configureOptions);
+        }
+
+        /// <summary>
+        /// Add Auth0 configuration using Open ID Connect
+        /// </summary>
+        /// <param name="builder">The original <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance</param>
+        /// <param name="authenticationScheme">The authentication scheme to use.</param>
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0WebAppOptions"/></param>
+        /// <returns>The <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> instance that has been configured.</returns>
+
+        public static Auth0WebAppAuthenticationBuilder AddAuth0WebAppAuthentication(this AuthenticationBuilder builder, string authenticationScheme, Action<Auth0WebAppOptions> configureOptions)
+        {
             var auth0Options = new Auth0WebAppOptions();
 
             configureOptions(auth0Options);
             ValidateOptions(auth0Options);
 
-            builder.AddCookie();
-            builder.AddOpenIdConnect(Auth0Constants.AuthenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
+            builder.AddOpenIdConnect(authenticationScheme, options => ConfigureOpenIdConnect(options, auth0Options));
 
-            builder.Services.AddSingleton(auth0Options);
+            if (!auth0Options.SkipCookieMiddleware)
+            {
+                builder.AddCookie();
+            }
+
+            builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
-            return new Auth0WebAppAuthenticationBuilder(builder.Services, auth0Options);
+            return new Auth0WebAppAuthenticationBuilder(builder.Services, authenticationScheme, auth0Options);
         }
 
         /// <summary>

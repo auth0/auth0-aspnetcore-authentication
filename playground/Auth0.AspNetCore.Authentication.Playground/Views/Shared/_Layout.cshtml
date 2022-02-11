@@ -31,10 +31,12 @@
                         {
                             <li><a asp-controller="Account" class="nav-link" asp-action="Profile">Hello @User.Identity.Name!</a></li>
                             <li><a id="qsLogoutBtn" class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a></li>
+                            <li><a id="qsLogoutBtn" class="nav-link" asp-controller="Account" asp-action="Logout2">Logout (2nd provider)</a></li>
                         }
                         else
                         {
                             <li><a id="qsLoginBtn" class="nav-link" asp-controller="Account" asp-action="Login">Login</a></li>
+                            <li><a id="qsLoginBtn" class="nav-link" asp-controller="Account" asp-action="Login2">Login (2nd provider)</a></li>
                         }
                     </ul>
                 </div>

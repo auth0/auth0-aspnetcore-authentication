@@ -18,7 +18,16 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .WithRedirectUri(returnUrl)
                 .Build();
 
-            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+        }
+
+        public async Task Login2(string returnUrl = "/")
+        {
+            var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+                .WithRedirectUri(returnUrl)
+                .Build();
+
+            await HttpContext.ChallengeAsync(PlaygroundConstants.AuthenticationScheme2, authenticationProperties);
         }
 
         [Authorize]
@@ -31,7 +40,21 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
                 .WithRedirectUri(Url.Action("Index", "Home"))
                 .Build();
 
-            await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.SignOutAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        [Authorize]
+        public async Task Logout2()
+        {
+            // Indicate here where Auth0 should redirect the user after a logout.
+            // Note that the resulting absolute Uri must be whitelisted in the
+            // **Allowed Logout URLs** settings for the client.
+            var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+                .WithRedirectUri(Url.Action("Index", "Home"))
+                .Build();
+
+            await HttpContext.SignOutAsync(PlaygroundConstants.AuthenticationScheme2, authenticationProperties);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 

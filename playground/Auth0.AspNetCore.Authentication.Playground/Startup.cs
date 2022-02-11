@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Auth0.AspNetCore.Authentication;
 
 namespace Auth0.AspNetCore.Authentication.Playground
 {
@@ -20,26 +21,52 @@ namespace Auth0.AspNetCore.Authentication.Playground
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuth0WebAppAuthentication(options =>
-            {
-                options.Domain = Configuration["Auth0:Domain"];
-                options.ClientId = Configuration["Auth0:ClientId"];
-                options.ClientSecret = Configuration["Auth0:ClientSecret"];
-            }).WithAccessToken(options =>
-            {
-                options.Audience = Configuration["Auth0:Audience"];
-                options.UseRefreshTokens = true;
-
-                options.Events = new Auth0WebAppWithAccessTokenEvents
+            services
+                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
                 {
-                    OnMissingRefreshToken = async (context) =>
+                    options.Domain = Configuration["Auth0:Domain"];
+                    options.ClientId = Configuration["Auth0:ClientId"];
+                    options.ClientSecret = Configuration["Auth0:ClientSecret"];
+                })
+                .WithAccessToken(options =>
+                {
+                    options.Audience = Configuration["Auth0:Audience"];
+                    options.UseRefreshTokens = true;
+
+                    options.Events = new Auth0WebAppWithAccessTokenEvents
                     {
-                        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                        await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-                    }
-                };
-            });
+                        OnMissingRefreshToken = async (context) =>
+                        {
+                            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                            await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                        }
+                    };
+                });
+
+            services
+                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme2, options =>
+                {
+                    options.Domain = Configuration["Auth02:Domain"];
+                    options.ClientId = Configuration["Auth02:ClientId"];
+                    options.ClientSecret = Configuration["Auth02:ClientSecret"];
+                    options.SkipCookieMiddleware = true;
+                    options.CallbackPath = "/callback2";
+                }).WithAccessToken(options =>
+                {
+                    options.Audience = Configuration["Auth02:Audience"];
+                    options.UseRefreshTokens = true;
+
+                    options.Events = new Auth0WebAppWithAccessTokenEvents
+                    {
+                        OnMissingRefreshToken = async (context) =>
+                        {
+                            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                            await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme2, authenticationProperties);
+                        }
+                    };
+                });
 
             services.AddControllersWithViews();
         }

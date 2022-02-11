@@ -7,7 +7,6 @@ namespace Auth0.AspNetCore.Authentication.Playground.Controllers
 {
     public class HomeController : Controller
     {
-
         public IActionResult Index()
         {
             return View();
