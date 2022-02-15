@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.1) (2022-02-14)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0...1.0.1)
+
+**Changed**
+- Support specifying a custom scheme [\#59](https://github.com/auth0/auth0-aspnetcore-authentication/pull/59)
+
 ## [1.0.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.0-beta.1) (2021-09-16)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0-beta.1...1.0.0)

@@ -31,10 +31,10 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "vRDfiLQyzQWChYggfj5sU++Ag3zo6Cg2EJF57NBcd7U="
+          "hash": "H2YQvNnlRCRZX//Qn89S6fuXWi0+iaIvj2htqOt7Nrc="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -43,10 +43,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.html",
-          "hash": "d9IHaJ7xuCUQ9arC4fqFZBrNARk0ulHBXR1f+qrpZJw="
+          "hash": "Cg7DAdXTJzplGMLEXQnN5FPcq+0O2dyjJRsg6NGxt4I="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -55,10 +55,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0Constants.html",
-          "hash": "tmyPGAOf9pR6yJKhnoGGEVJTcLPXyeMW5VFtuD50bfU="
+          "hash": "VBH5bEIpCZPvxsMSFt+KPoNtnDuiPiQf3mlyAkwuuy0="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -67,10 +67,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html",
-          "hash": "Or3yUwy8anQlP2s39J32Gfu2bjZi2ZbLbx4evoG/w10="
+          "hash": "O9O94OTMYi4LUXRsXduPNN4ZNBMmBLBMoXx/vtRQiXU="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -79,10 +79,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html",
-          "hash": "4dOPeFAmFCSNPH921RylwuUW7aniXPS6cFL4dWkT4Sw="
+          "hash": "3sXvmafuvdLKzCPIaVhji0P5I5Nn7fx/cibLhVu9QK4="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -91,10 +91,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
-          "hash": "Ik2p1S/y4qZ1Rt2CYE+RYrNPrxEMehF0IrPDHFNjNPY="
+          "hash": "HUAklW3bla0Iw5PwQhCKaiRQbVOxotTR36IChakPx5k="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -103,10 +103,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.html",
-          "hash": "mc+0J2ruMOfcZz5EgeuRBlAH5Ta2/OtPe9iCmf+6mfM="
+          "hash": "uQ+j4b4wM3NV+03/HYdHH/MIUCdIotkU4+bnWMBDSZk="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -115,10 +115,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html",
-          "hash": "XJmNif2m00quCW31leRcjKyZCNCy2esjwFb3fl7ceyI="
+          "hash": "CqxeDWPR5jyzGBGTilYH2mz9YnwjG1+CrsFuc9FL3yY="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -127,10 +127,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html",
-          "hash": "eZsm7mwLocaPPBjVAIjDMW2x35SCZu1WLszgrfffM/I="
+          "hash": "sudAk7zUvdnDOtU4kCnYbSmmsePnVq8ZW+s9HQUiP28="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -139,7 +139,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html",
-          "hash": "JeX9B3fVP6+4YVhu0WMCYQveOnJkPEtD8pU0NpJbhlA="
+          "hash": "Ao/XBF8lTW8GvA4XiuDUhlxgpom8FVGk1zToEdAczSc="
         }
       },
       "is_incremental": false,
@@ -151,7 +151,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html",
-          "hash": "TI3KnaY02bAdR3WM1kRDIAUYFkOw48HJrBVlMEmewJg="
+          "hash": "CMOEkjupCg/f7AScnPcDuzS5EhxAXxN1ydPBuIkYHjE="
         }
       },
       "is_incremental": false,
@@ -163,7 +163,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html",
-          "hash": "cL7Ua0/Yuxpscgt8aAZY0sqaRlfz93nhiZ3i934Vb4U="
+          "hash": "TCT03DGAuNgw793BUtg0RjdjxiQW1YU543iN0gQOIAM="
         }
       },
       "is_incremental": false,
@@ -175,10 +175,10 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html",
-          "hash": "cA8hKldncElqSBZgw42WfdEDSuFszhN0WoOGq9NXF20="
+          "hash": "tfhzs2D97TiPoaepmwgWvcNOznoPmGp8iHBmIKxZltE="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -187,7 +187,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.html",
-          "hash": "+Rq4xSMtE6LhEEpJV8FGAtTAPA1lTPVO4CyBsQXGO0g="
+          "hash": "KA2r+oycbKhpb4gMob3I/lkdGPMrfn0UyJByV2VJ73A="
         }
       },
       "is_incremental": false,
@@ -221,25 +221,23 @@
   "incremental_info": [
     {
       "status": {
-        "can_incremental": false,
-        "details": "Cannot build incrementally because docfx version changed from 2.56.4.0 to 2.57.2.0.",
+        "can_incremental": true,
         "incrementalPhase": "build",
         "total_file_count": 0,
-        "skipped_file_count": 0,
-        "full_build_reason_code": "DocfxVersionChanged"
+        "skipped_file_count": 0
       },
       "processors": {
         "ConceptualDocumentProcessor": {
-          "can_incremental": false,
+          "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
-          "can_incremental": false,
+          "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 13,
-          "skipped_file_count": 0
+          "skipped_file_count": 11
         },
         "ResourceDocumentProcessor": {
           "can_incremental": false,
