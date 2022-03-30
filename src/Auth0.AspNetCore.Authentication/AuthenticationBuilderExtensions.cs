@@ -8,6 +8,9 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -52,7 +55,10 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!auth0Options.SkipCookieMiddleware)
             {
-                builder.AddCookie();
+                builder.AddCookie(o =>
+                {
+                    Replace(o, auth0Options.CookieAuthenticationOptions);
+                });
             }
 
             builder.Services.Configure(authenticationScheme, configureOptions);
@@ -103,6 +109,20 @@ namespace Auth0.AspNetCore.Authentication
             if (CodeResponseTypes.Contains(auth0Options.ResponseType!) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
             {
                 throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
+            }
+        }
+
+        private static void Replace<T>(T original, T replacement)
+            where T : class
+        {
+            if (original is null || replacement is null) throw new ArgumentNullException();
+
+            var type = typeof(T);
+            var settableProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p=>p.CanWrite && p.CanRead);
+            foreach (var prop in settableProperties)
+            {
+                var replacementValue = prop.GetValue(replacement);
+                prop.SetValue(original, replacementValue);
             }
         }
     }
