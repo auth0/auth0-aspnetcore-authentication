@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -45,11 +44,6 @@ namespace Auth0.AspNetCore.Authentication
         /// </summary>
         /// <remarks>Defaults to false.</remarks> 
         public bool SkipCookieMiddleware { get; set; } = false;
-
-        /// <summary>
-        /// Control authentication cookie settings
-        /// </summary>
-        public CookieAuthenticationOptions CookieAuthenticationOptions { get; } = new CookieAuthenticationOptions();
 
         /// <summary>
         /// The Id of the organization to which the users should log in to.

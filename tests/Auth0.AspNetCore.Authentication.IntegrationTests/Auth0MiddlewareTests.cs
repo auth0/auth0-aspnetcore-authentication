@@ -29,20 +29,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
-        public async Task Login_Path_Should_Reflect_Specified_Override()
-        {
-            using (var server = TestServerBuilder.CreateServer(o=>o.CookieAuthenticationOptions.LoginPath = "/xxx", null, false, true))
-            {
-                using (var client = server.CreateClient())
-                {
-                    var response = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Protected}"));
-                    response.StatusCode.Should().Be(HttpStatusCode.Found);
-                    response.Headers.Location.AbsoluteUri.Should().Contain("xxx");
-                }
-            }
-        }
-
-        [Fact]
         public async Task Should_Redirect_To_Login_When_Using_Service_Collection_Extensions()
         {
             using (var server = TestServerBuilder.CreateServer(null, null, false, true))
