@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
 using Moq;
 using Moq.Protected;
+using Newtonsoft.Json;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
 {
@@ -72,7 +74,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
               .ReturnsAsync(() => new HttpResponseMessage()
               {
                   StatusCode = statusCode,
-                  Content = new StringContent(BuildTokenRespone(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
+                  Content = new StringContent(BuildTokenResponse(idTokenFunc(), expiresIn, includeAccessToken, includeRefreshToken)),
               })
               .Verifiable();
 
@@ -105,24 +107,22 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
             }
         }
 
-        private string BuildTokenRespone(string idToken, int expiresIn, bool includeAccessToken, bool includeRefreshToken)
+        private string BuildTokenResponse(string idToken, int expiresIn, bool includeAccessToken, bool includeRefreshToken)
         {
-            var token = @"{
-'id_token': '" + idToken + @"',
-'expires_in': '" + expiresIn + @"',
-";
-
+            var tokenContents = new Dictionary<string, object>
+            {
+                ["id_token"] = idToken,
+                ["expires_in"] = expiresIn
+            };
             if (includeAccessToken)
             {
-                token += "'access_token': '123',";
+                tokenContents["access_token"] = "123";
             }
-
             if (includeRefreshToken)
             {
-                token += "'refresh_token': '456',";
+                tokenContents["refresh_token"] = "456";
             }
-
-            token += "}";
+            var token = JsonConvert.SerializeObject(tokenContents);
             return token;
         }
     }
