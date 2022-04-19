@@ -33,10 +33,16 @@ namespace Auth0.AspNetCore.Authentication
 
         public static Func<T, Task> ProxyEvent<T>(Func<T, Task> newHandler, Func<T, Task> originalHandler)
         {
-            return (context) =>
+            return async (context) =>
             {
-                newHandler(context);
-                return originalHandler != null ? originalHandler(context) : Task.CompletedTask;
+                if (newHandler != null)
+                {
+                    await newHandler(context);
+                }
+                if (originalHandler != null)
+                {
+                    await originalHandler(context);
+                }
             };
         }
     }
