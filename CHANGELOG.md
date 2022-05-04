@@ -1,3 +1,13 @@
+## [1.0.2](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.2) (2022-05-04)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.1...1.0.2)
+
+**Fixed**
+- Fix auto refresh issue with Refresh Tokens [\#67](https://github.com/auth0/auth0-aspnetcore-authentication/pull/67)
+
+**Changed**
+- Add dependencies for .NET6.0 [\#68](https://github.com/auth0/auth0-aspnetcore-authentication/pull/68)
+
 ## [1.0.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.1) (2022-02-14)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.0...1.0.1)
