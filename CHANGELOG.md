@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.3) (2022-05-12)
+
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.2...1.0.3)
+
+**Fixed**
+- Pin version of Microsoft.IdentityModel.Protocols.OpenIdConnect [\#72](https://github.com/auth0/auth0-aspnetcore-authentication/pull/72)
+
 ## [1.0.2](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.2) (2022-05-04)
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.1...1.0.2)
