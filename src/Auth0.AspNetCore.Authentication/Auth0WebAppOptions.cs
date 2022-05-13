@@ -85,5 +85,10 @@ namespace Auth0.AspNetCore.Authentication
         /// the user will be prompted to re-authenticate.
         /// </summary>
         public TimeSpan? MaxAge { get; set; }
+
+        /// <summary>
+        /// Provide a role claim type if it's different from the default Microsoft schema 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'.
+        /// </summary>
+        public string? RoleClaimType { get; set; } = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
     }
 }
