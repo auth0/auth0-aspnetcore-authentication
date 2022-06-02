@@ -1,6 +1,6 @@
 {
   "name": "auth0-aspnetcore-authentication",
-  "version": "0.0.1",
+  "version": "1.0.4",
   "description": "ASP.NET Core Authentication Middleware for Auth0",
   "scripts": {
     "release": "node ./scripts/release",

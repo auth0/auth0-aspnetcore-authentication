@@ -1,6 +1,6 @@
 {
   "homepages": [],
-  "source_base_path": "C:/Development/Auth0/auth0-aspnetcore-mvc/docs-source",
+  "source_base_path": "/Users/frederikprijck/Development/auth0-aspnetcore-authentication/docs-source",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -31,10 +31,10 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "REXTvs85e5B/EO5esBCax/gBBpM4jATxtl7vruksnkc="
+          "hash": "w2W/KOtJBcgWZffvg8Zh5wGtedTCqL0ilIDG3jsZqSI="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -43,7 +43,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.html",
-          "hash": "Cg7DAdXTJzplGMLEXQnN5FPcq+0O2dyjJRsg6NGxt4I="
+          "hash": "qvIFln4v/FkimzEv0WB7on5Ewf124q0HAhAfne5yEa0="
         }
       },
       "is_incremental": false,
@@ -55,7 +55,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0Constants.html",
-          "hash": "VBH5bEIpCZPvxsMSFt+KPoNtnDuiPiQf3mlyAkwuuy0="
+          "hash": "CzSPcJ5dAJp/7W0af4qtDyKypTuqS4fukrdl0jTWS78="
         }
       },
       "is_incremental": false,
@@ -67,7 +67,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html",
-          "hash": "O9O94OTMYi4LUXRsXduPNN4ZNBMmBLBMoXx/vtRQiXU="
+          "hash": "6fl9Vfx6/7lHvtnYTtqnb1kJQB4mBEp2W3TG9u4FgNQ="
         }
       },
       "is_incremental": false,
@@ -79,7 +79,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html",
-          "hash": "3sXvmafuvdLKzCPIaVhji0P5I5Nn7fx/cibLhVu9QK4="
+          "hash": "92SDUc8rQ4cS1iOGm98rP6g2U0Qyp6f3HjTQTLP+H2Y="
         }
       },
       "is_incremental": false,
@@ -91,7 +91,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html",
-          "hash": "HUAklW3bla0Iw5PwQhCKaiRQbVOxotTR36IChakPx5k="
+          "hash": "Jgl+vW0CECec8fIhEoBXLASNZPIHjPKhdAYFuk174pI="
         }
       },
       "is_incremental": false,
@@ -103,7 +103,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.html",
-          "hash": "uQ+j4b4wM3NV+03/HYdHH/MIUCdIotkU4+bnWMBDSZk="
+          "hash": "8yC/XC8rmgcAG1sEEjM5wIX6fYyJIE0Lt7RRkR5W4EY="
         }
       },
       "is_incremental": false,
@@ -115,7 +115,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html",
-          "hash": "CqxeDWPR5jyzGBGTilYH2mz9YnwjG1+CrsFuc9FL3yY="
+          "hash": "9HvQH1hAyyBCP+Rr7tMgOyKyyG2EFG5uu/c/egnPG1Y="
         }
       },
       "is_incremental": false,
@@ -127,7 +127,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html",
-          "hash": "sudAk7zUvdnDOtU4kCnYbSmmsePnVq8ZW+s9HQUiP28="
+          "hash": "QA7CsjcjHX/xQfujABrkJNJW4pybviYGGy/A3ydzl3w="
         }
       },
       "is_incremental": false,
@@ -139,7 +139,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html",
-          "hash": "Ao/XBF8lTW8GvA4XiuDUhlxgpom8FVGk1zToEdAczSc="
+          "hash": "kncG7jha0bOQ0rMEm7Md7P852fSiupANysfkfRlIpo4="
         }
       },
       "is_incremental": false,
@@ -151,7 +151,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html",
-          "hash": "CMOEkjupCg/f7AScnPcDuzS5EhxAXxN1ydPBuIkYHjE="
+          "hash": "zMkCi4QKxOgoII9ETb3TePnsxMD2gSkM9ue+EPeNrRI="
         }
       },
       "is_incremental": false,
@@ -163,7 +163,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html",
-          "hash": "TCT03DGAuNgw793BUtg0RjdjxiQW1YU543iN0gQOIAM="
+          "hash": "5aiesCUPmcekfhNnqZYlnwIdPwI2vyKL9+vZDXMEsn4="
         }
       },
       "is_incremental": false,
@@ -175,7 +175,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html",
-          "hash": "tfhzs2D97TiPoaepmwgWvcNOznoPmGp8iHBmIKxZltE="
+          "hash": "nvk4eEjBiPLnk4RZUHjtmke1yiRN/pLkWH40WOarFJk="
         }
       },
       "is_incremental": false,
@@ -187,7 +187,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.html",
-          "hash": "KA2r+oycbKhpb4gMob3I/lkdGPMrfn0UyJByV2VJ73A="
+          "hash": "YsAwsUvsFUfz2cMqRSdP2RcAjLg3OCla4Akf9c2U9O0="
         }
       },
       "is_incremental": false,
@@ -231,7 +231,7 @@
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": true,
