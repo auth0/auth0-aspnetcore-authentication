@@ -37,16 +37,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <Major>1</Major>
-    <Minor>0</Minor>
-    <Revision>3</Revision>
-    <Suffix></Suffix>
+    <Version>1.0.3</Version>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyVersion>$(Major).$(Minor).$(Revision)</AssemblyVersion>
-    <AssemblyFileVersion>$(Major).$(Minor).$(Revision)</AssemblyFileVersion>
-    <InformationalVersion>$(Major).$(Minor).$(Revision)$(Suffix)</InformationalVersion>
-    <PackageVersion>$(Major).$(Minor).$(Revision)$(Suffix)</PackageVersion>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <AssemblyFileVersion>$(Version)</AssemblyFileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <PackageVersion>$(Version)</PackageVersion>
   </PropertyGroup>
 
 </Project>
