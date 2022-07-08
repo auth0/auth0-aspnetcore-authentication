@@ -87,12 +87,13 @@ namespace Auth0.AspNetCore.Authentication
             oidcOptions.TokenValidationParameters = new TokenValidationParameters
             {
                 NameClaimType = "name",
+                RoleClaimType = auth0Options.RoleClaimType,
                 ValidateAudience = true,
                 ValidAudience = auth0Options.ClientId,
                 ValidateIssuer = true,
                 ValidIssuer = $"https://{auth0Options.Domain}/",
                 ValidateLifetime = true,
-                RequireExpirationTime = true,
+                RequireExpirationTime = true
             };
 
             oidcOptions.Events = OpenIdConnectEventsFactory.Create(auth0Options);
