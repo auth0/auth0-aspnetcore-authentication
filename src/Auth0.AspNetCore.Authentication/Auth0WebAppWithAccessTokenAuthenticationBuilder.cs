@@ -144,7 +144,10 @@ namespace Auth0.AspNetCore.Authentication
                                 if (result != null)
                                 {
                                     context.Properties.UpdateTokenValue("access_token", result.AccessToken);
-                                    context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                    if (!string.IsNullOrEmpty(result.RefreshToken))
+                                    {
+                                        context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                    }
                                     context.Properties.UpdateTokenValue("id_token", result.IdToken);
                                     context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
                                 }
