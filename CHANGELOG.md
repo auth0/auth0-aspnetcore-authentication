@@ -1,4 +1,10 @@
-## [1.0.3](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.3) (2022-05-12)
+# Change Log
+
+## [1.0.4](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.4) (2022-09-19)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.3...1.0.4)
+
+**Fixed**
+- [SDK-3619] Do not update refresh token when rotation is disabled [\#81](https://github.com/auth0/auth0-aspnetcore-authentication/pull/81) ([frederikprijck](https://github.com/frederikprijck))
 
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.2...1.0.3)
 
