@@ -63,9 +63,9 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 ## Calling an API
 
-If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
+If you want to call an API from your ASP.NET MVC application, you need to obtain an access token issued for the API you want to call. 
 As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
-Next, To obtain the token to access an external API, call `WithAccessToken` and set the `audience` to the API Identifier. You can get the API Identifier from the API Settings for the API you want to use.
+Next, to obtain the token to access an external API, call `WithAccessToken` and set the `audience` to the API Identifier. You can get the API Identifier from the API Settings for the API you want to use.
 
 ```csharp
 services
@@ -94,9 +94,9 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
 
-### Retrieving the Access Token
+### Retrieving the access token
 
-As the SDK uses the OpenId Connect middleware, the ID Token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
+As the SDK uses the OpenId Connect middleware, the ID token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
 
 The access token can be retrieved by calling `HttpContext.GetTokenAsync("access_token")`.
 
@@ -115,9 +115,9 @@ public async Task<IActionResult> Profile()
 }
 ```
 
-### Refresh Tokens
+### Refresh tokens
 
-In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure you have a valid Access Token at all times, you can configure the SDK to use Refresh Tokens:
+In the case where the application needs to use an access token to access an API, there may be a situation where the access token expires before the application's session does. In order to ensure you have a valid access token at all times, you can configure the SDK to use refresh tokens:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -137,9 +137,9 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-#### Detecting the absense of a Refresh Token
+#### Detecting the absense of a refresh token
 
-In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
+In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of refresh tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a refresh token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
 ```
 services
@@ -160,11 +160,11 @@ services
     });
 ```
 
-The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
+The above snippet checks whether the SDK is configured to use refresh tokens, if there is an existing ID token (meaning the user is authenticated) as well as the absence of a refresh token. If each of these criteria are met, it logs the user out from the application and initializes a new login flow.
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
 
-## Organization
+## Organizations
 
 [Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
 
@@ -207,9 +207,9 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
-### Organization Claim Validation
+### Organization claim validation
 
-If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID Token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
+If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
 
 ```
 services.AddAuth0WebAppAuthentication(options =>
@@ -301,7 +301,7 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
 
 Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
 
-Once the role is created and assigned to the required user(s), you will need to create a [rule](https://auth0.com/docs/rules/current) that adds the role(s) to the ID Token so that it is available to your backend. To do so, go to the [new rule page](https://manage.auth0.com/#/rules/new) and create an empty rule. Then, use the following code for your rule:
+Once the role is created and assigned to the required user(s), you will need to create a [rule](https://auth0.com/docs/rules/current) that adds the role(s) to the ID token so that it is available to your backend. To do so, go to the [new rule page](https://manage.auth0.com/#/rules/new) and create an empty rule. Then, use the following code for your rule:
 
 ```javascript
 function (user, context, callback) {
