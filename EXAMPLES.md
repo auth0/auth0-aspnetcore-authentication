@@ -7,7 +7,7 @@
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
 
-### Login and Logout
+## Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
 
 ```csharp
@@ -35,7 +35,7 @@ public async Task Logout()
 }
 ```
 
-### Scopes
+## Scopes
 
 By default, this SDK requests the `openid profile` scopes, if needed you can configure the SDK to request a different set of scopes.
 As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
@@ -61,7 +61,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
 
-### Calling an API
+## Calling an API
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
 As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
@@ -94,7 +94,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
 
-#### Retrieving the Access Token
+### Retrieving the Access Token
 
 As the SDK uses the OpenId Connect middleware, the ID Token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
 
@@ -115,7 +115,7 @@ public async Task<IActionResult> Profile()
 }
 ```
 
-#### Refresh Tokens
+### Refresh Tokens
 
 In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure you have a valid Access Token at all times, you can configure the SDK to use Refresh Tokens:
 
@@ -137,7 +137,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-##### Detecting the absense of a Refresh Token
+#### Detecting the absense of a Refresh Token
 
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
@@ -164,7 +164,7 @@ The above snippet checks whether the SDK is configured to use Refresh Tokens, if
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
 
-### Organization
+## Organization
 
 [Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
 
@@ -182,7 +182,7 @@ Using Organizations, you can:
 
 Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.
 
-#### Log in to an organization
+### Log in to an organization
 
 Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
 
@@ -207,7 +207,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
-#### Organization Claim Validation
+### Organization Claim Validation
 
 If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID Token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
 
@@ -235,7 +235,7 @@ services.AddAuth0WebAppAuthentication(options =>
 
 For more information, please read [Work with Tokens and Organizations](https://auth0.com/docs/organizations/using-tokens) on Auth0 Docs.
 
-#### Accept user invitations
+### Accept user invitations
 Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
 
 ```csharp
@@ -253,11 +253,11 @@ public class InvitationController : Controller {
 }
 ```
 
-### Extra Parameters
+## Extra Parameters
 
 Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the SDK to do so.
 
-#### Extra parameters when logging in
+### Extra parameters when logging in
 
 In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0WebAppAuthentication`.
 
@@ -284,7 +284,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
 
-#### Extra parameters when logging out
+### Extra parameters when logging out
 The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
 
 ```csharp
@@ -297,7 +297,7 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
 ```
 > :information_source: The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
 
-### Roles
+## Roles
 
 Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
 
@@ -318,7 +318,7 @@ function (user, context, callback) {
 
 > :information_source: As this SDK uses the OpenId Connect middleware, it expects roles to exist in the `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` claim.
 
-#### Integrate roles in your ASP.NET application
+### Integrate roles in your ASP.NET application
 You can use the [Role based authorization](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles) mechanism to make sure that only the users with specific roles can access certain actions. Add the `[Authorize(Roles = "...")]` attribute to your controller action.
 
 ```csharp
