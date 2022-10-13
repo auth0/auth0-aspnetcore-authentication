@@ -81,7 +81,7 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
-For more code samples on how to integrate the auth0-aspnetcore-authentication SDK in your ASP.NET MVC application, have a look at our [examples](./EXAMPLES.md).
+For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](./EXAMPLES.md).
 
 ## Feedback
 ### Contributing
