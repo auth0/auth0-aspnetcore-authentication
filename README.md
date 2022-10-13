@@ -81,6 +81,34 @@ services.AddAuth0WebAppAuthentication(options =>
 });
 ```
 
+### Login and Logout
+Triggering login or logout is done using ASP.NET's `HttpContext`:
+
+```csharp
+public async Task Login(string returnUrl = "/")
+{
+    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri(returnUrl)
+        .Build();
+
+    await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+}
+
+[Authorize]
+public async Task Logout()
+{
+    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+        // Indicate here where Auth0 should redirect the user after a logout.
+        // Note that the resulting absolute Uri must be added in the
+        // **Allowed Logout URLs** settings for the client.
+        .WithRedirectUri(Url.Action("Index", "Home"))
+        .Build();
+
+    await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+}
+```
+
 For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](./EXAMPLES.md).
 
 ## Feedback
