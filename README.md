@@ -7,7 +7,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 [![License](https://img.shields.io/:license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 ![AzureDevOps](https://img.shields.io/azure-devops/build/Auth0SDK/Auth0.AspNetCore.Authentication/8)
 
-:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :rocket: [How To](#how-to) - :computer: [API Reference](https://auth0.github.io/auth0-aspnetcore-authentication/) - :speech_balloon: [Feedback](#feedback)
+:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :rocket: [How To](#how-to) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
 
 ## Documentation
 
@@ -110,6 +110,16 @@ public async Task Logout()
 ```
 
 For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](./EXAMPLES.md).
+
+## API reference
+Explore public API's available in auth0-aspnetcore-authentication.
+
+- [Auth0WebAppOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html)
+- [Auth0WebAppWithAccessTokenOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html)
+- [LoginAuthenticationPropertiesBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html)
+- [LogoutAuthenticationPropertiesBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html)
+- [Auth0WebAppAuthenticationBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html)
+- [Auth0WebAppWithAccessTokenAuthenticationBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html)
 
 ## Feedback
 ### Contributing
