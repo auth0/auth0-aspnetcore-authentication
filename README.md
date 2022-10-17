@@ -7,7 +7,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 [![License](https://img.shields.io/:license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 ![AzureDevOps](https://img.shields.io/azure-devops/build/Auth0SDK/Auth0.AspNetCore.Authentication/8)
 
-:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :rocket: [How To](#how-to) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
+:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
 
 ## Documentation
 
