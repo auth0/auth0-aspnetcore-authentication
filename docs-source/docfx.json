@@ -39,6 +39,12 @@
         "files": [
           "images/**"
         ]
+      },
+      {
+        "files": [
+          "banner.png"
+        ],
+        "src": ".."
       }
     ],
     "overwrite": [
