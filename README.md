@@ -13,7 +13,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 
 - [Quickstart](https://auth0.com/docs/quickstart/webapp/aspnet-core) - our interactive guide for quickly adding login, logout and user information to an ASP.NET MVC application using Auth0.
 - [Sample App](https://github.com/auth0-samples/auth0-aspnetcore-mvc-samples/tree/master/Quickstart/Sample) - a full-fledged ASP.NET MVC application integrated with Auth0.
-- [Examples](./EXAMPLES.md) - code samples for common ASP.NET MVC authentication scenario's.
+- [Examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md) - code samples for common ASP.NET MVC authentication scenario's.
 - [Docs site](https://www.auth0.com/docs) - explore our docs site and learn more about 
 
 ## Getting started
@@ -109,7 +109,7 @@ public async Task Logout()
 }
 ```
 
-For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](./EXAMPLES.md).
+For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md).
 
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
@@ -128,7 +128,7 @@ We appreciate feedback and contribution to this repo! Before you get started, pl
 
 - [Auth0's general contribution guidelines](https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md)
 - [Auth0's code of conduct guidelines](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md)
-- [This repo's contribution guide](CONTRIBUTING.md)
+- [This repo's contribution guide](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/CONTRIBUTING.md)
 
 ### Raise an issue
 
@@ -142,11 +142,11 @@ Please do not report security vulnerabilities on the public GitHub issue tracker
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="./auth0_light_mode.png"   width="150">
-    <source media="(prefers-color-scheme: dark)" srcset="./auth0_dark_mode.png" width="150">
-    <img alt="Auth0 Logo" src="./auth0_light_mode.png" width="150">
+    <source media="(prefers-color-scheme: light)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png"   width="150">
+    <source media="(prefers-color-scheme: dark)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_dark_mode.png" width="150">
+    <img alt="Auth0 Logo" src="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png" width="150">
   </picture>
 </p>
 <p align="center">Auth0 is an easy to implement, adaptable authentication and authorization platform. To learn more checkout <a href="https://auth0.com/why-auth0">Why Auth0?</a></p>
 <p align="center">
-This project is licensed under the MIT license. See the <a href="./LICENSE"> LICENSE</a> file for more info.</p>
+This project is licensed under the MIT license. See the <a href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE"> LICENSE</a> file for more info.</p>
