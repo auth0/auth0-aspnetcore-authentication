@@ -1,4 +1,4 @@
-# Auth0 SDK for ASP.NET Core Authentication
+![](./banner.png)
 
 A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core application as seamlessly as possible.
 
