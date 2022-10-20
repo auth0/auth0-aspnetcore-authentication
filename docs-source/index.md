@@ -1,17 +1,35 @@
-# Auth0 ASP.NET Authentication SDK
-This library supports .NET Core 3.1, .NET 5 and .NET 6 and is a wrapper around `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core  application using [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post) as seamlessly as possible.
+![](https://cdn.auth0.com/website/sdks/banners/auth0-aspnetcore-authentication-banner.png)
 
-## Installation
+A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core application as seamlessly as possible.
 
-The SDK is available on Nuget and can be installed through the UI or using the Package Manager Console:
+![Release](https://img.shields.io/github/v/release/auth0/auth0-aspnetcore-authentication)
+![Downloads](https://img.shields.io/nuget/dt/auth0.aspnetcore.authentication)
+[![License](https://img.shields.io/:license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
+![AzureDevOps](https://img.shields.io/azure-devops/build/Auth0SDK/Auth0.AspNetCore.Authentication/8)
+
+:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
+
+## Documentation
+
+- [Quickstart](https://auth0.com/docs/quickstart/webapp/aspnet-core) - our interactive guide for quickly adding login, logout and user information to an ASP.NET MVC application using Auth0.
+- [Sample App](https://github.com/auth0-samples/auth0-aspnetcore-mvc-samples/tree/master/Quickstart/Sample) - a full-fledged ASP.NET MVC application integrated with Auth0.
+- [Examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md) - code samples for common ASP.NET MVC authentication scenario's.
+- [Docs site](https://www.auth0.com/docs) - explore our docs site and learn more about 
+
+## Getting started
+### Requirements
+
+This library supports .NET Core 3.1, .NET 5 and .NET 6.
+
+### Installation
+
+The SDK is available on [Nuget](https://www.nuget.org/packages/Auth0.AspNetCore.Authentication) and can be installed through the UI or using the Package Manager Console:
 
 ```
 Install-Package Auth0.AspNetCore.Authentication
 ```
 
-## Getting Started
-
-### Auth0 Configuration
+### Configure Auth0
 
 Create a **Regular Web Application** in the [Auth0 Dashboard](https://manage.auth0.com/#/applications).
 
@@ -29,10 +47,9 @@ Next, configure the following URLs for your application under the "Application U
 
 Take note of the **Client ID**, **Client Secret**, and **Domain** values under the "Basic Information" section. You'll need these values to configure your ASP.NET web application.
 
-> [!NOTE]
-> You need the **Client Secret** only when you have to get an access token to [call an API](#calling-an-api).
+> :information_source: You need the **Client Secret** only when you have to get an access token to [call an API](#calling-an-api).
 
-### Basic Setup
+### Configure the SDK
 
 To make your ASP.NET web application communicate properly with Auth0, you need to add the following configuration section to your `appsettings.json` file:
 
@@ -92,337 +109,44 @@ public async Task Logout()
 }
 ```
 
-### Scopes
+For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md).
 
-By default, this SDK requests the `openid profile` scopes, if needed you can configure the SDK to request a different set of scopes.
-As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDk will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
+## API reference
+Explore public API's available in auth0-aspnetcore-authentication.
 
-```csharp
-services.AddAuth0WebAppAuthentication(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.Scope = "openid profile scope1 scope2";
-});
-```
+- [Auth0WebAppOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html)
+- [Auth0WebAppWithAccessTokenOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html)
+- [LoginAuthenticationPropertiesBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html)
+- [LogoutAuthenticationPropertiesBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html)
+- [Auth0WebAppAuthenticationBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html)
+- [Auth0WebAppWithAccessTokenAuthenticationBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html)
 
-Apart from being able to configure the used scopes globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply scopes when triggering login through `HttpContext.ChallengeAsync`:
+## Feedback
+### Contributing
 
-```csharp
-var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-    .WithScope("openid profile scope1 scope2")
-    .Build();
-
-await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-```
-
-> [!NOTE]
-> Specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
-
-### Calling an API
-
-If you want to call an API from your ASP.NET MVC application, you need to obtain an Access Token issued for the API you want to call. 
-As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
-Next, To obtain the token to access an external API, call `WithAccessToken` and set the `audience` to the API Identifier. You can get the API Identifier from the API Settings for the API you want to use.
-
-```csharp
-services
-    .AddAuth0WebAppAuthentication(options =>
-    {
-        options.Domain = Configuration["Auth0:Domain"];
-        options.ClientId = Configuration["Auth0:ClientId"];
-        options.ClientSecret = Configuration["Auth0:ClientSecret"];
-    })
-    .WithAccessToken(options =>
-    {
-        options.Audience = Configuration["Auth0:Audience"];
-    });
-```
-
-Apart from being able to configure the audience globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply the audience when triggering login through `HttpContext.ChallengeAsync`:
-
-```csharp
-var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-    .WithRedirectUri("/") // "/" is the default value used for RedirectUri, so this can be omitted.
-    .WithAudience("YOUR_AUDIENCE")
-    .Build();
-
-await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-```
-
-> [!NOTE]
-> Specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
-
-#### Retrieving the Access Token
-
-As the SDK uses the OpenId Connect middleware, the ID Token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
-
-The access token can be retrieved by calling `HttpContext.GetTokenAsync("access_token")`.
-
-```csharp
-[Authorize]
-public async Task<IActionResult> Profile()
-{
-    var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-    return View(new UserProfileViewModel()
-    {
-        Name = User.Identity.Name,
-        EmailAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
-        ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
-    });
-}
-```
-
-#### Refresh Tokens
-
-In the case where the application needs to use an Access Token to access an API, there may be a situation where the Access Token expires before the application's session does. In order to ensure you have a valid Access Token at all times, you can configure the SDK to use Refresh Tokens:
-
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    services
-        .AddAuth0WebAppAuthentication(options =>
-        {
-            options.Domain = Configuration["Auth0:Domain"];
-            options.ClientId = Configuration["Auth0:ClientId"];
-            options.ClientSecret = Configuration["Auth0:ClientSecret"];
-        })
-        .WithAccessToken(options =>
-        {
-            options.Audience = Configuration["Auth0:Audience"];
-            options.UseRefreshTokens = true;
-        });
-}
-```
-
-##### Detecting the absense of a Refresh Token
-
-In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of Refresh Tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a Refresh Token in order to react accordingly (e.g. log the user out locally and force them to re-login).
-
-```
-services
-    .AddAuth0WebAppAuthentication(options => {})
-    .WithAccessToken(options =>
-    {
-        options.Audience = Configuration["Auth0:Audience"];
-        options.UseRefreshTokens = true;
-        options.Events = new Auth0WebAppWithAccessTokenEvents
-        {
-            OnMissingRefreshToken = async (context) =>
-            {
-                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                await context.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-            }
-        };
-    });
-```
-
-The above snippet checks whether the SDK is configured to use Refresh Tokens, if there is an existing Id Token (meaning the user is authenticaed) as well as the absense of a Refresh Token. If each of these criteria are met, it logs the user out (from the application's side, not from Auth0's side) and initialized a new login flow.
-
-> [!NOTE]
-> In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
-
-### Organization
-
-[Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
-
-Using Organizations, you can:
-
-- Represent teams, business customers, partner companies, or any logical grouping of users that should have different ways of accessing your applications, as organizations.
-
-- Manage their membership in a variety of ways, including user invitation.
-
-- Configure branded, federated login flows for each organization.
-
-- Implement role-based access control, such that users can have different roles when authenticating in the context of different organizations.
-
-- Build administration capabilities into your products, using Organizations APIs, so that those businesses can manage their own organizations.
-
-Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.
-
-#### Log in to an organization
-
-Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
-
-```csharp
-services.AddAuth0WebAppAuthentication(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.Organization = Configuration["Auth0:Organization"];
-});
-```
-
-Apart from being able to configure the organization globally, the SDK's `AuthenticationPropertiesBuilder` can be used to supply the organization when triggering login through `HttpContext.ChallengeAsync`:
-
-```csharp
-var authenticationProperties = new AuthenticationPropertiesBuilder()
-    .WithOrganization("YOUR_ORGANIZATION")
-    .Build();
-
-await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-```
-
-> [!NOTE]
-> Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
-
-#### Organization Claim Validation
-
-If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID Token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
-
-```
-services.AddAuth0WebAppAuthentication(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.OpenIdConnectEvents = new OpenIdConnectEvents
-    {
-        OnTokenValidated = (context) =>
-        {
-            var organizationClaimValue = context.SecurityToken.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
-            var expectedOrganizationIds = new List<string> {"123", "456"};
-            if (!string.IsNullOrEmpty(organizationClaimValue) && !expectedOrganizationIds.Contains(organizationClaimValue))
-            {
-                context.Fail("Unexpected org_id claim detected.");
-            }
-
-            return Task.CompletedTask;
-        }
-    };
-}).
-```
-
-For more information, please read [Work with Tokens and Organizations](https://auth0.com/docs/organizations/using-tokens) on Auth0 Docs.
-
-#### Accept user invitations
-Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
-
-```csharp
-public class InvitationController : Controller {
-
-    public async Task Accept(string organization, string invitation)
-    {
-        var authenticationProperties = new AuthenticationPropertiesBuilder()
-            .WithOrganization(organization)
-            .WithInvitation(invitation)
-            .Build();
-            
-        await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-    }
-}
-
-```
-
-### Extra Parameters
-
-Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the SDK to do so.
-
-#### Extra parameters when logging in
-
-In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0WebAppAuthentication`.
-
-An example is the `screen_hint` parameter, which can be used to show the signup page instead of the login page when redirecting users to Auth0:
-
-```csharp
-services.AddAuth0WebAppAuthentication(options =>
-{
-    options.Domain = Configuration["Auth0:Domain"];
-    options.ClientId = Configuration["Auth0:ClientId"];
-    options.LoginParameters = new Dictionary<string, string>() { { "screen_hint", "signup" } };
-});
-```
-
-Apart from being able to configure these globally, the SDK's `LoginAuthenticationPropertiesBuilder` can be used to supply extra parameters when triggering login through `HttpContext.ChallengeAsync`:
-
-```csharp
-var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-    .WithParameter("screen_hint", "signup")
-    .Build();
-
-await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-```
-
-> [!NOTE]
-> Specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
-
-#### Extra parameters when logging out
-The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
-
-```csharp
-var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-    .WithParameter("federated")
-    .Build();
-
-await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-```
-> [!NOTE]
-> The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
-
-### Roles
-
-Before you can add Role Based Access Control, you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
-
-Once the role is created and assigned to the required user(s), you will need to create a [rule](https://auth0.com/docs/rules/current) that adds the role(s) to the Id Token so that it is available to your backend. To do so, go to the [new rule page](https://manage.auth0.com/#/rules/new) and create an empty rule. Then, use the following code for your rule:
-
-```javascript
-function (user, context, callback) {
-  const assignedRoles = (context.authorization || {}).roles;
-  const idTokenClaims = context.idToken || {};
-
-  idTokenClaims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] = assignedRoles;
-
-  context.idToken = idTokenClaims;
-
-  callback(null, user, context);
-}
-```
-
-> [!NOTE]
-> As this SDK uses the OpenId Connect middleware, it expects roles to exist in the `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` claim.
-
-#### Integrate roles in your ASP.NET application
-You can use the [Role based authorization](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles) mechanism to make sure that only the users with specific roles can access certain actions. Add the `[Authorize(Roles = "...")]` attribute to your controller action.
-
-```csharp
-[Authorize(Roles = "admin")]
-public IActionResult Admin()
-{
-    return View();
-}
-```
-
-## Contributing
-
-We appreciate feedback and contribution to this SDK! Before you get started, please see the following:
+We appreciate feedback and contribution to this repo! Before you get started, please see the following:
 
 - [Auth0's general contribution guidelines](https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md)
 - [Auth0's code of conduct guidelines](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md)
 - [This repo's contribution guide](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/CONTRIBUTING.md)
 
-## Support + Feedback
+### Raise an issue
 
-For support or to provide feedback, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-authentication/issues).
+To provide feedback or report a bug, please [raise an issue on our issue tracker](https://github.com/auth0/auth0-aspnetcore-authentication/issues).
 
-## Vulnerability Reporting
+### Vulnerability Reporting
 
-Please do not report security vulnerabilities on the public GitHub issue tracker. The [Responsible Disclosure Program](https://auth0.com/whitehat) details the procedure for disclosing security issues.
+Please do not report security vulnerabilities on the public GitHub issue tracker. The [Responsible Disclosure Program](https://auth0.com/responsible-disclosure-policy) details the procedure for disclosing security issues.
 
-## What is Auth0
+---
 
-Auth0 helps you to easily:
-
-- implement authentication with multiple identity providers, including social (e.g., Google, Facebook, Microsoft, LinkedIn, GitHub, Twitter, etc), or enterprise (e.g., Windows Azure AD, Google Apps, Active Directory, ADFS, SAML, etc.)
-- log in users with username/password databases, passwordless, or multi-factor authentication
-- link multiple user accounts together
-- generate signed JSON Web Tokens to authorize your API calls and flow the user identity securely
-- access demographics and analytics detailing how, when, and where users are logging in
-- enrich user profiles from other data sources using customizable JavaScript rules
-
-[Why Auth0?](https://auth0.com/why-auth0)
-
-## License
-
-This project is licensed under the MIT license. See the [LICENSE](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE) file for more info.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png"   width="150">
+    <source media="(prefers-color-scheme: dark)" srcset="https://cdn.auth0.com/website/sdks/logos/auth0_dark_mode.png" width="150">
+    <img alt="Auth0 Logo" src="https://cdn.auth0.com/website/sdks/logos/auth0_light_mode.png" width="150">
+  </picture>
+</p>
+<p align="center">Auth0 is an easy to implement, adaptable authentication and authorization platform. To learn more checkout <a href="https://auth0.com/why-auth0">Why Auth0?</a></p>
+<p align="center">
+This project is licensed under the MIT license. See the <a href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE"> LICENSE</a> file for more info.</p>
