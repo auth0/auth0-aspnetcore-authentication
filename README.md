@@ -1,4 +1,4 @@
-![](./banner.png)
+![](https://cdn.auth0.com/website/sdks/banners/auth0-aspnetcore-authentication-banner.png)
 
 A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make integrating Auth0 in your ASP.NET Core application as seamlessly as possible.
 
