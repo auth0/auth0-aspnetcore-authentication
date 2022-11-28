@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="jwks.json" />
+    <EmbeddedResource Include="jwks2.json" />
     <EmbeddedResource Include="wellknownconfig.json" />
     <EmbeddedResource Include="wellknownconfig_without_par.json" />
   </ItemGroup>

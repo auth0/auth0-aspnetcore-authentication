@@ -6,6 +6,7 @@
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
+- [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
 
 ## Login and Logout
@@ -310,6 +311,54 @@ You can use the [Role based authorization](https://docs.microsoft.com/en-us/aspn
 public IActionResult Admin()
 {
     return View();
+}
+```
+
+## Backchannel Logout
+
+Backchannel logout can be configured by calling `WithBackchannelLogout()` when calling `AddAuth0WebAppAuthentication`.
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    }).WithBackchannelLogout();
+
+```
+
+Additionally, you will also need to call `UseBackchannelLogout();` on the ApplicationBuilder:
+
+```csharp
+app.UseBackchannelLogout();
+```
+
+As logout tokens need to be stored, you will also need to provide something for our SDK to store the tokens in.
+
+```csharp
+services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
+```
+
+The implementation of `CustomLogoutTokenHandler` will heaviliy depend on your situation, but here's a blueprint you can use:
+
+```csharp
+ public class CustomLogoutTokenHandler : ILogoutTokenHandler
+{
+    public CustomLogoutTokenHandler()
+    {
+    }
+
+    public Task OnTokenReceivedAsync(string issuer, string sid, string logoutToken, TimeSpan expiration)
+    {
+        // When a token is received, you need to store it for the duration of `expiration`, using `issuer` and `sid` as the identifiers.
+    }
+
+    public Task<bool> IsLoggedOutAsync(string issuer, string sid)
+    {
+        // Return a boolean based on whether or not you find a logout token using the `issuer` and `sid`.
+    }
 }
 ```
 

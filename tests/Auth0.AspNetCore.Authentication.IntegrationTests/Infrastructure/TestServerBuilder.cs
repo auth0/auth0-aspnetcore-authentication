@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using Auth0.AspNetCore.Authentication.BackchannelLogout;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Logging;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
 {
@@ -31,7 +31,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -42,6 +42,12 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                             app.UseRouting();
                             app.UseAuthentication();
                             app.UseAuthorization();
+
+                            if (enableBackchannelLogout)
+                            {
+                                app.UseBackchannelLogout();
+                            }
+
                             app.Use(async (context, next) =>
                             {
                                 var req = context.Request;
@@ -116,6 +122,11 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                             if (configureWithAccessTokensOptions != null)
                             {
                                 builder.WithAccessToken(configureWithAccessTokensOptions);
+                            }
+                            
+                            if (enableBackchannelLogout)
+                            {
+                                builder.WithBackchannelLogout();
                             }
 
                             services.AddControllersWithViews();

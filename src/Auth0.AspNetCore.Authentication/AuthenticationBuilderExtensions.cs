@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +9,19 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Microsoft.Extensions.Logging;
 
 namespace Auth0.AspNetCore.Authentication
 {
+    public static class OpenIdConnectConfigurationKeys
+    {
+        public static string BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
+        public static string BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
+    }
+    
     /// <summary>
     /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> extension(s) for registering Auth0.
     /// </summary>
@@ -57,6 +68,12 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
+
+            builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Configure(options =>
+                {
+                    options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(authenticationScheme), options.Events.OnValidatePrincipal);
+                });
 
             return new Auth0WebAppAuthenticationBuilder(builder.Services, authenticationScheme, auth0Options);
         }
@@ -110,6 +127,136 @@ namespace Auth0.AspNetCore.Authentication
                 if (!string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey != null)
                 {
                     throw new InvalidOperationException("Both Client Secret and Client Assertion can not be set at the same time when using `code` or `code id_token` as the response_type.");
+                }
+            }
+        }
+
+        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(string authenticationScheme)
+        {
+            return async (context) =>
+            {
+                var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
+                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
+                var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
+                var logoutTokenHandler = context.HttpContext.RequestServices.GetService<ILogoutTokenHandler>();
+
+                if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
+                {
+                    if (!string.IsNullOrEmpty(authScheme) && authScheme != authenticationScheme)
+                    {
+                        return;
+                    }
+                }
+
+                if (logoutTokenHandler != null)
+                {
+                    await VerifyBackchannelLogoutSupport(context.HttpContext, oidcOptions);
+
+                    var issuer = $"https://{options.Domain}/";
+                    var sid = context.Principal?.FindFirst("sid")?.Value;
+
+                    var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
+
+                    if (isLoggedOut)
+                    {
+                        // Log out the user
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync();
+                    }
+                }
+
+                if (optionsWithAccessToken == null)
+                {
+                    return;
+                }
+
+                await RefreshTokenIfNeccesary(context, options, optionsWithAccessToken, oidcOptions);
+            };
+        }
+
+        private static async Task RefreshTokenIfNeccesary(CookieValidatePrincipalContext context, Auth0WebAppOptions options, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, OpenIdConnectOptions oidcOptions)
+        {
+            if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
+            {
+                if (optionsWithAccessToken.UseRefreshTokens)
+                {
+                    if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
+                    {
+                        var now = DateTimeOffset.Now;
+                        var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]!);
+                        var leeway = 60;
+                        var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
+                        var isExpired = difference <= 0;
+
+                        if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
+                        {
+                            var result = await RefreshTokens(options, refreshToken, oidcOptions.Backchannel);
+
+                            if (result != null)
+                            {
+                                context.Properties.UpdateTokenValue("access_token", result.AccessToken);
+                                if (!string.IsNullOrEmpty(result.RefreshToken))
+                                {
+                                    context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
+                                }
+                                context.Properties.UpdateTokenValue("id_token", result.IdToken);
+                                context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                            }
+                            else
+                            {
+                                context.Properties.UpdateTokenValue("refresh_token", null!);
+                            }
+
+                            context.ShouldRenew = true;
+
+                        }
+                    }
+                    else
+                    {
+                        if (optionsWithAccessToken.Events?.OnMissingRefreshToken != null)
+                        {
+                            await optionsWithAccessToken.Events.OnMissingRefreshToken(context.HttpContext);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (CodeResponseTypes.Contains(options.ResponseType!))
+                {
+                    if (optionsWithAccessToken.Events?.OnMissingAccessToken != null)
+                    {
+                        await optionsWithAccessToken.Events.OnMissingAccessToken(context.HttpContext);
+                    }
+                }
+            }
+        }
+
+        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
+        {
+            var tokenClient = new TokenClient(httpClient);
+            return await tokenClient.Refresh(options, refreshToken);
+        }
+
+        private static async Task VerifyBackchannelLogoutSupport(HttpContext context, OpenIdConnectOptions oidcOptions)
+        {
+            if (oidcOptions.Configuration == null)
+            {
+                oidcOptions.Configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(context.RequestAborted);
+            }
+
+            var additionalConfiguration = oidcOptions.Configuration.AdditionalData;
+            var supported = (additionalConfiguration?.GetBooleanOrDefault(OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED, false) ?? false);
+            var sessionSupported = additionalConfiguration?.GetBooleanOrDefault(OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED, false) ?? false;
+
+            if (!supported || !sessionSupported)
+            {
+                var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
+
+                if (loggerFactory != null)
+                {
+                    var logger = loggerFactory.CreateLogger("Auth0");
+                    logger.LogWarning("Configured back-channel logout, but OIDC configuration indicates lack of support.");
                 }
             }
         }

@@ -12,9 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="BackchannelLogout\" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Auth0Icon.png" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
-
   <PropertyGroup>
     <Product>Auth0.AspNetCore.Authentication</Product>
     <Description>Auth0 authentication middleware for ASP.NET Core.</Description>
