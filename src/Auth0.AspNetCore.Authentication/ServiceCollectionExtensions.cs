@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
+using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -36,6 +41,21 @@ namespace Auth0.AspNetCore.Authentication
                     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
                 .AddAuth0WebAppAuthentication(authenticationScheme, configureOptions);
+        }
+    }
+
+    public static class EndpointRouteBuilderExtensions
+    {
+        public static void MapBackchannelEndpoint(this IEndpointRouteBuilder endpoints)
+        {
+            endpoints.MapPost("backchannel-logout", ProcessWith)
+                .AllowAnonymous();
+        }
+
+        private static Task ProcessWith(HttpContext context)
+        {
+            var service = new BackchannelLogoutService();
+            return service.ProcessRequestAsync(context);
         }
     }
 }

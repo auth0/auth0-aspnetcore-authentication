@@ -81,12 +81,6 @@ namespace Auth0.AspNetCore.Authentication
 
                     options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(_authenticationScheme), options.Events.OnRedirectToIdentityProvider);
                 });
-
-            _services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-                .Configure(options =>
-                {
-                    options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(_authenticationScheme), options.Events.OnValidatePrincipal);
-                });
         }
 
         private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(string authenticationScheme)
@@ -107,87 +101,6 @@ namespace Auth0.AspNetCore.Authentication
 
                 return Task.CompletedTask;
             };
-        }
-
-        private static Func<CookieValidatePrincipalContext, Task> CreateOnValidatePrincipal(string authenticationScheme)
-        {
-            return async (context) =>
-            {
-                var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
-                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
-                var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
-
-                if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
-                {
-                    if (!string.IsNullOrEmpty(authScheme) && authScheme != authenticationScheme)
-                    {
-                        return;
-                    }
-                }
-
-                if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
-                {
-                    if (optionsWithAccessToken.UseRefreshTokens)
-                    {
-                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
-                        {
-                            var now = DateTimeOffset.Now;
-                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]!);
-                            var leeway = 60;
-                            var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
-                            var isExpired = difference <= 0;
-
-                            if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
-                            {
-                                var result = await RefreshTokens(options, refreshToken, oidcOptions.Backchannel);
-
-                                if (result != null)
-                                {
-                                    context.Properties.UpdateTokenValue("access_token", result.AccessToken);
-                                    if (!string.IsNullOrEmpty(result.RefreshToken))
-                                    {
-                                        context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
-                                    }
-                                    context.Properties.UpdateTokenValue("id_token", result.IdToken);
-                                    context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
-                                }
-                                else
-                                {
-                                    context.Properties.UpdateTokenValue("refresh_token", null!);
-                                }
-
-                                context.ShouldRenew = true;
-
-                            }
-                        }
-                        else
-                        {
-                            if (optionsWithAccessToken.Events?.OnMissingRefreshToken != null)
-                            {
-                                await optionsWithAccessToken.Events.OnMissingRefreshToken(context.HttpContext);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (CodeResponseTypes.Contains(options.ResponseType!))
-                    {
-                        if (optionsWithAccessToken.Events?.OnMissingAccessToken != null)
-                        {
-                            await optionsWithAccessToken.Events.OnMissingAccessToken(context.HttpContext);
-                        }
-                    }
-                }
-            };
-        }
-
-        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient? httpClient = null)
-        {
-            using (var tokenClient = new TokenClient(httpClient))
-            {
-                return await tokenClient.Refresh(options, refreshToken);
-            }
         }
 
         private static void ValidateOptions(Auth0WebAppOptions options)

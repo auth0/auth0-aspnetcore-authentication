@@ -94,6 +94,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapBackchannelEndpoint();
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
