@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Authentication
@@ -60,6 +61,7 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, Auth0OpenIdConnectPostConfigureOptions2>());
 
             builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure(options =>
@@ -131,11 +133,17 @@ namespace Auth0.AspNetCore.Authentication
                     }
                 }
 
-                var isLoggedOut = await IsLoggedOut(context, options);
+                var issuer = $"https://{options.Domain}/";
+                var sid = context.Principal?.FindFirst("sid")?.Value;
+                var isLoggedOut = await IsLoggedOut(issuer, sid);
 
                 if (isLoggedOut)
                 {
-                    return;
+                    // Log out the user
+                    context.RejectPrincipal();
+                    await context.HttpContext.SignOutAsync();
+
+                    LogoutTokenStore.Instance.Remove($"{issuer}|{sid}");
                 }
 
                 if (optionsWithAccessToken == null)
@@ -147,23 +155,9 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static async Task<bool> IsLoggedOut(CookieValidatePrincipalContext context, Auth0WebAppOptions options)
+        private static async Task<bool> IsLoggedOut(string issuer, string? sid)
         {
-            var issuer = $"https://{options.Domain}/";
-            var sid = context.Principal?.FindFirst("sid")?.Value;
-            if (!string.IsNullOrEmpty(LogoutTokenStore.Instance.Get($"{issuer}|{sid}")))
-            {
-                // Log out the user
-                context.RejectPrincipal();
-                await context.HttpContext.SignOutAsync();
-
-                LogoutTokenStore.Instance.Remove($"{issuer}|{sid}");
-
-                // TODO: Ensure this cancels calling CreateOnValidatePrincipal
-                return true;
-            }
-
-            return false;
+            return (!string.IsNullOrEmpty(LogoutTokenStore.Instance.Get($"{issuer}|{sid}")));
         }
 
         private static async Task RefreshTokenIfNeccesary(CookieValidatePrincipalContext context, Auth0WebAppOptions options, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, OpenIdConnectOptions oidcOptions)

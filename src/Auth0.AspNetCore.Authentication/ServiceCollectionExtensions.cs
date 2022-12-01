@@ -54,8 +54,8 @@ namespace Auth0.AspNetCore.Authentication
 
         private static Task ProcessWith(HttpContext context)
         {
-            var service = new BackchannelLogoutService();
-            return service.ProcessRequestAsync(context);
+            var service = new BackchannelLogoutHandler();
+            return service.HandleRequestAsync(context);
         }
     }
 }

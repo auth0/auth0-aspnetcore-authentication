@@ -43,6 +43,13 @@ namespace Auth0.AspNetCore.Authentication.Playground
                         }
                     };
                 });
+            services.AddSingleton<ITicketStore, Auth0TicketStore2>();
+            services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Configure<ITicketStore>((options, store) =>
+                {
+                    options.SessionStore = store;
+                });
+
 
             services
                 .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme2, options =>
