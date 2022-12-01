@@ -125,14 +125,16 @@ namespace Auth0.AspNetCore.Authentication
                     }
                 }
 
-                if (context.Properties.Items.TryGetValue(".Token.access_token", out _))
+                var accessToken = context.Properties.GetTokenValue("access_token");
+                if (!string.IsNullOrEmpty(accessToken))
                 {
                     if (optionsWithAccessToken.UseRefreshTokens)
                     {
-                        if (context.Properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken))
+                        var refreshToken = context.Properties.GetTokenValue("refresh_token");
+                        if (!string.IsNullOrEmpty(refreshToken))
                         {
                             var now = DateTimeOffset.Now;
-                            var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]!);
+                            var expiresAt = DateTimeOffset.Parse(context.Properties.GetTokenValue("expires_at")!);
                             var leeway = 60;
                             var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
                             var isExpired = difference <= 0;
