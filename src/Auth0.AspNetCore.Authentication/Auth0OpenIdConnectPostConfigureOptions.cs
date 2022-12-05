@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -23,21 +24,25 @@ namespace Auth0.AspNetCore.Authentication
     {
         public void PostConfigure(string name, CookieAuthenticationOptions options)
         {
-            options.SessionStore = new Auth0TicketStore(options.SessionStore!);
+            options.SessionStore = new Auth0TicketStoreDecorator(options.SessionStore!);
         }
     }
 
-    internal class Auth0TicketStore: ITicketStore
+    internal class Auth0TicketStoreDecorator: ITicketStore
     {
         private readonly ITicketStore ticketStore;
+        private readonly IDictionary<string, string> sidMap = new Dictionary<string, string>();
 
-        public Auth0TicketStore(ITicketStore ticketStore)
+        public Auth0TicketStoreDecorator(ITicketStore ticketStore)
         {
             this.ticketStore = ticketStore;
         }
 
         public Task RemoveAsync(string key)
         {
+            var sid = sidMap.ToList().SingleOrDefault(i => i.Value == key).Key;
+            sidMap.Remove(sid);
+
             return ticketStore.RemoveAsync(key);
         }
 
@@ -51,9 +56,13 @@ namespace Auth0.AspNetCore.Authentication
             return ticketStore.RetrieveAsync(key);
         }
 
-        public Task<string> StoreAsync(AuthenticationTicket ticket)
+        public async Task<string> StoreAsync(AuthenticationTicket ticket)
         {
-            return ticketStore.StoreAsync(ticket);
+            var sid = ticket.Principal.FindFirst("sid")!.Value;
+            var id = await ticketStore.StoreAsync(ticket);
+
+            sidMap.Add(sid, id);
+            return id;
         }
     }
 
@@ -88,7 +97,7 @@ namespace Auth0.AspNetCore.Authentication
 
         public async Task<string> StoreAsync(AuthenticationTicket ticket)
         {
-            var id = new Guid();
+            var id = Guid.NewGuid();
             var key = "Auth0." + id;
             await RenewAsync(key, ticket);
             return key;

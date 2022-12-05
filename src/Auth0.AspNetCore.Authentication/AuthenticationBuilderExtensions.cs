@@ -61,7 +61,7 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, Auth0OpenIdConnectPostConfigureOptions2>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, Auth0CookieAuthenticationPostConfigureOptions>());
 
             builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure(options =>
