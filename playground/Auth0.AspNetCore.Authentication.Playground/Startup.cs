@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Auth0.AspNetCore.Authentication;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Auth0.AspNetCore.Authentication.Playground
 {
@@ -42,38 +43,12 @@ namespace Auth0.AspNetCore.Authentication.Playground
                             await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
                         }
                     };
-                });
-            services.AddSingleton<ITicketStore, Auth0TicketStore2>();
-            services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-                .Configure<ITicketStore>((options, store) =>
-                {
-                    options.SessionStore = store;
-                });
+                }).WithBackchannelLogout();
 
+            services.AddSingleton<IDistributedCache, Auth0DistributedCache>();
+            
 
-            services
-                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme2, options =>
-                {
-                    options.Domain = Configuration["Auth02:Domain"];
-                    options.ClientId = Configuration["Auth02:ClientId"];
-                    options.ClientSecret = Configuration["Auth02:ClientSecret"];
-                    options.SkipCookieMiddleware = true;
-                    options.CallbackPath = "/callback2";
-                }).WithAccessToken(options =>
-                {
-                    options.Audience = Configuration["Auth02:Audience"];
-                    options.UseRefreshTokens = true;
-
-                    options.Events = new Auth0WebAppWithAccessTokenEvents
-                    {
-                        OnMissingRefreshToken = async (context) =>
-                        {
-                            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                            var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                            await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme2, authenticationProperties);
-                        }
-                    };
-                });
+            
 
             services.AddControllersWithViews();
         }

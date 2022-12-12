@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Authentication
@@ -61,7 +63,6 @@ namespace Auth0.AspNetCore.Authentication
 
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, Auth0CookieAuthenticationPostConfigureOptions>());
 
             builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure(options =>
@@ -135,15 +136,21 @@ namespace Auth0.AspNetCore.Authentication
 
                 var issuer = $"https://{options.Domain}/";
                 var sid = context.Principal?.FindFirst("sid")?.Value;
-                var isLoggedOut = await IsLoggedOut(issuer, sid);
 
-                if (isLoggedOut)
+                var cache = context.HttpContext.RequestServices.GetRequiredService<IDistributedCache>();
+
+                var logoutToken = await cache.GetAsync($"{issuer}|{sid}");
+
+                if (logoutToken != null)
                 {
                     // Log out the user
                     context.RejectPrincipal();
                     await context.HttpContext.SignOutAsync();
 
-                    LogoutTokenStore.Instance.Remove($"{issuer}|{sid}");
+                    // Temporary for testing
+                    // We shouldn't actualy remove anything
+                    await cache.RemoveAsync($"{issuer}|{sid}");
+
                 }
 
                 if (optionsWithAccessToken == null)
@@ -155,9 +162,10 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static async Task<bool> IsLoggedOut(string issuer, string? sid)
+        private static async Task<bool> IsLoggedOut(IDistributedCache cache, string issuer, string? sid)
         {
-            return (!string.IsNullOrEmpty(LogoutTokenStore.Instance.Get($"{issuer}|{sid}")));
+            var result = await cache.GetAsync($"{issuer}|{sid}");
+            return result != null;
         }
 
         private static async Task RefreshTokenIfNeccesary(CookieValidatePrincipalContext context, Auth0WebAppOptions options, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, OpenIdConnectOptions oidcOptions)

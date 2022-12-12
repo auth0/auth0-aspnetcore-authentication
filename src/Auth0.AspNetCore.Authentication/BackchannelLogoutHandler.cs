@@ -17,49 +17,52 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text;
 
 namespace Auth0.AspNetCore.Authentication
 {
     public class BackchannelLogoutHandler
     {
+        private readonly IDistributedCache cache;
+
+        public BackchannelLogoutHandler(IDistributedCache cache)
+        {
+            this.cache = cache;
+        }
         public virtual async Task HandleRequestAsync(HttpContext context)
         {
             try
             {
-                if (context.Request.Method == "POST")
+                context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+
+                if (context.Request.HasFormContentType)
                 {
-                    if (context.Request.HasFormContentType)
+                    var logoutToken = context.Request.Form["logout_token"].FirstOrDefault();
+
+                    if (!String.IsNullOrWhiteSpace(logoutToken))
                     {
-                        var logoutToken = context.Request.Form["logout_token"].FirstOrDefault();
+                        var auth0Options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(Auth0Constants.AuthenticationScheme);
+                        var oidcOptions = context.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(Auth0Constants.AuthenticationScheme);
 
-                        if (!String.IsNullOrWhiteSpace(logoutToken))
+                        var principal = await ValidateLogoutToken(logoutToken, oidcOptions, context);
+
+                        if (principal != null)
                         {
-                            var auth0Options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(Auth0Constants.AuthenticationScheme);
-                            var oidcOptions = context.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(Auth0Constants.AuthenticationScheme);
+                            var issuer = principal.Claims.FirstOrDefault(c => c.Type == "iss")?.Value;
+                            var sid = principal.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
 
-                            var principal = await ValidateLogoutToken(logoutToken, oidcOptions, context);
+                            await cache.SetAsync($"{issuer}|{sid}", Encoding.ASCII.GetBytes(logoutToken));
 
-                            if (principal != null)
-                            {
-                                var issuer = principal.Claims.FirstOrDefault(c => c.Type == "iss")?.Value;
-                                var sid = principal.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
-
-                                LogoutTokenStore.Instance.Set($"{issuer}|{sid}", logoutToken);
-
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            await context.WriteErrorAsync(400, "invalid_request", "Missing logout_token");
+                            return;
                         }
                     }
+                    else
+                    {
+                        await context.WriteErrorAsync(400, "invalid_request", "Missing logout_token");
+                    }
                 }
-                else
-                {
-                    // 405: Method Not Allowed
-                    context.Response.StatusCode = 405;
-                }
+                
             }
             catch (Exception ex)
             {
@@ -94,7 +97,6 @@ namespace Auth0.AspNetCore.Authentication
 
     public static class HttpContextExtensions
     {
-
         public static async Task WriteErrorAsync(this HttpContext context, int statusCode, string error, string description)
         {
             context.Response.StatusCode = statusCode;

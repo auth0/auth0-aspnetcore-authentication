@@ -48,14 +48,12 @@ namespace Auth0.AspNetCore.Authentication
     {
         public static void MapBackchannelEndpoint(this IEndpointRouteBuilder endpoints)
         {
-            endpoints.MapPost("backchannel-logout", ProcessWith)
+            endpoints.MapPost("backchannel-logout", (context) =>
+            {
+                var handler = context.RequestServices.GetRequiredService<BackchannelLogoutHandler>();
+                return handler.HandleRequestAsync(context);
+            })
                 .AllowAnonymous();
-        }
-
-        private static Task ProcessWith(HttpContext context)
-        {
-            var service = new BackchannelLogoutHandler();
-            return service.HandleRequestAsync(context);
         }
     }
 }

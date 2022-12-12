@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
 namespace Auth0.AspNetCore.Authentication
@@ -20,87 +22,51 @@ namespace Auth0.AspNetCore.Authentication
         }
     }
 
-    internal class Auth0CookieAuthenticationPostConfigureOptions : IPostConfigureOptions<CookieAuthenticationOptions>
+    public class Auth0DistributedCache : IDistributedCache
     {
-        public void PostConfigure(string name, CookieAuthenticationOptions options)
-        {
-            options.SessionStore = new Auth0TicketStoreDecorator(options.SessionStore!);
-        }
-    }
+        private Dictionary<string, byte[]> _store = new Dictionary<string, byte[]>();
 
-    internal class Auth0TicketStoreDecorator: ITicketStore
-    {
-        private readonly ITicketStore ticketStore;
-        private readonly IDictionary<string, string> sidMap = new Dictionary<string, string>();
 
-        public Auth0TicketStoreDecorator(ITicketStore ticketStore)
+        public byte[]? Get(string key)
         {
-            this.ticketStore = ticketStore;
+            return this._store.GetValueOrDefault(key);
         }
 
-        public Task RemoveAsync(string key)
+        public Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
-            var sid = sidMap.ToList().SingleOrDefault(i => i.Value == key).Key;
-            sidMap.Remove(sid);
-
-            return ticketStore.RemoveAsync(key);
+            return Task.FromResult(this._store.GetValueOrDefault(key));
         }
 
-        public Task RenewAsync(string key, AuthenticationTicket ticket)
+        public void Refresh(string key)
         {
-            return ticketStore.RenewAsync(key, ticket);
+            throw new NotImplementedException();
         }
 
-        public Task<AuthenticationTicket> RetrieveAsync(string key)
+        public Task RefreshAsync(string key, CancellationToken token = default)
         {
-            return ticketStore.RetrieveAsync(key);
+            throw new NotImplementedException();
         }
 
-        public async Task<string> StoreAsync(AuthenticationTicket ticket)
+        public void Remove(string key)
         {
-            var sid = ticket.Principal.FindFirst("sid")!.Value;
-            var id = await ticketStore.StoreAsync(ticket);
-
-            sidMap.Add(sid, id);
-            return id;
+            this._store.Remove(key);
         }
-    }
 
-    public class Auth0TicketStore2 : ITicketStore
-    {
-
-        private IDictionary<string, AuthenticationTicket> _cache = new Dictionary<string, AuthenticationTicket>();
-
-        public Task RemoveAsync(string key)
+        public Task RemoveAsync(string key, CancellationToken token = default)
         {
-            _cache.Remove(key);
+            this._store.Remove(key);
             return Task.CompletedTask;
         }
 
-        public Task RenewAsync(string key, AuthenticationTicket ticket)
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
         {
-            if (_cache.ContainsKey(key))
-            {
-                _cache[key] = ticket;
-            }
-            else
-            {
-                _cache.Add(key, ticket);
-            }
+            this._store.Add(key, value);
+        }
+
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+        {
+            this._store.Add(key, value);
             return Task.CompletedTask;
-        }
-
-        public Task<AuthenticationTicket> RetrieveAsync(string key)
-        {
-            return Task.FromResult(_cache[key]);
-        }
-
-        public async Task<string> StoreAsync(AuthenticationTicket ticket)
-        {
-            var id = Guid.NewGuid();
-            var key = "Auth0." + id;
-            await RenewAsync(key, ticket);
-            return key;
         }
     }
 }
