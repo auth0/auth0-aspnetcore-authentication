@@ -58,6 +58,7 @@ namespace Auth0.AspNetCore.Authentication
         {
             //return new Auth0WebAppWithAccessTokenAuthenticationBuilder(_services, configureOptions, _options, _authenticationScheme);
             _services.AddSingleton<BackchannelLogoutHandler>();
+            _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
             return this;
         }
 

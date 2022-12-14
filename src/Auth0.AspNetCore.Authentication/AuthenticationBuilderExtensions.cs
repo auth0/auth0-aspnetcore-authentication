@@ -125,6 +125,7 @@ namespace Auth0.AspNetCore.Authentication
                 var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
                 var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
                 var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
+                var logoutTokenHandler = context.HttpContext.RequestServices.GetRequiredService<ILogoutTokenHandler>();
 
                 if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
                 {
@@ -137,11 +138,9 @@ namespace Auth0.AspNetCore.Authentication
                 var issuer = $"https://{options.Domain}/";
                 var sid = context.Principal?.FindFirst("sid")?.Value;
 
-                var cache = context.HttpContext.RequestServices.GetRequiredService<IDistributedCache>();
+                var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
 
-                var logoutToken = await cache.GetAsync($"{issuer}|{sid}");
-
-                if (logoutToken != null)
+                if (isLoggedOut)
                 {
                     // Log out the user
                     context.RejectPrincipal();
@@ -149,7 +148,7 @@ namespace Auth0.AspNetCore.Authentication
 
                     // Temporary for testing
                     // We shouldn't actualy remove anything
-                    await cache.RemoveAsync($"{issuer}|{sid}");
+                    await logoutTokenHandler.RemoveAsync(issuer, sid);
 
                 }
 
@@ -160,12 +159,6 @@ namespace Auth0.AspNetCore.Authentication
 
                 await RefreshTokenIfNeccesary(context, options, optionsWithAccessToken, oidcOptions);
             };
-        }
-
-        private static async Task<bool> IsLoggedOut(IDistributedCache cache, string issuer, string? sid)
-        {
-            var result = await cache.GetAsync($"{issuer}|{sid}");
-            return result != null;
         }
 
         private static async Task RefreshTokenIfNeccesary(CookieValidatePrincipalContext context, Auth0WebAppOptions options, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, OpenIdConnectOptions oidcOptions)

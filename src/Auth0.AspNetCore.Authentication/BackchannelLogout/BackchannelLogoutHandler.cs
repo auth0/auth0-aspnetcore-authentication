@@ -1,34 +1,23 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Security.Claims;
-using static System.Net.WebRequestMethods;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Options;
-using System.Net;
 using Microsoft.Extensions.DependencyInjection;
-using System.IdentityModel.Tokens.Jwt;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
 
 namespace Auth0.AspNetCore.Authentication
 {
     public class BackchannelLogoutHandler
     {
-        private readonly IDistributedCache cache;
+        private readonly ILogoutTokenHandler tokenHandler;
 
-        public BackchannelLogoutHandler(IDistributedCache cache)
+        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler)
         {
-            this.cache = cache;
+            this.tokenHandler = tokenHandler;
         }
         public virtual async Task HandleRequestAsync(HttpContext context)
         {
@@ -52,7 +41,7 @@ namespace Auth0.AspNetCore.Authentication
                             var issuer = principal.Claims.FirstOrDefault(c => c.Type == "iss")?.Value;
                             var sid = principal.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
 
-                            await cache.SetAsync($"{issuer}|{sid}", Encoding.ASCII.GetBytes(logoutToken));
+                            await tokenHandler.OnTokenReceivedAsync(issuer, sid, logoutToken);
 
                             return;
                         }

@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Auth0.AspNetCore.Authentication;
-using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Session;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace Auth0.AspNetCore.Authentication.Playground
 {
@@ -22,36 +24,173 @@ namespace Auth0.AspNetCore.Authentication.Playground
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
-                {
-                    options.Domain = Configuration["Auth0:Domain"];
-                    options.ClientId = Configuration["Auth0:ClientId"];
-                    options.ClientSecret = Configuration["Auth0:ClientSecret"];
-                })
-                .WithAccessToken(options =>
-                {
-                    options.Audience = Configuration["Auth0:Audience"];
-                    options.UseRefreshTokens = true;
 
-                    options.Events = new Auth0WebAppWithAccessTokenEvents
-                    {
-                        OnMissingRefreshToken = async (context) =>
-                        {
-                            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                            var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                            await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-                        }
-                    };
-                }).WithBackchannelLogout();
-
-            services.AddSingleton<IDistributedCache, Auth0DistributedCache>();
-            
-
-            
+            //ConfigureServicesAuth0(services);
+            //ConfigureServicesAuth0CustomStore(services);
+            //ConfigureServicesAuth0Statfull(services);
+            //ConfigureServicesAuth0StatfullCustomStore(services);
+            ConfigureServicesAuth0StatfullInstantSessionClear(services);
 
             services.AddControllersWithViews();
         }
+
+        private void ConfigureServicesAuth0(IServiceCollection services)
+        {
+            services
+               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+               {
+                   options.Domain = Configuration["Auth0:Domain"];
+                   options.ClientId = Configuration["Auth0:ClientId"];
+                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
+               })
+               .WithAccessToken(options =>
+               {
+                   options.Audience = Configuration["Auth0:Audience"];
+                   options.UseRefreshTokens = true;
+
+                   options.Events = new Auth0WebAppWithAccessTokenEvents
+                   {
+                       OnMissingRefreshToken = async (context) =>
+                       {
+                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                       }
+                   };
+               }).WithBackchannelLogout();
+
+        }
+
+        private void ConfigureServicesAuth0CustomStore(IServiceCollection services)
+        {
+            services
+               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+               {
+                   options.Domain = Configuration["Auth0:Domain"];
+                   options.ClientId = Configuration["Auth0:ClientId"];
+                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
+               })
+               .WithAccessToken(options =>
+               {
+                   options.Audience = Configuration["Auth0:Audience"];
+                   options.UseRefreshTokens = true;
+
+                   options.Events = new Auth0WebAppWithAccessTokenEvents
+                   {
+                       OnMissingRefreshToken = async (context) =>
+                       {
+                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                       }
+                   };
+               }).WithBackchannelLogout();
+
+            // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
+            services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
+        }
+
+        private void ConfigureServicesAuth0Statfull(IServiceCollection services)
+        {
+            services
+               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+               {
+                   options.Domain = Configuration["Auth0:Domain"];
+                   options.ClientId = Configuration["Auth0:ClientId"];
+                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
+               })
+               .WithAccessToken(options =>
+               {
+                   options.Audience = Configuration["Auth0:Audience"];
+                   options.UseRefreshTokens = true;
+
+                   options.Events = new Auth0WebAppWithAccessTokenEvents
+                   {
+                       OnMissingRefreshToken = async (context) =>
+                       {
+                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                       }
+                   };
+               }).WithBackchannelLogout();
+
+            // Configure a custom ITicketStore to store the Identity Information on the server
+            services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
+            // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
+            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+              ConfigureCookieAuthenticationOptions>();
+        }
+
+        private void ConfigureServicesAuth0StatfullCustomStore(IServiceCollection services)
+        {
+            services
+               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+               {
+                   options.Domain = Configuration["Auth0:Domain"];
+                   options.ClientId = Configuration["Auth0:ClientId"];
+                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
+               })
+               .WithAccessToken(options =>
+               {
+                   options.Audience = Configuration["Auth0:Audience"];
+                   options.UseRefreshTokens = true;
+
+                   options.Events = new Auth0WebAppWithAccessTokenEvents
+                   {
+                       OnMissingRefreshToken = async (context) =>
+                       {
+                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                       }
+                   };
+               }).WithBackchannelLogout();
+
+
+            // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
+            services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
+            // Configure a custom ITicketStore to store the Identity Information on the server
+            services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
+            // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
+            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+              ConfigureCookieAuthenticationOptions>();
+        }
+
+        private void ConfigureServicesAuth0StatfullInstantSessionClear(IServiceCollection services)
+        {
+            services
+               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
+               {
+                   options.Domain = Configuration["Auth0:Domain"];
+                   options.ClientId = Configuration["Auth0:ClientId"];
+                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
+               })
+               .WithAccessToken(options =>
+               {
+                   options.Audience = Configuration["Auth0:Audience"];
+                   options.UseRefreshTokens = true;
+
+                   options.Events = new Auth0WebAppWithAccessTokenEvents
+                   {
+                       OnMissingRefreshToken = async (context) =>
+                       {
+                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
+                       }
+                   };
+               }).WithBackchannelLogout();
+
+            // Configure a custom LogoutTokenHandler, allowing you to clear the stateful session
+            services.AddTransient<ILogoutTokenHandler, CustomClearSessionLogoutTokenHandler>();
+            // Configure a custom ITicketStore to store the Identity Information on the server
+            services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
+            // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
+            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+              ConfigureCookieAuthenticationOptions>();
+        }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -81,6 +220,23 @@ namespace Auth0.AspNetCore.Authentication.Playground
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+    }
+
+    public class ConfigureCookieAuthenticationOptions
+  : IPostConfigureOptions<CookieAuthenticationOptions>
+    {
+        private readonly ITicketStore _ticketStore;
+
+        public ConfigureCookieAuthenticationOptions(ITicketStore ticketStore)
+        {
+            _ticketStore = ticketStore;
+        }
+
+        public void PostConfigure(string name,
+                 CookieAuthenticationOptions options)
+        {
+            options.SessionStore = _ticketStore;
         }
     }
 }
