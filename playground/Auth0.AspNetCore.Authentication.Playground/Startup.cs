@@ -21,7 +21,13 @@ namespace Auth0.AspNetCore.Authentication.Playground
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// Configure the SDK to use a all default settings.
+        /// This means the logout token is stored in memory.
+        /// 
+        /// NOT SUITABLE FOR PRODUCTION
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -61,6 +67,11 @@ namespace Auth0.AspNetCore.Authentication.Playground
 
         }
 
+        /// <summary>
+        /// Configure the SDK to use a custom LogoutTokenHandler to store the tokens.
+        /// This means the logout token is stored in memory.
+        /// </summary>
+        /// <param name="services"></param>
         private void ConfigureServicesAuth0CustomStore(IServiceCollection services)
         {
             services
@@ -87,9 +98,17 @@ namespace Auth0.AspNetCore.Authentication.Playground
                }).WithBackchannelLogout();
 
             // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
+            // The Identity information is still stored stateless, in the cookie.
             services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
         }
 
+        /// <summary>
+        /// Configure the SDK to use Stateful session without specifying a custom LogoutTokenHandler
+        /// This means the logout token is stored in memory.
+        ///
+        /// NOT SUITABLE FOR PRODUCTION
+        /// </summary>
+        /// <param name="services"></param>
         private void ConfigureServicesAuth0Statfull(IServiceCollection services)
         {
             services
@@ -122,6 +141,10 @@ namespace Auth0.AspNetCore.Authentication.Playground
               ConfigureCookieAuthenticationOptions>();
         }
 
+        /// <summary>
+        /// Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens.
+        /// </summary>
+        /// <param name="services"></param>
         private void ConfigureServicesAuth0StatfullCustomStore(IServiceCollection services)
         {
             services
@@ -157,6 +180,10 @@ namespace Auth0.AspNetCore.Authentication.Playground
               ConfigureCookieAuthenticationOptions>();
         }
 
+        /// <summary>
+        /// Configure the SDK to use Stateful session and a custom LogoutTokenHandler to not store the tokens but inmediatly clear the session.
+        /// </summary>
+        /// <param name="services"></param>
         private void ConfigureServicesAuth0StatfullInstantSessionClear(IServiceCollection services)
         {
             services
