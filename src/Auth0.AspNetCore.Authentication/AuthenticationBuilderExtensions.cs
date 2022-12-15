@@ -125,7 +125,7 @@ namespace Auth0.AspNetCore.Authentication
                 var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
                 var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
                 var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
-                var logoutTokenHandler = context.HttpContext.RequestServices.GetRequiredService<ILogoutTokenHandler>();
+                var logoutTokenHandler = context.HttpContext.RequestServices.GetService<ILogoutTokenHandler>();
 
                 if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
                 {
@@ -135,21 +135,25 @@ namespace Auth0.AspNetCore.Authentication
                     }
                 }
 
-                var issuer = $"https://{options.Domain}/";
-                var sid = context.Principal?.FindFirst("sid")?.Value;
-
-                var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
-
-                if (isLoggedOut)
+                // If backchannel logout is enabled
+                if (logoutTokenHandler != null)
                 {
-                    // Log out the user
-                    context.RejectPrincipal();
-                    await context.HttpContext.SignOutAsync();
+                    var issuer = $"https://{options.Domain}/";
+                    var sid = context.Principal?.FindFirst("sid")?.Value;
 
-                    // Temporary for testing
-                    // We shouldn't actualy remove anything
-                    await logoutTokenHandler.RemoveAsync(issuer, sid);
+                    var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
 
+                    if (isLoggedOut)
+                    {
+                        // Log out the user
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync();
+
+                        // Temporary for testing
+                        // We shouldn't actualy remove anything
+                        await logoutTokenHandler.RemoveAsync(issuer, sid);
+
+                    }
                 }
 
                 if (optionsWithAccessToken == null)

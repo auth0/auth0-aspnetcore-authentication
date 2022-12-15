@@ -9,6 +9,7 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Auth0.AspNetCore.Authentication.Playground
 {
@@ -21,26 +22,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
 
         public IConfiguration Configuration { get; }
 
-        /// <summary>
-        /// Configure the SDK to use a all default settings.
-        /// This means the logout token is stored in memory.
-        /// 
-        /// NOT SUITABLE FOR PRODUCTION
-        /// </summary>
-        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
-        {
-
-            //ConfigureServicesAuth0(services);
-            //ConfigureServicesAuth0CustomStore(services);
-            //ConfigureServicesAuth0Statfull(services);
-            //ConfigureServicesAuth0StatfullCustomStore(services);
-            ConfigureServicesAuth0StatfullInstantSessionClear(services);
-
-            services.AddControllersWithViews();
-        }
-
-        private void ConfigureServicesAuth0(IServiceCollection services)
         {
             services
                .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
@@ -65,6 +47,43 @@ namespace Auth0.AspNetCore.Authentication.Playground
                    };
                }).WithBackchannelLogout();
 
+
+
+            // The above configuration works but is not suitable for production as it uses an InMemory cache to store the logout token
+            // Instead, for production use any of the following, additional, configuration.
+            // Note: For the statefull scenario's, ensure to uncomment `ConfigureServicesAuth0Statfull` as well.
+
+
+            // ** STATELESS **
+
+            // 1. Configure the SDK to use a custom LogoutTokenHandler to store the tokens.
+            // 
+            // ConfigureServicesAuth0CustomStore(services);
+
+
+            // ** STATEFUL **
+
+            // Ensure to uncomment this when using any of the below configurations
+            // ConfigureStatefullSessions(services)
+
+
+            // 2. Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens.
+            //
+            // ConfigureServicesAuth0StatfullCustomStore(services);
+
+
+            // 3. Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens that relies on IDistributedCache.
+            //
+            // ConfigureServicesAuth0StatfullCustomStoreUsingDistributedCache(services);
+
+
+            // 4. Configure the SDK to use Stateful session and a custom LogoutTokenHandler to not store the tokens but inmediatly clear the session.
+            //
+            // ConfigureServicesAuth0StatfullInstantSessionClear(services);
+
+
+
+            services.AddControllersWithViews();
         }
 
         /// <summary>
@@ -74,72 +93,11 @@ namespace Auth0.AspNetCore.Authentication.Playground
         /// <param name="services"></param>
         private void ConfigureServicesAuth0CustomStore(IServiceCollection services)
         {
-            services
-               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
-               {
-                   options.Domain = Configuration["Auth0:Domain"];
-                   options.ClientId = Configuration["Auth0:ClientId"];
-                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
-               })
-               .WithAccessToken(options =>
-               {
-                   options.Audience = Configuration["Auth0:Audience"];
-                   options.UseRefreshTokens = true;
-
-                   options.Events = new Auth0WebAppWithAccessTokenEvents
-                   {
-                       OnMissingRefreshToken = async (context) =>
-                       {
-                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-                       }
-                   };
-               }).WithBackchannelLogout();
-
             // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
             // The Identity information is still stored stateless, in the cookie.
             services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
         }
 
-        /// <summary>
-        /// Configure the SDK to use Stateful session without specifying a custom LogoutTokenHandler
-        /// This means the logout token is stored in memory.
-        ///
-        /// NOT SUITABLE FOR PRODUCTION
-        /// </summary>
-        /// <param name="services"></param>
-        private void ConfigureServicesAuth0Statfull(IServiceCollection services)
-        {
-            services
-               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
-               {
-                   options.Domain = Configuration["Auth0:Domain"];
-                   options.ClientId = Configuration["Auth0:ClientId"];
-                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
-               })
-               .WithAccessToken(options =>
-               {
-                   options.Audience = Configuration["Auth0:Audience"];
-                   options.UseRefreshTokens = true;
-
-                   options.Events = new Auth0WebAppWithAccessTokenEvents
-                   {
-                       OnMissingRefreshToken = async (context) =>
-                       {
-                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-                       }
-                   };
-               }).WithBackchannelLogout();
-
-            // Configure a custom ITicketStore to store the Identity Information on the server
-            services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
-            // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
-            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
-              ConfigureCookieAuthenticationOptions>();
-        }
 
         /// <summary>
         /// Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens.
@@ -147,37 +105,20 @@ namespace Auth0.AspNetCore.Authentication.Playground
         /// <param name="services"></param>
         private void ConfigureServicesAuth0StatfullCustomStore(IServiceCollection services)
         {
-            services
-               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
-               {
-                   options.Domain = Configuration["Auth0:Domain"];
-                   options.ClientId = Configuration["Auth0:ClientId"];
-                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
-               })
-               .WithAccessToken(options =>
-               {
-                   options.Audience = Configuration["Auth0:Audience"];
-                   options.UseRefreshTokens = true;
-
-                   options.Events = new Auth0WebAppWithAccessTokenEvents
-                   {
-                       OnMissingRefreshToken = async (context) =>
-                       {
-                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-                       }
-                   };
-               }).WithBackchannelLogout();
-
-
             // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
             services.AddTransient<ILogoutTokenHandler, CustomLogoutTokenHandler>();
-            // Configure a custom ITicketStore to store the Identity Information on the server
-            services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
-            // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
-            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
-              ConfigureCookieAuthenticationOptions>();
+        }
+
+        /// <summary>
+        /// Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens that relies on IDistributedCache.
+        /// </summary>
+        /// <param name="services"></param>
+        private void ConfigureServicesAuth0StatfullCustomStoreUsingDistributedCache(IServiceCollection services)
+        {
+            // Configure a Distributed Cache
+            services.AddSingleton<IDistributedCache, Auth0DistributedCache>();
+            // Configure a custom LogoutTokenHandler, allowing you to store the logout token wherever you want
+            services.AddTransient<ILogoutTokenHandler, CustomDistributedLogoutTokenHandler>();
         }
 
         /// <summary>
@@ -186,36 +127,16 @@ namespace Auth0.AspNetCore.Authentication.Playground
         /// <param name="services"></param>
         private void ConfigureServicesAuth0StatfullInstantSessionClear(IServiceCollection services)
         {
-            services
-               .AddAuth0WebAppAuthentication(PlaygroundConstants.AuthenticationScheme, options =>
-               {
-                   options.Domain = Configuration["Auth0:Domain"];
-                   options.ClientId = Configuration["Auth0:ClientId"];
-                   options.ClientSecret = Configuration["Auth0:ClientSecret"];
-               })
-               .WithAccessToken(options =>
-               {
-                   options.Audience = Configuration["Auth0:Audience"];
-                   options.UseRefreshTokens = true;
-
-                   options.Events = new Auth0WebAppWithAccessTokenEvents
-                   {
-                       OnMissingRefreshToken = async (context) =>
-                       {
-                           await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                           var authenticationProperties = new LoginAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
-                           await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
-                       }
-                   };
-               }).WithBackchannelLogout();
-
             // Configure a custom LogoutTokenHandler, allowing you to clear the stateful session
             services.AddTransient<ILogoutTokenHandler, CustomClearSessionLogoutTokenHandler>();
+        }
+
+        private void ConfigureStatefullSessions(IServiceCollection services)
+        {
             // Configure a custom ITicketStore to store the Identity Information on the server
             services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
             // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
-            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
-              ConfigureCookieAuthenticationOptions>();
+            services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, ConfigureCookieAuthenticationOptions>();
         }
 
 
