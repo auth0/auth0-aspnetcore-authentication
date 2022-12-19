@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -14,9 +15,31 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
+using Microsoft.IdentityModel.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Auth0.AspNetCore.Authentication
 {
+    public static class IDictionaryExtensions
+    {
+        public static bool GetBooleanOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, bool defaultValue)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                return Convert.ToBoolean(dictionary[key]);
+            };
+
+            return defaultValue;
+        }
+    }
+
+    public static class OpenIdConnectConfigurationKeys
+    {
+        public static string BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
+        public static string BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
+    }
+    
     /// <summary>
     /// Contains <see href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationbuilder">AuthenticationBuilder</see> extension(s) for registering Auth0.
     /// </summary>
@@ -138,6 +161,8 @@ namespace Auth0.AspNetCore.Authentication
                 // If backchannel logout is enabled
                 if (logoutTokenHandler != null)
                 {
+                    await VerifyBackchannelLogoutSupport(context.HttpContext, oidcOptions);
+
                     var issuer = $"https://{options.Domain}/";
                     var sid = context.Principal?.FindFirst("sid")?.Value;
 
@@ -228,6 +253,29 @@ namespace Auth0.AspNetCore.Authentication
             using (var tokenClient = new TokenClient(httpClient))
             {
                 return await tokenClient.Refresh(options, refreshToken);
+            }
+        }
+
+        private static async Task VerifyBackchannelLogoutSupport(HttpContext context, OpenIdConnectOptions oidcOptions)
+        {
+            if (oidcOptions.Configuration == null)
+            {
+                oidcOptions.Configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(context.RequestAborted);
+            }
+
+            var additionalConfiguration = oidcOptions.Configuration.AdditionalData;
+            var supported = (additionalConfiguration?.GetBooleanOrDefault(OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED, false) ?? false);
+            var sessionSupported = additionalConfiguration?.GetBooleanOrDefault(OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED, false) ?? false;
+
+            if (!supported || !sessionSupported)
+            {
+                var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
+
+                if (loggerFactory != null)
+                {
+                    var logger = loggerFactory.CreateLogger("Auth0");
+                    logger.LogWarning("Configured back-channel logout, but OIDC configuration indicates lack of support.");
+                }
             }
         }
     }
