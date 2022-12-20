@@ -43,17 +43,4 @@ namespace Auth0.AspNetCore.Authentication
                 .AddAuth0WebAppAuthentication(authenticationScheme, configureOptions);
         }
     }
-
-    public static class EndpointRouteBuilderExtensions
-    {
-        public static void MapBackchannelEndpoint(this IEndpointRouteBuilder endpoints)
-        {
-            endpoints.MapPost("backchannel-logout", (context) =>
-            {
-                var handler = context.RequestServices.GetRequiredService<BackchannelLogoutHandler>();
-                return handler.HandleRequestAsync(context);
-            })
-                .AllowAnonymous();
-        }
-    }
 }
