@@ -605,7 +605,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opt =>
@@ -650,7 +650,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opt =>
@@ -707,7 +707,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, "org_456", nonce), (me) => me.HasAuth0ClientHeader())
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, "org_456", nonce), (me) => me.HasAuth0ClientHeader())
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opt =>
@@ -763,7 +763,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasAuth0ClientHeader())
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opt =>
@@ -827,8 +827,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20)
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
@@ -883,8 +883,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.OK, "456_ROTATED")
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.OK, "456_ROTATED")
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opts =>
@@ -943,8 +943,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.OK, null)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.OK, null)
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opts =>
@@ -1003,8 +1003,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.BadRequest)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.BadRequest)
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
@@ -1062,7 +1062,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(70)), (me) => me.HasGrantType("authorization_code"))
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(70)), (me) => me.HasGrantType("authorization_code"))
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
@@ -1159,7 +1159,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                         new KeyValuePair<string, string>("state", state),
                         new KeyValuePair<string, string>("nonce", nonce),
                         new KeyValuePair<string, string>("id_token",
-                            JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce,
+                            TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce,
                                 DateTime.Now.AddSeconds(20)))
                     };
 
@@ -1186,7 +1186,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20, true, HttpStatusCode.OK, null)
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20, true, HttpStatusCode.OK, null)
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opts =>

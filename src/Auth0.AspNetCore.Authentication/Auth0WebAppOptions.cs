@@ -29,6 +29,11 @@ namespace Auth0.AspNetCore.Authentication
         public string? ClientSecret { get; set; }
 
         /// <summary>
+        /// Client Assertion Signing Key
+        /// </summary>
+        public string? ClientAssertionSigningKey { get; set; }
+
+        /// <summary>
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")
         /// </summary>
         public string Scope { get; set; } = "openid profile";
