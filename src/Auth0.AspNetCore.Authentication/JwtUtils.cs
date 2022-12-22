@@ -3,74 +3,147 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Runtime;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Auth0.AspNetCore.Authentication
 {
-    class MyCustomCryptoProviderFactory : CryptoProviderFactory
+    interface ISigningCredentialsFactory: IDisposable
     {
-        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
+        public string SecurityAlgorithm { get; }
+
+        SigningCredentials GenerateSigningCredentials();
+    }
+
+    class RSASigningCredentialsFactory : ISigningCredentialsFactory
+    {
+        private RSACryptoServiceProvider _provider = new RSACryptoServiceProvider();
+
+        private readonly string privateKeyPem;
+
+        public string SecurityAlgorithm => SecurityAlgorithms.RsaSha256;
+
+        public RSASigningCredentialsFactory(string privateKeyPem)
         {
-            return base.CreateForSigning(key, algorithm);
+            this.privateKeyPem = privateKeyPem;
         }
-    }
-    class JwtCAPayload
-    {
-        public string ClientId { get; set; }
-        public string Audience { get; set; }
-    }
-    internal static class JwtUtils
-    {
-        public static string GenerateJwtToken(string privateKeyPem, JwtCAPayload payload)
+
+        public SigningCredentials GenerateSigningCredentials()
         {
-            //string privateKeyPem = File.ReadAllText("~/../../../../privateKey.pem");
-
-            // keeping only the payload of the key 
-            //privateKeyPem = privateKeyPem.Replace("-----BEGIN RSA PRIVATE KEY-----", "");
-            //privateKeyPem = privateKeyPem.Replace("-----END RSA PRIVATE KEY-----", "");
-
             byte[] privateKeyRaw = Convert.FromBase64String(privateKeyPem);
 
-            var signingCredentials = CreateSigningCredentials(privateKeyRaw);
+            _provider.ImportRSAPrivateKey(new ReadOnlySpan<byte>(privateKeyRaw), out _);
 
-            //using (var provider = new RSACryptoServiceProvider())
-            //{
-            //provider.ImportRSAPrivateKey(new ReadOnlySpan<byte>(privateKeyRaw), out _);
-            //var rsaSecurityKey = new RsaSecurityKey(provider);
-
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-                var tokenDescriptor = CreateSecurityTokenDescriptor(payload, signingCredentials);
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-
-                return tokenHandler.WriteToken(token);
-            //}
-
-
+            return new SigningCredentials(new RsaSecurityKey(_provider), SecurityAlgorithm); ;
         }
 
-        private static SecurityKey CreateSecurityKey(byte[] privateKeyRaw)
+        public void Dispose()
         {
-            using (var provider = new RSACryptoServiceProvider())
+            if (_provider != null)
             {
-                provider.ImportRSAPrivateKey(new ReadOnlySpan<byte>(privateKeyRaw), out _);
-                return new RsaSecurityKey(provider);
+                _provider.Dispose();
+            }
+        }
+    }
+
+    class HmacSigningCredentialsFactory : ISigningCredentialsFactory
+    {
+        private readonly string privateKeyPem;
+
+        public string SecurityAlgorithm => SecurityAlgorithms.HmacSha256;
+
+        public HmacSigningCredentialsFactory(string privateKeyPem)
+        {
+            this.privateKeyPem = privateKeyPem;
+        }
+
+        public SigningCredentials GenerateSigningCredentials()
+        {
+            return new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKeyPem)), SecurityAlgorithm);
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    class PSSigningCredentialsFactory : ISigningCredentialsFactory
+    {
+        private RSACryptoServiceProvider _provider = new RSACryptoServiceProvider(2048);
+
+        private readonly string privateKeyPem;
+
+        public string SecurityAlgorithm => SecurityAlgorithms.RsaSsaPssSha256;
+
+        public PSSigningCredentialsFactory(string privateKeyPem)
+        {
+            this.privateKeyPem = privateKeyPem;
+        }
+
+        public SigningCredentials GenerateSigningCredentials()
+        {
+            byte[] privateKeyRaw = Convert.FromBase64String(privateKeyPem);
+
+            _provider.ImportRSAPrivateKey(new ReadOnlySpan<byte>(privateKeyRaw), out _);
+
+            return new SigningCredentials(new RsaSecurityKey(_provider), SecurityAlgorithm);
+        }
+
+        public void Dispose()
+        {
+            if (_provider != null)
+            {
+                _provider.Dispose();
+            }
+        }
+    }
+
+    class JwtTokenFactory : IDisposable
+    {
+        private ISigningCredentialsFactory _factory;
+        private readonly string privateKeyPem;
+
+        // Should take IssuerSigningKey instead
+        public JwtTokenFactory(string privateKeyPem, string privateKeyType)
+        {
+            this.privateKeyPem = privateKeyPem;
+            this._factory = CreateSigningCredentialsFactory(privateKeyPem, privateKeyType);
+        }
+
+
+        public string GenerateToken(JwtCAPayload payload)
+        {
+            var signingCredentials = _factory.GenerateSigningCredentials();
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = CreateSecurityTokenDescriptor(payload, signingCredentials);
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        public void Dispose()
+        {
+            if (_factory != null)
+            {
+                _factory.Dispose();
             }
         }
 
-        private static SigningCredentials CreateSigningCredentials(byte[] privateKeyRaw)
+        private ISigningCredentialsFactory CreateSigningCredentialsFactory(string privateKey, string privateKeyType)
         {
-            using var provider = new RSACryptoServiceProvider();
-            
-            provider.ImportRSAPrivateKey(new ReadOnlySpan<byte>(privateKeyRaw), out _);
-            return new SigningCredentials(new RsaSecurityKey(provider), SecurityAlgorithms.RsaSha256)
+            switch (privateKeyType)
             {
-                CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
+                case SecurityAlgorithms.HmacSha256:
+                    return new HmacSigningCredentialsFactory(privateKey);
+                case SecurityAlgorithms.RsaSsaPssSha256:
+                    return new PSSigningCredentialsFactory(privateKey);
+                default:
+                    return new RSASigningCredentialsFactory(privateKey);
             };
-            
         }
 
         private static SecurityTokenDescriptor CreateSecurityTokenDescriptor(JwtCAPayload payload, SigningCredentials signingCredentials)
@@ -93,5 +166,63 @@ namespace Auth0.AspNetCore.Authentication
                 SigningCredentials = signingCredentials
             };
         }
+    }
+
+    class JwtTokenFactory2
+    {
+        private readonly SecurityKey securityKey;
+        private readonly string algorithm;
+
+        // Should take IssuerSigningKey instead
+        public JwtTokenFactory2(SecurityKey securityKey, string algorithm)
+        {
+            this.securityKey = securityKey;
+            this.algorithm = algorithm;
+        }
+
+
+        public string GenerateToken(JwtCAPayload payload)
+        {
+            var signingCredentials = CreateSigningCredentials();
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = CreateSecurityTokenDescriptor(payload, signingCredentials);
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        private SigningCredentials CreateSigningCredentials()
+        {
+            return new SigningCredentials(securityKey, algorithm);
+        }
+
+        private static SecurityTokenDescriptor CreateSecurityTokenDescriptor(JwtCAPayload payload, SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, payload.ClientId),
+                }),
+                IssuedAt = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddSeconds(180),
+                Issuer = payload.ClientId,
+                Audience = payload.Audience,
+                Claims = new Dictionary<string, object>
+            {
+                { JwtRegisteredClaimNames.Jti, Guid.NewGuid() },
+            },
+
+                SigningCredentials = signingCredentials
+            };
+        }
+    }
+
+    class JwtCAPayload
+    {
+        public string ClientId { get; set; }
+        public string Audience { get; set; }
     }
 }
