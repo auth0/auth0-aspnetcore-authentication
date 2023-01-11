@@ -57,5 +57,26 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
             var content = me.Content.ReadAsStringAsync().Result;
             return content.Contains($"grant_type={grantType}");
         }
+
+        /// <summary>
+        /// Indicate whether or not the HttpRequestMessage countains the `Auth0-Client` header.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>True if the request countains the `Auth0-Client` header, false if not.</returns>
+        public static bool HasClientSecret(this HttpRequestMessage me)
+        {
+            return HasBody(me, $"client_secret");
+        }
+
+        /// <summary>
+        /// Indicate whether or not the HttpRequestMessage countains the `Auth0-Client` header.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>True if the request countains the `Auth0-Client` header, false if not.</returns>
+        public static bool HasBody(this HttpRequestMessage me, string key)
+        {
+            var content = me.Content.ReadAsStringAsync().Result;
+            return content.Contains($"{key}=");
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Auth0.AspNetCore.Authentication
 
                 OnAccessDenied = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAccessDenied),
                 OnAuthenticationFailed = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthenticationFailed),
-                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived),
+                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived, CreateOnAuthorizationCodeReceived(auth0Options)),
                 OnMessageReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnMessageReceived),
                 OnRemoteFailure = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteFailure),
                 OnRemoteSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteSignOut),
@@ -36,7 +37,7 @@ namespace Auth0.AspNetCore.Authentication
             {
                 if (newHandler != null)
                 {
-                   await newHandler(context);
+                    await newHandler(context);
                 }
 
                 if (originalHandler != null)
@@ -84,14 +85,14 @@ namespace Auth0.AspNetCore.Authentication
                         postLogoutUri = request.Scheme + "://" + request.Host + request.PathBase + postLogoutUri;
                     }
 
-                    logoutUri += $"&returnTo={ Uri.EscapeDataString(postLogoutUri)}";
+                    logoutUri += $"&returnTo={Uri.EscapeDataString(postLogoutUri)}";
                 }
 
                 foreach (var (key, value) in parameters)
                 {
                     if (!string.IsNullOrEmpty(value))
                     {
-                        logoutUri += $"&{key}={ Uri.EscapeDataString(value)}";
+                        logoutUri += $"&{key}={Uri.EscapeDataString(value)}";
                     }
                     else
                     {
@@ -117,6 +118,24 @@ namespace Auth0.AspNetCore.Authentication
                 catch (IdTokenValidationException ex)
                 {
                     context.Fail(ex.Message);
+                }
+
+                return Task.CompletedTask;
+            };
+        }
+
+
+        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(Auth0WebAppOptions auth0Options)
+        {
+            return (context) =>
+            {
+                if (auth0Options.ClientAssertionSecurityKey != null)
+                {
+                    context.TokenEndpointRequest?.SetParameter("client_assertion", new JwtTokenFactory(auth0Options.ClientAssertionSecurityKey, auth0Options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
+                       .GenerateToken(auth0Options.ClientId, $"https://{auth0Options.Domain}/", auth0Options.ClientId
+                    ));
+
+                    context.TokenEndpointRequest?.SetParameter("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
                 }
 
                 return Task.CompletedTask;
