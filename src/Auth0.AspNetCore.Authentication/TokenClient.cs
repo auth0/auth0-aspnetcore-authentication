@@ -36,9 +36,10 @@ namespace Auth0.AspNetCore.Authentication
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
                 { "client_id", options.ClientId },
-                { "client_secret", options.ClientSecret! },
                 { "refresh_token", refreshToken }
             };
+
+            ApplyClientAuthentication(options, body);
 
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
@@ -55,6 +56,22 @@ namespace Auth0.AspNetCore.Authentication
 
                     return await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
                 }
+            }
+        }
+
+        private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body)
+        {
+            if (options.ClientAssertionSecurityKey != null)
+            {
+                body.Add("client_assertion", new JwtTokenFactory(options.ClientAssertionSecurityKey, options.ClientAssertionSecurityKeyAlgorithm!)
+                   .GenerateToken(options.ClientId, $"https://{options.Domain}/", options.ClientId
+                ));
+
+                body.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+            }
+            else
+            {
+                body.Add("client_secret", options.ClientSecret!);
             }
         }
     }
