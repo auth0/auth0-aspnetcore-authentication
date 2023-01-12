@@ -730,7 +730,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasBody("client_assertion"))
+                .MockToken(() => TestJwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasClientAssertion())
                 .Build();
 
             var provider = new RSACryptoServiceProvider();
