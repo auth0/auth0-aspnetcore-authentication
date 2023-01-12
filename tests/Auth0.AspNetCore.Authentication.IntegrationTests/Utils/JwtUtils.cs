@@ -11,7 +11,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Utils
     /// <summary>
     /// Utils class to generate a JWT token for testing purposes.
     /// </summary>
-    internal static class TestJwtUtils
+    internal static class JwtUtils
     {
         /// <summary>
         /// Generate a JWT token using the provided options
