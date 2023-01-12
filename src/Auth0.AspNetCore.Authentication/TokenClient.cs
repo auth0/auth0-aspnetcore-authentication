@@ -1,4 +1,5 @@
 ﻿using Auth0.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace Auth0.AspNetCore.Authentication
         {
             if (options.ClientAssertionSecurityKey != null)
             {
-                body.Add("client_assertion", new JwtTokenFactory(options.ClientAssertionSecurityKey, options.ClientAssertionSecurityKeyAlgorithm!)
+                body.Add("client_assertion", new JwtTokenFactory(options.ClientAssertionSecurityKey, options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
                    .GenerateToken(options.ClientId, $"https://{options.Domain}/", options.ClientId
                 ));
 
