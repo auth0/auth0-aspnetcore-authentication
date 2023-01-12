@@ -137,7 +137,7 @@ namespace Auth0.AspNetCore.Authentication
                             var expiresAt = DateTimeOffset.Parse(context.Properties.GetTokenValue("expires_at")!);
                             var leeway = 60;
                             var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
-                            var isExpired = difference <= 0;
+                            var isExpired = difference <= 1;
 
                             if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                             {
@@ -197,6 +197,11 @@ namespace Auth0.AspNetCore.Authentication
             if (string.IsNullOrWhiteSpace(options.ClientSecret) && options.ClientAssertionSecurityKey == null)
             {
                 throw new InvalidOperationException("Both Client Secret and Client Assertion can not be null when requesting an access token, one or the other has to be set.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.ClientSecret) && options.ClientAssertionSecurityKey != null)
+            {
+                throw new InvalidOperationException("Both Client Secret and Client Assertion can not be set at the same time when requesting an access token.");
             }
         }
 

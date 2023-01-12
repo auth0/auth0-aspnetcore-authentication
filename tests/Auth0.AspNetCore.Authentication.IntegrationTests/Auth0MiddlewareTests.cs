@@ -535,6 +535,25 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public void Should_Not_Allow_Configuring_WithAccessToken_With_Both_ClientSecret_And_ClientAssertion()
+        {
+            var provider = new RSACryptoServiceProvider();
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.ClientSecret = "123";
+                options.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
+                options.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Both Client Secret and Client Assertion can not be set at the same time when requesting an access token.");
+        }
+
+        [Fact]
         public void Should_Allow_Configuring_WithAccessToken_Without_ClientAssertion()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
