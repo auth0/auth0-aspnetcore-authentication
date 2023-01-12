@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -27,6 +28,16 @@ namespace Auth0.AspNetCore.Authentication
         /// Required when using <see cref="ResponseType"/> set to `code` or `code id_token`.
         /// </remarks>
         public string? ClientSecret { get; set; }
+
+        /// <summary>
+        /// Security Key to use with Client Assertion
+        /// </summary>
+        public SecurityKey? ClientAssertionSecurityKey { get; set; }
+
+        /// <summary>
+        /// Algorithm for the Security Key to use with Client Assertion
+        /// </summary>
+        public string? ClientAssertionSecurityKeyAlgorithm { get; set; }
 
         /// <summary>
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")

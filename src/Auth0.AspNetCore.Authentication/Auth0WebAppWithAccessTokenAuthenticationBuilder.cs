@@ -194,9 +194,14 @@ namespace Auth0.AspNetCore.Authentication
 
         private static void ValidateOptions(Auth0WebAppOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.ClientSecret))
+            if (string.IsNullOrWhiteSpace(options.ClientSecret) && options.ClientAssertionSecurityKey == null)
             {
-                throw new ArgumentNullException(nameof(options.ClientSecret), "Client Secret can not be null when requesting an access token.");
+                throw new InvalidOperationException("Both Client Secret and Client Assertion can not be null when requesting an access token, one or the other has to be set.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.ClientSecret) && options.ClientAssertionSecurityKey != null)
+            {
+                throw new InvalidOperationException("Both Client Secret and Client Assertion can not be set at the same time when requesting an access token.");
             }
         }
 

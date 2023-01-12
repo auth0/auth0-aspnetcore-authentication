@@ -15,6 +15,8 @@ using Auth0.AspNetCore.Authentication.IntegrationTests.Builders;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Utils;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
 {
@@ -520,7 +522,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_Configuring_WithAccessToken_Without_ClientSecret()
+        public void Should_Not_Allow_Configuring_WithAccessToken_Without_ClientSecret_And_ClientAssertion()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(null, options =>
             {
@@ -528,8 +530,60 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             });
 
             act.Should()
-                .Throw<ArgumentNullException>()
-                .Which.Message.Should().Be("Client Secret can not be null when requesting an access token. (Parameter 'ClientSecret')");
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Both Client Secret and Client Assertion can not be null when requesting an access token, one or the other has to be set.");
+        }
+
+        [Fact]
+        public void Should_Not_Allow_Configuring_WithAccessToken_With_Both_ClientSecret_And_ClientAssertion()
+        {
+            var provider = new RSACryptoServiceProvider();
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.ClientSecret = "123";
+                options.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
+                options.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Both Client Secret and Client Assertion can not be set at the same time when requesting an access token.");
+        }
+
+        [Fact]
+        public void Should_Allow_Configuring_WithAccessToken_Without_ClientAssertion()
+        {
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.ClientSecret = "123";
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .NotThrow<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void Should_Allow_Configuring_WithAccessToken_Without_ClientSecret()
+        {
+            var provider = new RSACryptoServiceProvider();
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+
+                options.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
+                options.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .NotThrow<InvalidOperationException>();
         }
 
         [Fact]
@@ -638,6 +692,99 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 }
             }
 
+        }
+
+        [Fact]
+        public async Task Should_Send_ClientSecret_To_Token_Endpoint()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasClientSecret())
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+                opt.ClientSecret = "123";
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Send_ClientAssertion_To_Token_Endpoint()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasClientAssertion())
+                .Build();
+
+            var provider = new RSACryptoServiceProvider();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+                opt.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
+                opt.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+                }
+            }
         }
 
         [Fact]
@@ -828,11 +975,68 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 .MockOpenIdConfig()
                 .MockJwks()
                 .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20)
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token") && me.HasClientSecret(), 20)
                 .Build();
             using (var server = TestServerBuilder.CreateServer(opts =>
             {
                 opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+            }))
+            {
+
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    mockHandler.Verify();
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Refresh_Access_Token_When_Expired_Using_Client_Assertion()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.Now.AddSeconds(20)), (me) => me.HasGrantType("refresh_token") && me.HasClientAssertion(), 20)
+                .Build();
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientAssertionSecurityKey = new RsaSecurityKey(new RSACryptoServiceProvider());
+                opts.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
                 opts.Backchannel = new HttpClient(mockHandler.Object);
             }, opts =>
             {
