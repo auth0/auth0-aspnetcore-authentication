@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.1.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.1.0) (2023-01-16)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.4...1.1.0)
+
+**Added**
+- Add support for Client Assertion [\#93](https://github.com/auth0/auth0-aspnetcore-authentication/pull/93) ([frederikprijck](https://github.com/frederikprijck))
+
+**Changed**
+- Drop .NET Core 3.1; Add .NET 7 [\#91](https://github.com/auth0/auth0-aspnetcore-authentication/pull/91) ([frederikprijck](https://github.com/frederikprijck))
+- Drop support for .NET5 [\#90](https://github.com/auth0/auth0-aspnetcore-authentication/pull/90) ([frederikprijck](https://github.com/frederikprijck))
+
+**Fixed**
+- Update Microsoft.IdentityModel.Protocols.OpenIdConnect dependency to avoid memory leak [\#89](https://github.com/auth0/auth0-aspnetcore-authentication/pull/89) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [1.0.4](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.0.4) (2022-09-19)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.3...1.0.4)
 

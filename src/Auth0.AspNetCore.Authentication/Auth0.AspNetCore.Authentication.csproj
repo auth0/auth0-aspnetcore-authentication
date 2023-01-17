@@ -36,7 +36,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <Version>1.0.4</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyVersion>$(Version)</AssemblyVersion>
