@@ -8,8 +8,4 @@
     <ProjectReference Include="..\..\src\Auth0.AspNetCore.Authentication\Auth0.AspNetCore.Authentication.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.1" />
-  </ItemGroup>
-
 </Project>
