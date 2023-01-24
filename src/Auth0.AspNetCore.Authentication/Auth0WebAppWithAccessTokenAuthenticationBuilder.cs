@@ -93,7 +93,7 @@ namespace Auth0.AspNetCore.Authentication
         {
             return (context) =>
             {
-                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
+                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
 
                 if (!string.IsNullOrWhiteSpace(optionsWithAccessToken.Audience))
                 {
@@ -113,9 +113,9 @@ namespace Auth0.AspNetCore.Authentication
         {
             return async (context) =>
             {
-                var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(authenticationScheme);
-                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
-                var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(authenticationScheme);
+                var options = context.HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<Auth0WebAppOptions>>().Get(authenticationScheme);
+                var optionsWithAccessToken = context.HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<Auth0WebAppWithAccessTokenOptions>>().Get(authenticationScheme);
+                var oidcOptions = context.HttpContext.RequestServices.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>().Get(authenticationScheme);
 
                 if (context.Properties.Items.TryGetValue(".AuthScheme", out var authScheme))
                 {
