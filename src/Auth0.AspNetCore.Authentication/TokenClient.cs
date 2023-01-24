@@ -9,27 +9,17 @@ using System.Threading.Tasks;
 
 namespace Auth0.AspNetCore.Authentication
 {
-    internal class TokenClient : IDisposable
+    internal class TokenClient
     {
         private readonly HttpClient _httpClient;
-        private readonly bool _isHttpClientOwner;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
         {
             IgnoreNullValues = true,
         };
 
-        public TokenClient(HttpClient? httpClient = null)
+        public TokenClient(HttpClient httpClient)
         {
-            _isHttpClientOwner = httpClient == null;
-            _httpClient = httpClient ?? new HttpClient();
-        }
-
-        public void Dispose()
-        {
-            if (_isHttpClientOwner)
-            {
-                _httpClient.Dispose();
-            }
+            _httpClient = httpClient;
         }
 
         public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken)
