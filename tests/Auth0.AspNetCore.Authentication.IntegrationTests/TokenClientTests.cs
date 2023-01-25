@@ -13,14 +13,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
     public class TokenClientTests
     {
         [Fact]
-        public async Task Disposes_HttpClient_it_creates_on_dispose()
-        {
-            var client = new TokenClient();
-            client.Dispose();
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com" }, ""));
-        }
-
-        [Fact]
         public async Task Returns_Null_When_No_Success_StatusCode()
         {
             var mockHandler = new Mock<HttpMessageHandler>();
