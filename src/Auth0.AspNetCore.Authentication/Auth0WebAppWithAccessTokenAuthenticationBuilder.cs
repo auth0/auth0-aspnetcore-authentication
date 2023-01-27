@@ -184,12 +184,11 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient? httpClient = null)
+        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
         {
-            using (var tokenClient = new TokenClient(httpClient))
-            {
-                return await tokenClient.Refresh(options, refreshToken);
-            }
+            var tokenClient = new TokenClient(httpClient);
+            
+            return await tokenClient.Refresh(options, refreshToken);
         }
 
         private static void ValidateOptions(Auth0WebAppOptions options)
