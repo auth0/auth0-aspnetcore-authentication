@@ -82,7 +82,7 @@ namespace Auth0.AspNetCore.Authentication
                     options.Events.OnRedirectToIdentityProvider = Utils.ProxyEvent(CreateOnRedirectToIdentityProvider(_authenticationScheme), options.Events.OnRedirectToIdentityProvider);
                 });
 
-            _services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+            _services.AddOptions<CookieAuthenticationOptions>(_options.CookieName)
                 .Configure(options =>
                 {
                     options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(_authenticationScheme), options.Events.OnValidatePrincipal);

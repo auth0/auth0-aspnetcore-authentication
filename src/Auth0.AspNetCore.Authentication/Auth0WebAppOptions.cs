@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,14 @@ namespace Auth0.AspNetCore.Authentication
     /// </summary>
     public class Auth0WebAppOptions
     {
+        /// <summary>
+        /// The name of the cookie scheme to use
+        /// </summary>
+        /// <remarks>
+        /// The default is <see cref="CookieAuthenticationDefaults.AuthenticationScheme"/>
+        /// </remarks>
+        public string CookieName { get; set; } = CookieAuthenticationDefaults.AuthenticationScheme;
+
         /// <summary>
         /// Auth0 domain name, e.g. tenant.auth0.com.
         /// </summary>
