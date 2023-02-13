@@ -18,7 +18,7 @@ namespace Auth0.AspNetCore.Authentication
         /// <remarks>
         /// The default is <see cref="CookieAuthenticationDefaults.AuthenticationScheme"/>
         /// </remarks>
-        public string CookieName { get; set; } = CookieAuthenticationDefaults.AuthenticationScheme;
+        public string CookieAuthenticationScheme { get; set; } = CookieAuthenticationDefaults.AuthenticationScheme;
 
         /// <summary>
         /// Auth0 domain name, e.g. tenant.auth0.com.
