@@ -55,7 +55,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
         }
 
         [Authorize]
-        public async Task Logout([FromQuery(Name = "extraParameters")] Dictionary<string, string> extraParameters = null)
+        public async Task Logout([FromQuery(Name = "extraParameters")] Dictionary<string, string> extraParameters = null, [FromQuery(Name = "cookieAuthenticationScheme")] string cookieAuthenticationScheme = null)
         {
             // Indicate here where Auth0 should redirect the user after a logout.
             // Note that the resulting absolute Uri must be whitelisted in the
@@ -72,7 +72,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
             }
 
             await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationPropertiesBuilder.Build());
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(cookieAuthenticationScheme ?? CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         [Authorize]

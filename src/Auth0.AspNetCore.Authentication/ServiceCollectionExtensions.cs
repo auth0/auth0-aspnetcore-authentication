@@ -31,9 +31,13 @@ namespace Auth0.AspNetCore.Authentication
             return services
                 .AddAuthentication(options =>
                 {
-                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    var authOptions = new Auth0WebAppOptions();
+
+                    configureOptions(authOptions);
+
+                    options.DefaultAuthenticateScheme = authOptions.CookieAuthenticationScheme;
+                    options.DefaultSignInScheme = authOptions.CookieAuthenticationScheme;
+                    options.DefaultChallengeScheme = authOptions.CookieAuthenticationScheme;
                 })
                 .AddAuth0WebAppAuthentication(authenticationScheme, configureOptions);
         }
