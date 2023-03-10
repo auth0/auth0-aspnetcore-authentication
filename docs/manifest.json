@@ -34,7 +34,7 @@
           "hash": "StlHZ/HZTjBY/7dZ6jXBkZEzxMbIgRx3K4m8l9Pajac="
         }
       },
-      "is_incremental": false,
+      "is_incremental": true,
       "version": ""
     },
     {
@@ -79,7 +79,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html",
-          "hash": "KzI88o0/cZ1IGRnnq7Yg3Y+tY+SPdVTuUk7gOPgqpwQ="
+          "hash": "2YSRLbKiAz5U/9GZMd2fRjgJCTaWMFREdMehSaHx8bU="
         }
       },
       "is_incremental": false,
@@ -231,7 +231,7 @@
           "can_incremental": true,
           "incrementalPhase": "build",
           "total_file_count": 1,
-          "skipped_file_count": 0
+          "skipped_file_count": 1
         },
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": true,

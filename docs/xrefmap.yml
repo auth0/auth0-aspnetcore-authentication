@@ -187,6 +187,19 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientSecret
   nameWithType: Auth0WebAppOptions.ClientSecret
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme
+  name: CookieAuthenticationScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CookieAuthenticationScheme
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme
+  nameWithType: Auth0WebAppOptions.CookieAuthenticationScheme
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme*
+  name: CookieAuthenticationScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CookieAuthenticationScheme_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme
+  nameWithType: Auth0WebAppOptions.CookieAuthenticationScheme
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Domain
   name: Domain
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Domain

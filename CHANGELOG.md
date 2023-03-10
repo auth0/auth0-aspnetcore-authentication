@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.2.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.2.0) (2023-03-10)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.1.0...1.2.0)
+
+**Added**
+- Ensure CookieName is configurable [\#98](https://github.com/auth0/auth0-aspnetcore-authentication/pull/98) ([nquandt](https://github.com/nquandt))
+
+**Changed**
+- Avoid creating HttpClient when using refresh tokens [\#95](https://github.com/auth0/auth0-aspnetcore-authentication/pull/95) ([frederikprijck](https://github.com/frederikprijck))
+- Use IOptionsMonitor instead of IOptionsSnapshot [\#96](https://github.com/auth0/auth0-aspnetcore-authentication/pull/96) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [1.1.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.1.0) (2023-01-16)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.0.4...1.1.0)
 
