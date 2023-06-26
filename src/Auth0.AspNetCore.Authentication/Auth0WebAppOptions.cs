@@ -105,5 +105,7 @@ namespace Auth0.AspNetCore.Authentication
         /// the user will be prompted to re-authenticate.
         /// </summary>
         public TimeSpan? MaxAge { get; set; }
+
+        public bool? ForceScopeInRefreshRequests { get; set; }
     }
 }

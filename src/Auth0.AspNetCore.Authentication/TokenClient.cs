@@ -27,8 +27,12 @@ namespace Auth0.AspNetCore.Authentication
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
                 { "client_id", options.ClientId },
-                { "refresh_token", refreshToken }
+                { "refresh_token", refreshToken },                
             };
+
+            if (options.ForceScopeInRefreshRequests == true) {
+                body.Add("scope", options.Scope);
+            }
 
             ApplyClientAuthentication(options, body);
 
