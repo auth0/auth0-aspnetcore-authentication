@@ -66,8 +66,12 @@ namespace Auth0.AspNetCore.Authentication
         public bool SkipCookieMiddleware { get; set; } = false;
 
         /// <summary>
-        /// The Id of the organization to which the users should log in to.
+        /// The Organization to which the users should log in to.
         /// </summary>
+        /// <remarks>
+        /// - If you provide an Organization ID (a string with the prefix `org_`), it will be validated against the `org_id` claim of your user's ID Token. The validation is case-sensitive.
+        /// - If you provide an Organization Name (a string *without* the prefix `org_`), it will be validated against the `org_name` claim of your user's ID Token.The validation is case-insensitive.
+        /// </remarks>
         public string? Organization { get; set; }
 
         /// <summary>
