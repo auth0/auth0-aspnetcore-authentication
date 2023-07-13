@@ -79,7 +79,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html",
-          "hash": "2YSRLbKiAz5U/9GZMd2fRjgJCTaWMFREdMehSaHx8bU="
+          "hash": "4MwyODOhtlbTY6KyEm0iFElfosZ30Y32cqVF9gl3Hmw="
         }
       },
       "is_incremental": false,
@@ -151,7 +151,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html",
-          "hash": "p76ictLBDhYTl0M/Z3ehKgyOJodOdGA0T5sNKfCHvK0="
+          "hash": "pSnOxhV1yG5DxTUOe+p+Utn1bdDlmsq25sdV0Ohpgvs="
         }
       },
       "is_incremental": false,
