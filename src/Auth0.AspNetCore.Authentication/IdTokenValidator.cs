@@ -18,15 +18,18 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!string.IsNullOrWhiteSpace(organization))
             {
-                var organizationClaimValue = token.Claims.SingleOrDefault(claim => claim.Type == "org_id")?.Value;
+                var organizationClaim = organization.StartsWith("org_") ? "org_id" : "org_name";
+                var rawOrganizationClaimValue = token.Claims.SingleOrDefault(claim => claim.Type == organizationClaim)?.Value;
+                var organizationClaimValue = organizationClaim == "org_name" ? rawOrganizationClaimValue?.ToLower() : rawOrganizationClaimValue;
+                var expectedOrganization = organizationClaim == "org_name" ? organization.ToLower() : organization;
 
                 if (string.IsNullOrWhiteSpace(organizationClaimValue))
                 {
-                    throw new IdTokenValidationException("Organization claim must be a string present in the ID token.");
+                    throw new IdTokenValidationException($"Organization claim ({organizationClaim}) must be a string present in the ID token.");
                 }
-                else if (organizationClaimValue != organization)
+                else if (organizationClaimValue != expectedOrganization)
                 {
-                    throw new IdTokenValidationException($"Organization claim mismatch in the ID token; expected \"{organization}\", found \"{organizationClaimValue}\".");
+                    throw new IdTokenValidationException($"Organization claim ({organizationClaim}) mismatch in the ID token; expected \"{expectedOrganization}\", found \"{organizationClaimValue}\".");
                 }
             }
 

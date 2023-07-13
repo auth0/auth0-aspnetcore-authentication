@@ -187,7 +187,7 @@ Apart from being able to configure the organization globally, the SDK's `LoginAu
 
 ```csharp
 var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-    .WithOrganization("YOUR_ORGANIZATION")
+    .WithOrganization("YOUR_ORGANIZATION_ID_OR_NAME")
     .Build();
 
 await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
@@ -197,7 +197,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 ### Organization claim validation
 
-If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` claim you get back in the ID token. In that case, you should validate the `org_id` claim yourself (e.g. by checking it against a list of valid organization ID's or comparing it with the application's URL).
+If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` (or `org_name`) claim you get back in the ID token. In that case, you should validate the `org_id` (or `org_name`) claim yourself (e.g. by checking it against a list of valid organization ID's (or names) or comparing it with the application's URL).
 
 ```
 services.AddAuth0WebAppAuthentication(options =>
