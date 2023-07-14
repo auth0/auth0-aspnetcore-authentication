@@ -289,18 +289,13 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
 
 Before you can add [Role Based Access Control](https://auth0.com/docs/manage-users/access-control/rbac), you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
 
-Once the role is created and assigned to the required user(s), you will need to create a [rule](https://auth0.com/docs/rules/current) that adds the role(s) to the ID token so that it is available to your backend. To do so, go to the [new rule page](https://manage.auth0.com/#/rules/new) and create an empty rule. Then, use the following code for your rule:
+Once the role is created and assigned to the required user(s), you will need to create an [action](https://auth0.com/docs/rules/curren](https://auth0.com/docs/customize/actions) that adds the role(s) to the ID token so that it is available to your backend. To do so, go to the [Auth0 dashboard](https://manage.auth0.com/) and create a custom action. Then, use the following code for your action:
 
 ```javascript
-function (user, context, callback) {
-  const assignedRoles = (context.authorization || {}).roles;
-  const idTokenClaims = context.idToken || {};
+exports.onExecutePostLogin = async (event, api) => {
+  const assignedRoles = (event.authorization || {}).roles;
 
-  idTokenClaims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] = assignedRoles;
-
-  context.idToken = idTokenClaims;
-
-  callback(null, user, context);
+  api.idToken.setCustomClaim('http://schemas.microsoft.com/ws/2008/06/identity/claims/role', assignedRoles);
 }
 ```
 
