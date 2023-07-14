@@ -840,7 +840,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     innerException
                         .Should()
                         .BeOfType<Exception>()
-                        .Which.Message.Should().Be("Organization claim must be a string present in the ID token.");
+                        .Which.Message.Should().Be("Organization claim (org_id) must be a string present in the ID token.");
                 }
             }
         }
@@ -896,7 +896,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     innerException
                         .Should()
                         .BeOfType<Exception>()
-                        .Which.Message.Should().Be("Organization claim mismatch in the ID token; expected \"org_123\", found \"org_456\".");
+                        .Which.Message.Should().Be("Organization claim (org_id) mismatch in the ID token; expected \"org_123\", found \"org_456\".");
                 }
             }
         }
