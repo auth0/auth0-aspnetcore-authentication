@@ -289,7 +289,7 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
 
 Before you can add [Role Based Access Control](https://auth0.com/docs/manage-users/access-control/rbac), you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
 
-Once the role is created and assigned to the required user(s), you will need to create an [action](https://auth0.com/docs/rules/curren](https://auth0.com/docs/customize/actions) that adds the role(s) to the ID token so that it is available to your backend. To do so, go to the [Auth0 dashboard](https://manage.auth0.com/) and create a custom action. Then, use the following code for your action:
+Once the role is created and assigned to the required user(s), you will need to create an [action](https://auth0.com/docs/customize/actions) that adds the role(s) to the ID token so that it is available to your backend. To do so, go to the [Auth0 dashboard](https://manage.auth0.com/) and create a custom action. Then, use the following code for your action:
 
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
