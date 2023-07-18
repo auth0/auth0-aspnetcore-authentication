@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.3.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.3.1) (2023-07-18)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.3.0...1.3.1)
+
+**Changed**
+- Do not lowercase org_name claim [\#110](https://github.com/auth0/auth0-aspnetcore-authentication/pull/110) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [1.3.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.3.0) (2023-07-13)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.2.0...1.3.0)
 
