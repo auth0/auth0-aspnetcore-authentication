@@ -19,8 +19,7 @@ namespace Auth0.AspNetCore.Authentication
             if (!string.IsNullOrWhiteSpace(organization))
             {
                 var organizationClaim = organization.StartsWith("org_") ? "org_id" : "org_name";
-                var rawOrganizationClaimValue = token.Claims.SingleOrDefault(claim => claim.Type == organizationClaim)?.Value;
-                var organizationClaimValue = organizationClaim == "org_name" ? rawOrganizationClaimValue?.ToLower() : rawOrganizationClaimValue;
+                var organizationClaimValue = token.Claims.SingleOrDefault(claim => claim.Type == organizationClaim)?.Value;
                 var expectedOrganization = organizationClaim == "org_name" ? organization.ToLower() : organization;
 
                 if (string.IsNullOrWhiteSpace(organizationClaimValue))
