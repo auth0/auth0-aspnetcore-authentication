@@ -113,7 +113,7 @@ namespace Auth0.AspNetCore.Authentication
             {
                 try
                 {
-                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties.Items);
+                    IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties?.Items);
                 }
                 catch (IdTokenValidationException ex)
                 {
