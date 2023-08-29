@@ -14,7 +14,7 @@ namespace Auth0.AspNetCore.Authentication
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
         };
 
         public TokenClient(HttpClient httpClient)

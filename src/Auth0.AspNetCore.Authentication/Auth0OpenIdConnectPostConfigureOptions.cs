@@ -8,7 +8,7 @@ namespace Auth0.AspNetCore.Authentication
     /// </summary>
     internal class Auth0OpenIdConnectPostConfigureOptions : IPostConfigureOptions<OpenIdConnectOptions>
     {
-        public void PostConfigure(string name, OpenIdConnectOptions options)
+        public void PostConfigure(string? name, OpenIdConnectOptions options)
         {
             options.Backchannel.DefaultRequestHeaders.Add("Auth0-Client", Utils.CreateAgentString());
         }
