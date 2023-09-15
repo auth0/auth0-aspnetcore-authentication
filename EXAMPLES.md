@@ -6,6 +6,7 @@
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
+- [Blazor Server](#blazor-server)
 
 ## Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
@@ -311,3 +312,59 @@ public IActionResult Admin()
     return View();
 }
 ```
+
+## Blazor Server
+
+The `Auth0-AspNetCore-Authentication` SDK works with Blazor Server in an almost identical way as how it's integrated in ASP.NET Core MVC.
+
+### Register the SDK
+Registering the SDK is identical as with ASP.NET Core MVC, where you should call `builder.Services.AddAuth0WebAppAuthentication` inside `Program.cs` and ensure to register the authentication middleware (`UseAuthentication()` and `UseAuthorization()`).
+
+```csharp
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = builder.Configuration["Auth0:Domain"];
+    options.ClientId = builder.Configuration["Auth0:ClientId"];
+    options.Scope = "openid profile email";
+});
+
+// ...
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+```
+
+### Adding Login and Logout
+Adding Login and Logout is different in the sense that you should create a `PageModel` implementation for both to allow the user to be redirected to and redirect further to Auth0.
+
+```csharp
+public class LoginModel : PageModel
+{
+    public async Task OnGet(string redirectUri)
+    {
+        var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+            .WithRedirectUri(redirectUri)
+            .Build();
+
+        await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+    }
+}
+
+[Authorize]
+public class LogoutModel : PageModel
+{
+    public async Task OnGet()
+    {
+        var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+                .WithRedirectUri("/")
+                .Build();
+
+        await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+}
+```
+
+For more information on how to integrate this SDK in Blazor Server, have a look at our dedicated [Blazor Server example](https://github.com/auth0-samples/auth0-aspnetcore-blazor-samples/blob/main/Quickstart/Sample).
