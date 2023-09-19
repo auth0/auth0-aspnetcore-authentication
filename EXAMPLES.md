@@ -318,7 +318,7 @@ public IActionResult Admin()
 The `Auth0-AspNetCore-Authentication` SDK works with Blazor Server in an almost identical way as how it's integrated in ASP.NET Core MVC.
 
 ### Register the SDK
-Registering the SDK is identical as with ASP.NET Core MVC, where you should call `builder.Services.AddAuth0WebAppAuthentication` inside `Program.cs` and ensure to register the authentication middleware (`UseAuthentication()` and `UseAuthorization()`).
+Registering the SDK is identical as with ASP.NET Core MVC, where you should call `builder.Services.AddAuth0WebAppAuthentication` inside `Program.cs`, and ensure the authentication middleware (`UseAuthentication()` and `UseAuthorization()`) is registered.
 
 ```csharp
 builder.Services.AddAuth0WebAppAuthentication(options =>
@@ -336,8 +336,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-### Adding Login and Logout
-Adding Login and Logout is different in the sense that you should create a `PageModel` implementation for both to allow the user to be redirected to and redirect further to Auth0.
+### Add login and logout
+Adding login and logout capabilities is different in the sense that you should create a `PageModel` implementation for both to allow the user to be redirected to Auth0.
 
 ```csharp
 public class LoginModel : PageModel
