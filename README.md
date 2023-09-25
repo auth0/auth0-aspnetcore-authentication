@@ -111,6 +111,8 @@ public async Task Logout()
 
 For more code samples on how to integrate the **auth0-aspnetcore-authentication** SDK in your **ASP.NET MVC** application, have a look at our [examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md).
 
+> This SDK also works with Blazor Server, for more info see [the Blazor Server section in our examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md#blazor-server).
+
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
 
