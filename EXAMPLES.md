@@ -366,5 +366,3 @@ public class LogoutModel : PageModel
     }
 }
 ```
-
-For more information on how to integrate this SDK in Blazor Server, have a look at our dedicated [Blazor Server example](https://github.com/auth0-samples/auth0-aspnetcore-blazor-samples/blob/main/Quickstart/Sample).
