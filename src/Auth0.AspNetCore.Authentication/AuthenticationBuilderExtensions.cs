@@ -100,9 +100,17 @@ namespace Auth0.AspNetCore.Authentication
 
         private static void ValidateOptions(Auth0WebAppOptions auth0Options)
         {
-            if (CodeResponseTypes.Contains(auth0Options.ResponseType!) && string.IsNullOrWhiteSpace(auth0Options.ClientSecret))
+            if (CodeResponseTypes.Contains(auth0Options.ResponseType!))
             {
-                throw new ArgumentNullException(nameof(auth0Options.ClientSecret), "Client Secret can not be null when using `code` or `code id_token` as the response_type.");
+                if (string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey == null)
+                {
+                    throw new ArgumentNullException("Both Client Secret and Client Assertion can not be null when using `code` or `code id_token` as the response_type.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey != null)
+                {
+                    throw new ArgumentNullException("Both Client Secret and Client Assertion can not be set at the same time when using `code` or `code id_token` as the response_type.");
+                }
             }
         }
     }
