@@ -510,7 +510,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_ResponseType_Code_Without_ClientSecret()
+        public void Should_Not_Allow_ResponseType_Code_Without_ClientSecret_Or_ClientAssertion()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
             {
@@ -518,8 +518,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             });
 
             act.Should()
-                .Throw<ArgumentNullException>()
-                .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Both Client Secret and Client Assertion can not be null when using `code` or `code id_token` as the response_type.");
         }
 
         [Fact]
@@ -555,6 +555,41 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public void Should_Allow_Setting_Code_Without_ClientSecret()
+        {
+            var provider = new RSACryptoServiceProvider();
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.ResponseType = "code";
+                options.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
+                options.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .NotThrow<Exception>();
+        }
+
+        [Fact]
+        public void Should_Allow_Setting_Code_Without_ClientAssertion()
+        {
+            var provider = new RSACryptoServiceProvider();
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
+            {
+                options.ResponseType = "code";
+                options.ClientSecret = "123";
+            }, options =>
+            {
+                options.Audience = "http://local.auth0";
+            });
+
+            act.Should()
+                .NotThrow<Exception>();
+        }
+
+        [Fact]
         public void Should_Allow_Configuring_WithAccessToken_Without_ClientAssertion()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
@@ -575,7 +610,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var provider = new RSACryptoServiceProvider();
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
             {
-
                 options.ClientAssertionSecurityKey = new RsaSecurityKey(provider);
                 options.ClientAssertionSecurityKeyAlgorithm = SecurityAlgorithms.RsaSha256;
             }, options =>
@@ -584,7 +618,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             });
 
             act.Should()
-                .NotThrow<InvalidOperationException>();
+                .NotThrow<Exception>();
         }
 
         [Fact]
