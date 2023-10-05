@@ -510,7 +510,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
-        public void Should_Not_Allow_ResponseType_Code_Without_ClientSecret()
+        public void Should_Not_Allow_ResponseType_Code_Without_ClientSecret_Or_ClientAssertion()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(options =>
             {
@@ -518,8 +518,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             });
 
             act.Should()
-                .Throw<ArgumentNullException>()
-                .Which.Message.Should().Be("Client Secret can not be null when using `code` or `code id_token` as the response_type. (Parameter 'ClientSecret')");
+                .Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("Both Client Secret and Client Assertion can not be null when using `code` or `code id_token` as the response_type.");
         }
 
         [Fact]

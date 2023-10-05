@@ -104,12 +104,12 @@ namespace Auth0.AspNetCore.Authentication
             {
                 if (string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey == null)
                 {
-                    throw new ArgumentNullException("Both Client Secret and Client Assertion can not be null when using `code` or `code id_token` as the response_type.");
+                    throw new InvalidOperationException("Both Client Secret and Client Assertion can not be null when using `code` or `code id_token` as the response_type.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey != null)
                 {
-                    throw new ArgumentNullException("Both Client Secret and Client Assertion can not be set at the same time when using `code` or `code id_token` as the response_type.");
+                    throw new InvalidOperationException("Both Client Secret and Client Assertion can not be set at the same time when using `code` or `code id_token` as the response_type.");
                 }
             }
         }
