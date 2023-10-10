@@ -32,11 +32,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Organization
   nameWithType: Auth0AuthenticationParameters.Organization
 - uid: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter(System.String)
-  name: Parameter(String)
+  name: Parameter(string)
   href: api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Authentication_Auth0AuthenticationParameters_Parameter_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter(System.String)
-  fullName: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter(System.String)
-  nameWithType: Auth0AuthenticationParameters.Parameter(String)
+  name.vb: Parameter(String)
+  fullName: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter(String)
+  nameWithType: Auth0AuthenticationParameters.Parameter(string)
+  nameWithType.vb: Auth0AuthenticationParameters.Parameter(String)
 - uid: Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.Parameter*
   name: Parameter
   href: api/Auth0.AspNetCore.Authentication.Auth0AuthenticationParameters.html#Auth0_AspNetCore_Authentication_Auth0AuthenticationParameters_Parameter_
@@ -68,32 +71,41 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder
   nameWithType: Auth0WebAppAuthenticationBuilder
-- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(IServiceCollection,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
   name: Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0WebAppOptions)
-  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_IServiceCollection_Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
-  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(IServiceCollection,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  name.vb: New(IServiceCollection, Auth0WebAppOptions)
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.New(Microsoft.Extensions.DependencyInjection.IServiceCollection, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
   nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection, Auth0WebAppOptions)
-- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(IServiceCollection,System.String,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  name: Auth0WebAppAuthenticationBuilder(IServiceCollection, String, Auth0WebAppOptions)
-  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_IServiceCollection_System_String_Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
-  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(IServiceCollection,System.String,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection, System.String, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection, String, Auth0WebAppOptions)
+  nameWithType.vb: Auth0WebAppAuthenticationBuilder.New(IServiceCollection, Auth0WebAppOptions)
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  name: Auth0WebAppAuthenticationBuilder(IServiceCollection, string, Auth0WebAppOptions)
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_String_Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  name.vb: New(IServiceCollection, String, Auth0WebAppOptions)
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, string, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.New(Microsoft.Extensions.DependencyInjection.IServiceCollection, String, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder(IServiceCollection, string, Auth0WebAppOptions)
+  nameWithType.vb: Auth0WebAppAuthenticationBuilder.New(IServiceCollection, String, Auth0WebAppOptions)
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor*
   name: Auth0WebAppAuthenticationBuilder
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder__ctor_
   commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.#ctor
   isSpec: "True"
+  name.vb: New
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.New
   nameWithType: Auth0WebAppAuthenticationBuilder.Auth0WebAppAuthenticationBuilder
-- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions})
+  nameWithType.vb: Auth0WebAppAuthenticationBuilder.New
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions})
   name: WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions>)
-  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithAccessToken_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__
-  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions})
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithAccessToken_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions})
   name.vb: WithAccessToken(Action(Of Auth0WebAppWithAccessTokenOptions))
-  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>)
-  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions))
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken(System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions))
   nameWithType: Auth0WebAppAuthenticationBuilder.WithAccessToken(Action<Auth0WebAppWithAccessTokenOptions>)
   nameWithType.vb: Auth0WebAppAuthenticationBuilder.WithAccessToken(Action(Of Auth0WebAppWithAccessTokenOptions))
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken*
@@ -310,31 +322,34 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder
   nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder
-- uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
   name: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions)
-  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_IServiceCollection_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
-  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  name.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions)
-  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
-  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions), Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Authentication_Auth0WebAppOptions_
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  name.vb: New(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions)
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>, Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.New(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions), Auth0.AspNetCore.Authentication.Auth0WebAppOptions)
   nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions)
-  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions)
-- uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions,System.String)
-  name: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions, String)
-  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_IServiceCollection_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Authentication_Auth0WebAppOptions_System_String_
-  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions,System.String)
-  name.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions, String)
-  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>, Auth0.AspNetCore.Authentication.Auth0WebAppOptions, System.String)
-  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions), Auth0.AspNetCore.Authentication.Auth0WebAppOptions, System.String)
-  nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions, String)
-  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions, String)
+  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.New(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions)
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions,System.String)
+  name: Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions, string)
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenOptions__Auth0_AspNetCore_Authentication_Auth0WebAppOptions_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions},Auth0.AspNetCore.Authentication.Auth0WebAppOptions,System.String)
+  name.vb: New(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions, String)
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions>, Auth0.AspNetCore.Authentication.Auth0WebAppOptions, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.New(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions), Auth0.AspNetCore.Authentication.Auth0WebAppOptions, String)
+  nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder(IServiceCollection, Action<Auth0WebAppWithAccessTokenOptions>, Auth0WebAppOptions, string)
+  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.New(IServiceCollection, Action(Of Auth0WebAppWithAccessTokenOptions), Auth0WebAppOptions, String)
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor*
   name: Auth0WebAppWithAccessTokenAuthenticationBuilder
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppWithAccessTokenAuthenticationBuilder__ctor_
   commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.#ctor
   isSpec: "True"
+  name.vb: New
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  fullName.vb: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.New
   nameWithType: Auth0WebAppWithAccessTokenAuthenticationBuilder.Auth0WebAppWithAccessTokenAuthenticationBuilder
+  nameWithType.vb: Auth0WebAppWithAccessTokenAuthenticationBuilder.New
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents
   name: Auth0WebAppWithAccessTokenEvents
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenEvents.html
@@ -431,23 +446,23 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions
   fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions
   nameWithType: AuthenticationBuilderExtensions
-- uid: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+- uid: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name: AddAuth0WebAppAuthentication(AuthenticationBuilder, Action<Auth0WebAppOptions>)
-  href: api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Authentication_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_AuthenticationBuilder_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
-  commentId: M:Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+  href: api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Authentication_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_Microsoft_AspNetCore_Authentication_AuthenticationBuilder_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name.vb: AddAuth0WebAppAuthentication(AuthenticationBuilder, Action(Of Auth0WebAppOptions))
-  fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
-  fullName.vb: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
+  fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
   nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action<Auth0WebAppOptions>)
   nameWithType.vb: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, Action(Of Auth0WebAppOptions))
-- uid: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder,System.String,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
-  name: AddAuth0WebAppAuthentication(AuthenticationBuilder, String, Action<Auth0WebAppOptions>)
-  href: api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Authentication_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_AuthenticationBuilder_System_String_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
-  commentId: M:Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder,System.String,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+- uid: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.String,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+  name: AddAuth0WebAppAuthentication(AuthenticationBuilder, string, Action<Auth0WebAppOptions>)
+  href: api/Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.html#Auth0_AspNetCore_Authentication_AuthenticationBuilderExtensions_AddAuth0WebAppAuthentication_Microsoft_AspNetCore_Authentication_AuthenticationBuilder_System_String_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.String,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name.vb: AddAuth0WebAppAuthentication(AuthenticationBuilder, String, Action(Of Auth0WebAppOptions))
-  fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, System.String, Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
-  fullName.vb: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, System.String, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
-  nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, String, Action<Auth0WebAppOptions>)
+  fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, string, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, String, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
+  nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, string, Action<Auth0WebAppOptions>)
   nameWithType.vb: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication(AuthenticationBuilder, String, Action(Of Auth0WebAppOptions))
 - uid: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication*
   name: AddAuth0WebAppAuthentication
@@ -462,22 +477,25 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder
   fullName: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder
   nameWithType: BaseAuthenticationPropertiesBuilder
-- uid: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name: BaseAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  href: api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__
-  commentId: M:Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name.vb: BaseAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
-  fullName: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(System.Nullable<AuthenticationProperties>)
-  fullName.vb: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(System.Nullable(Of AuthenticationProperties))
-  nameWithType: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  nameWithType.vb: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
+- uid: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: BaseAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  href: api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name.vb: New(AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties?)
+  fullName.vb: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.New(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  nameWithType.vb: BaseAuthenticationPropertiesBuilder.New(AuthenticationProperties)
 - uid: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor*
   name: BaseAuthenticationPropertiesBuilder
   href: api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder__ctor_
   commentId: Overload:Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.#ctor
   isSpec: "True"
+  name.vb: New
   fullName: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder
+  fullName.vb: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.New
   nameWithType: BaseAuthenticationPropertiesBuilder.BaseAuthenticationPropertiesBuilder
+  nameWithType.vb: BaseAuthenticationPropertiesBuilder.New
 - uid: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
   name: AuthenticationProperties
   href: api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_BaseAuthenticationPropertiesBuilder_AuthenticationProperties
@@ -490,22 +508,25 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder
   nameWithType: LoginAuthenticationPropertiesBuilder
-- uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name: LoginAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__
-  commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name.vb: LoginAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(System.Nullable<AuthenticationProperties>)
-  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(System.Nullable(Of AuthenticationProperties))
-  nameWithType: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  nameWithType.vb: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
+- uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: LoginAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name.vb: New(AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties?)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.New(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.New(AuthenticationProperties)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor*
   name: LoginAuthenticationPropertiesBuilder
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder__ctor_
   commentId: Overload:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.#ctor
   isSpec: "True"
+  name.vb: New
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.New
   nameWithType: LoginAuthenticationPropertiesBuilder.LoginAuthenticationPropertiesBuilder
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.New
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.Build
   name: Build()
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_Build
@@ -520,11 +541,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.Build
   nameWithType: LoginAuthenticationPropertiesBuilder.Build
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
-  name: WithAudience(String)
+  name: WithAudience(string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithAudience_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience(System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithAudience(String)
+  name.vb: WithAudience(String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience(String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithAudience(string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithAudience(String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience*
   name: WithAudience
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithAudience_
@@ -533,11 +557,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithAudience
   nameWithType: LoginAuthenticationPropertiesBuilder.WithAudience
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
-  name: WithInvitation(String)
+  name: WithInvitation(string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithInvitation_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation(System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithInvitation(String)
+  name.vb: WithInvitation(String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation(String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithInvitation(string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithInvitation(String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation*
   name: WithInvitation
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithInvitation_
@@ -546,11 +573,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithInvitation
   nameWithType: LoginAuthenticationPropertiesBuilder.WithInvitation
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
-  name: WithOrganization(String)
+  name: WithOrganization(string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithOrganization_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization(System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithOrganization(String)
+  name.vb: WithOrganization(String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization(String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithOrganization(string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithOrganization(String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization*
   name: WithOrganization
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithOrganization_
@@ -559,11 +589,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithOrganization
   nameWithType: LoginAuthenticationPropertiesBuilder.WithOrganization
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
-  name: WithParameter(String, String)
+  name: WithParameter(string, string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter(System.String, System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithParameter(String, String)
+  name.vb: WithParameter(String, String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter(string, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter(String, String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithParameter(string, string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithParameter(String, String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter*
   name: WithParameter
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithParameter_
@@ -572,11 +605,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithParameter
   nameWithType: LoginAuthenticationPropertiesBuilder.WithParameter
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  name: WithRedirectUri(String)
+  name: WithRedirectUri(string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithRedirectUri_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithRedirectUri(String)
+  name.vb: WithRedirectUri(String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri(String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithRedirectUri(string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithRedirectUri(String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri*
   name: WithRedirectUri
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithRedirectUri_
@@ -585,11 +621,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithRedirectUri
   nameWithType: LoginAuthenticationPropertiesBuilder.WithRedirectUri
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
-  name: WithScope(String)
+  name: WithScope(string)
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithScope_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope(System.String)
-  nameWithType: LoginAuthenticationPropertiesBuilder.WithScope(String)
+  name.vb: WithScope(String)
+  fullName: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope(String)
+  nameWithType: LoginAuthenticationPropertiesBuilder.WithScope(string)
+  nameWithType.vb: LoginAuthenticationPropertiesBuilder.WithScope(String)
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.WithScope*
   name: WithScope
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LoginAuthenticationPropertiesBuilder_WithScope_
@@ -603,22 +642,25 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder
   fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder
   nameWithType: LogoutAuthenticationPropertiesBuilder
-- uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name: LogoutAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder__ctor_System_Nullable_AuthenticationProperties__
-  commentId: M:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor(System.Nullable{AuthenticationProperties})
-  name.vb: LogoutAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
-  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(System.Nullable<AuthenticationProperties>)
-  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(System.Nullable(Of AuthenticationProperties))
-  nameWithType: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(Nullable<AuthenticationProperties>)
-  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(Nullable(Of AuthenticationProperties))
+- uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name: LogoutAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder__ctor_Microsoft_AspNetCore_Authentication_AuthenticationProperties_
+  commentId: M:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  name.vb: New(AuthenticationProperties)
+  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(Microsoft.AspNetCore.Authentication.AuthenticationProperties?)
+  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.New(Microsoft.AspNetCore.Authentication.AuthenticationProperties)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder(AuthenticationProperties?)
+  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.New(AuthenticationProperties)
 - uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor*
   name: LogoutAuthenticationPropertiesBuilder
   href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder__ctor_
   commentId: Overload:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.#ctor
   isSpec: "True"
+  name.vb: New
   fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder
+  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.New
   nameWithType: LogoutAuthenticationPropertiesBuilder.LogoutAuthenticationPropertiesBuilder
+  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.New
 - uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.Build
   name: Build()
   href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_Build
@@ -632,15 +674,15 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.Build
   nameWithType: LogoutAuthenticationPropertiesBuilder.Build
-- uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.Nullable{System.String})
-  name: WithParameter(String, Nullable<String>)
-  href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithParameter_System_String_System_Nullable_System_String__
-  commentId: M:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.Nullable{System.String})
-  name.vb: WithParameter(String, Nullable(Of String))
-  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String, System.Nullable<System.String>)
-  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String, System.Nullable(Of System.String))
-  nameWithType: LogoutAuthenticationPropertiesBuilder.WithParameter(String, Nullable<String>)
-  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.WithParameter(String, Nullable(Of String))
+- uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  name: WithParameter(string, string?)
+  href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithParameter_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(System.String,System.String)
+  name.vb: WithParameter(String, String)
+  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(string, string?)
+  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter(String, String)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithParameter(string, string?)
+  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.WithParameter(String, String)
 - uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter*
   name: WithParameter
   href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithParameter_
@@ -649,11 +691,14 @@ references:
   fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithParameter
   nameWithType: LogoutAuthenticationPropertiesBuilder.WithParameter
 - uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  name: WithRedirectUri(String)
+  name: WithRedirectUri(string)
   href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_System_String_
   commentId: M:Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(System.String)
-  nameWithType: LogoutAuthenticationPropertiesBuilder.WithRedirectUri(String)
+  name.vb: WithRedirectUri(String)
+  fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri(String)
+  nameWithType: LogoutAuthenticationPropertiesBuilder.WithRedirectUri(string)
+  nameWithType.vb: LogoutAuthenticationPropertiesBuilder.WithRedirectUri(String)
 - uid: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri*
   name: WithRedirectUri
   href: api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html#Auth0_AspNetCore_Authentication_LogoutAuthenticationPropertiesBuilder_WithRedirectUri_
@@ -667,23 +712,23 @@ references:
   commentId: T:Auth0.AspNetCore.Authentication.ServiceCollectionExtensions
   fullName: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions
   nameWithType: ServiceCollectionExtensions
-- uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+- uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name: AddAuth0WebAppAuthentication(IServiceCollection, Action<Auth0WebAppOptions>)
-  href: api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html#Auth0_AspNetCore_Authentication_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_IServiceCollection_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
-  commentId: M:Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+  href: api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html#Auth0_AspNetCore_Authentication_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name.vb: AddAuth0WebAppAuthentication(IServiceCollection, Action(Of Auth0WebAppOptions))
-  fullName: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
-  fullName.vb: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
+  fullName: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
   nameWithType: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action<Auth0WebAppOptions>)
   nameWithType.vb: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, Action(Of Auth0WebAppOptions))
-- uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection,System.String,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
-  name: AddAuth0WebAppAuthentication(IServiceCollection, String, Action<Auth0WebAppOptions>)
-  href: api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html#Auth0_AspNetCore_Authentication_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_IServiceCollection_System_String_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
-  commentId: M:Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection,System.String,Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+- uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
+  name: AddAuth0WebAppAuthentication(IServiceCollection, string, Action<Auth0WebAppOptions>)
+  href: api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html#Auth0_AspNetCore_Authentication_ServiceCollectionExtensions_AddAuth0WebAppAuthentication_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_String_System_Action_Auth0_AspNetCore_Authentication_Auth0WebAppOptions__
+  commentId: M:Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.Action{Auth0.AspNetCore.Authentication.Auth0WebAppOptions})
   name.vb: AddAuth0WebAppAuthentication(IServiceCollection, String, Action(Of Auth0WebAppOptions))
-  fullName: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, System.String, Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
-  fullName.vb: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, System.String, Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
-  nameWithType: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, String, Action<Auth0WebAppOptions>)
+  fullName: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, string, System.Action<Auth0.AspNetCore.Authentication.Auth0WebAppOptions>)
+  fullName.vb: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection, String, System.Action(Of Auth0.AspNetCore.Authentication.Auth0WebAppOptions))
+  nameWithType: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, string, Action<Auth0WebAppOptions>)
   nameWithType.vb: ServiceCollectionExtensions.AddAuth0WebAppAuthentication(IServiceCollection, String, Action(Of Auth0WebAppOptions))
 - uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.AddAuth0WebAppAuthentication*
   name: AddAuth0WebAppAuthentication
