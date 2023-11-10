@@ -52,7 +52,7 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!auth0Options.SkipCookieMiddleware)
             {
-                builder.AddCookie(auth0Options.CookieAuthenticationScheme );
+                builder.AddCookie(auth0Options.CookieAuthenticationScheme);
             }
 
             builder.Services.Configure(authenticationScheme, configureOptions);
