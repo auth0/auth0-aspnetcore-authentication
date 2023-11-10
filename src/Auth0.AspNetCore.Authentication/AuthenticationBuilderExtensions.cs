@@ -52,7 +52,7 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!auth0Options.SkipCookieMiddleware)
             {
-                builder.AddCookie(auth0Options.CookieAuthenticationScheme);
+                builder.AddCookie(auth0Options.CookieAuthenticationScheme );
             }
 
             builder.Services.Configure(authenticationScheme, configureOptions);
@@ -78,6 +78,7 @@ namespace Auth0.AspNetCore.Authentication
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel!;
             oidcOptions.MaxAge = auth0Options.MaxAge;
+            oidcOptions.AccessDeniedPath = auth0Options.AccessDeniedPath;
 
             if (!oidcOptions.Scope.Contains("openid"))
             {
