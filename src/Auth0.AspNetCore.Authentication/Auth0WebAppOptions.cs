@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -109,5 +110,13 @@ namespace Auth0.AspNetCore.Authentication
         /// the user will be prompted to re-authenticate.
         /// </summary>
         public TimeSpan? MaxAge { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the optional path the user agent is redirected to if the user
+        /// doesn't approve the authorization demand requested by the remote server.
+        /// This property is not set by default. In this case, an exception is thrown
+        /// if an access_denied response is returned by the remote authorization server.
+        /// </summary>
+        public PathString AccessDeniedPath { get; set; }
     }
 }

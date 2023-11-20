@@ -78,6 +78,7 @@ namespace Auth0.AspNetCore.Authentication
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel!;
             oidcOptions.MaxAge = auth0Options.MaxAge;
+            oidcOptions.AccessDeniedPath = auth0Options.AccessDeniedPath;
 
             if (!oidcOptions.Scope.Contains("openid"))
             {
