@@ -36,6 +36,16 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
         {
             return me.RequestUri.AbsolutePath.Contains("oauth/token");
         }
+        
+        /// <summary>
+        /// Indicate whether or not the HttpRequestMessage points to `oauth/par`.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>True if the request points to `oauth/par`, false if not.</returns>
+        public static bool IsPAREndPoint(this HttpRequestMessage me)
+        {
+            return me.RequestUri.AbsolutePath.Contains("oauth/par");
+        }
 
         /// <summary>
         /// Indicate whether or not the HttpRequestMessage countains the `Auth0-Client` header.

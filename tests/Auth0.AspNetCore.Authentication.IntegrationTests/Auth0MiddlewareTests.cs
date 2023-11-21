@@ -18,6 +18,7 @@ using Auth0.AspNetCore.Authentication.IntegrationTests.Utils;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Linq;
+using Auth0.AspNetCore.Authentication.Exceptions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
@@ -88,6 +89,62 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     redirectUri.Authority.Should().Be(Configuration["Auth0:Domain"]);
                     redirectUri.AbsolutePath.Should().Be("/authorize");
+                }
+            }
+        }
+        
+        [Fact]
+        public async Task Should_Post_To_PAR_Endpoint()
+        {
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockPAR("https://my-par-request-uri")
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+             {
+                 opt.UsePushedAuthorization = true;
+                 opt.Backchannel = new HttpClient(mockHandler.Object);
+             }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var response = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var redirectUri = response.Headers.Location;
+                    var queryParameters = UriUtils.GetQueryParams(redirectUri);
+                    var requestUri = queryParameters["request_uri"];
+                    
+                    requestUri.Should().Be("https://my-par-request-uri");
+                    redirectUri.AbsolutePath.Should().Be("/authorize");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Handle_Errors_From_PAR_Endpoint()
+        {
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockPAR("https://my-par-request-uri", null, 70, HttpStatusCode.BadRequest)
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+                   {
+                       opt.UsePushedAuthorization = true;
+                       opt.Backchannel = new HttpClient(mockHandler.Object);
+                   }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    Func<Task> act = () => client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    
+                    var exception = await act.Should().ThrowAsync<ErrorApiException>();
+
+                    exception.And.ApiError.Error.Should().Be("Test_Error");
+                    exception.And.ApiError.Message.Should().Be("Test Error");
+                    exception.And.Message.Should().Be("Test Error");
                 }
             }
         }
