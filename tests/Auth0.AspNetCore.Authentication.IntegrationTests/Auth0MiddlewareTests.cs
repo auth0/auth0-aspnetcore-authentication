@@ -94,6 +94,32 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
         
         [Fact]
+        public async Task Should_Throw_When_Using_PAR_But_No_OIDC_Config()
+        {
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig("wellknownconfig_without_par.json")
+                .MockJwks()
+                .MockPAR("https://my-par-request-uri")
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+                   {
+                       opt.UsePushedAuthorization = true;
+                       opt.Backchannel = new HttpClient(mockHandler.Object);
+                   }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    Func<Task> act = () => client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+                    
+                    var exception = await act.Should().ThrowAsync<InvalidOperationException>();
+
+                    exception.And.Message.Should().Be("Trying to use pushed authorization, but no value for 'pushed_authorization_request_endpoint' was found in the open id configuration.");
+                }
+            }
+        }
+        
+        [Fact]
         public async Task Should_Post_To_PAR_Endpoint()
         {
             var mockHandler = new OidcMockBuilder()

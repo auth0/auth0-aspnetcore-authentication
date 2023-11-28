@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -22,13 +23,17 @@ internal static class PushedAuthorizationRequestHandler
         // Read the PAR Endpoint from the OIDC configuration.
         var oidcConfiguration =
             await oidcOptions.ConfigurationManager?.GetConfigurationAsync(default)!;
-        var parEndpoint = oidcConfiguration?.AdditionalData["pushed_authorization_request_endpoint"] as string;
+
+        object? rawParEndpoint = string.Empty;
+        oidcConfiguration?.AdditionalData.TryGetValue("pushed_authorization_request_endpoint", out rawParEndpoint);
+        string? parEndpoint = rawParEndpoint as string;
 
         // If PAR was enabled in the options, but no `pushed_authorization_request_endpoint` value is find
-        // in the OIDC configuration, we will skip using Pushed Authorization Request.
+        // in the OIDC configuration, we will throw an error.
         if (string.IsNullOrEmpty(parEndpoint))
         {
-            return;
+            throw new InvalidOperationException(
+                "Trying to use pushed authorization, but no value for 'pushed_authorization_request_endpoint' was found in the open id configuration.");
         }
         
         var message = context.ProtocolMessage;

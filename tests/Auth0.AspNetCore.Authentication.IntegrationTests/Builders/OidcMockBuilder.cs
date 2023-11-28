@@ -24,7 +24,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
         /// Mock the `.well-known/openid-configuration` request.
         /// </summary>
         /// <returns>The contents of `wellknownconfig.json`, containing some dummy information needed for the tests.</returns>
-        public OidcMockBuilder MockOpenIdConfig()
+        public OidcMockBuilder MockOpenIdConfig(string configFile = "wellknownconfig.json")
         {
             _mockHandler
                    .Protected()
@@ -33,7 +33,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
                           ItExpr.Is<HttpRequestMessage>(me => me.IsOpenIdConfigurationEndPoint()),
                           ItExpr.IsAny<CancellationToken>()
                        )
-                       .ReturnsAsync(ReturnResource("wellknownconfig.json").Result);
+                       .ReturnsAsync(ReturnResource(configFile).Result);
 
             return this;
         }
