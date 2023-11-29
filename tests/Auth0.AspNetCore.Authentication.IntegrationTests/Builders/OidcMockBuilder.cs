@@ -24,7 +24,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
         /// Mock the `.well-known/openid-configuration` request.
         /// </summary>
         /// <returns>The contents of `wellknownconfig.json`, containing some dummy information needed for the tests.</returns>
-        public OidcMockBuilder MockOpenIdConfig()
+        public OidcMockBuilder MockOpenIdConfig(string configFile = "wellknownconfig.json")
         {
             _mockHandler
                    .Protected()
@@ -33,7 +33,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
                           ItExpr.Is<HttpRequestMessage>(me => me.IsOpenIdConfigurationEndPoint()),
                           ItExpr.IsAny<CancellationToken>()
                        )
-                       .ReturnsAsync(ReturnResource("wellknownconfig.json").Result);
+                       .ReturnsAsync(ReturnResource(configFile).Result);
 
             return this;
         }
@@ -77,6 +77,31 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
                   Content = new StringContent(BuildTokenResponse(idTokenFunc(), expiresIn, includeAccessToken, refreshToken)),
               })
               .Verifiable();
+
+            return this;
+        }
+        
+        /// <summary>
+        /// Mock the `oauth/par` request.
+        /// </summary>
+        /// <param name="requestUri">Value to set for the request_uri property on the PAR response.</param>
+        /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
+        /// <returns></returns>
+        public OidcMockBuilder MockPAR(string requestUri, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            _mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(me => me.IsPAREndPoint() && (matcher == null || matcher(me))),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(() => new HttpResponseMessage()
+                {
+                    StatusCode = statusCode,
+                    Content = new StringContent(statusCode == HttpStatusCode.OK ? BuildPARResponse(requestUri, expiresIn) : BuildPARError()),
+                })
+                .Verifiable();
 
             return this;
         }
@@ -124,6 +149,28 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
             }
             var token = JsonConvert.SerializeObject(tokenContents);
             return token;
+        }
+        
+        private string BuildPARResponse(string requestUri, int expiresIn)
+        {
+            var tokenContents = new Dictionary<string, object>
+            {
+                ["request_uri"] = requestUri,
+                ["expires_in"] = expiresIn
+            };
+            
+            return JsonConvert.SerializeObject(tokenContents);
+        }
+        
+        private string BuildPARError()
+        {
+            var error = new Dictionary<string, object>
+            {
+                ["error"] = "Test_Error",
+                ["error_description"] = "Test Error"
+            };
+            
+            return JsonConvert.SerializeObject(error);
         }
     }
 }

@@ -95,8 +95,7 @@ namespace Auth0.AspNetCore.Authentication
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
             };
-
-            oidcOptions.Events = OpenIdConnectEventsFactory.Create(auth0Options);
+            oidcOptions.Events = OpenIdConnectEventsFactory.Create(auth0Options, oidcOptions);
         }
 
         private static void ValidateOptions(Auth0WebAppOptions auth0Options)

@@ -118,5 +118,10 @@ namespace Auth0.AspNetCore.Authentication
         /// if an access_denied response is returned by the remote authorization server.
         /// </summary>
         public PathString AccessDeniedPath { get; set; }
+
+        /// <summary>
+        /// Sets whether to use pushed authorization requests or not.
+        /// </summary>
+        public bool UsePushedAuthorization { get; set; } = false;
     }
 }

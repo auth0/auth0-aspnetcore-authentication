@@ -1,20 +1,20 @@
-﻿using Auth0.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Auth0.AspNetCore.Authentication.PushedAuthorizationRequest;
 
 namespace Auth0.AspNetCore.Authentication
 {
     internal class OpenIdConnectEventsFactory
     {
-        internal static OpenIdConnectEvents Create(Auth0WebAppOptions auth0Options)
+        internal static OpenIdConnectEvents Create(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions)
         {
             return new OpenIdConnectEvents
             {
-                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options)),
+                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options, oidcOptions)),
                 OnRedirectToIdentityProviderForSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut, CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
                 OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated, CreateOnTokenValidated(auth0Options)),
 
@@ -47,9 +47,9 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions)
         {
-            return (context) =>
+            return async (context) =>
             {
                 // Set auth0Client querystring parameter for /authorize
                 context.ProtocolMessage.SetParameter("auth0Client", Utils.CreateAgentString());
@@ -64,7 +64,10 @@ namespace Auth0.AspNetCore.Authentication
                     context.Properties.Items[Auth0AuthenticationParameters.Organization] = auth0Options.Organization;
                 }
 
-                return Task.CompletedTask;
+                if (auth0Options.UsePushedAuthorization)
+                {
+                    await PushedAuthorizationRequestHandler.HandleAsync(context, oidcOptions);
+                }
             };
         }
 
@@ -194,5 +197,6 @@ namespace Auth0.AspNetCore.Authentication
 
             return parameters;
         }
+
     }
 }
