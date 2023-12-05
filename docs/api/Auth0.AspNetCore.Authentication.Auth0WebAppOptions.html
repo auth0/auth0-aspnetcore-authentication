@@ -17,7 +17,7 @@
       
       
       
-      <meta name="docfx:docurl" content="https://github.com/auth0/auth0-aspnetcore-authentication/new/chore/update-docs/apiSpec/new?filename=Auth0_AspNetCore_Authentication_Auth0WebAppOptions.md&amp;value=---%0Auid%3A%20Auth0.AspNetCore.Authentication.Auth0WebAppOptions%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="docfx:docurl" content="https://github.com/auth0/auth0-aspnetcore-authentication/new/release/1.4.0/apiSpec/new?filename=Auth0_AspNetCore_Authentication_Auth0WebAppOptions.md&amp;value=---%0Auid%3A%20Auth0.AspNetCore.Authentication.Auth0WebAppOptions%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
       <meta name="loc:inThisArticle" content="In this article">
       <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
       <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
@@ -90,7 +90,7 @@
 
   <h1 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions" class="text-break">
     Class Auth0WebAppOptions
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L13"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L14"><i class="bi bi-code-slash"></i></a>
   </h1>
 
   <div class="facts text-secondary">
@@ -154,11 +154,46 @@
 </h2>
 
 
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_AccessDeniedPath_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath*"></a>
+
+  <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_AccessDeniedPath" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath">
+  AccessDeniedPath
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L120"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets or sets the optional path the user agent is redirected to if the user
+doesn't approve the authorization demand requested by the remote server.
+This property is not set by default. In this case, an exception is thrown
+if an access_denied response is returned by the remote authorization server.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PathString AccessDeniedPath { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.http.pathstring">PathString</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
   <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Backchannel_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Backchannel*"></a>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Backchannel" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Backchannel">
   Backchannel
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L104"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L105"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Backchannel used to communicate with the Identity Provider.</p>
@@ -190,7 +225,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CallbackPath" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CallbackPath">
   CallbackPath
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L60"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L61"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>The path within the application to redirect the user to.</p>
@@ -225,7 +260,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientAssertionSecurityKey" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientAssertionSecurityKey">
   ClientAssertionSecurityKey
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L44"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L45"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Security Key to use with Client Assertion</p>
@@ -257,7 +292,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientAssertionSecurityKeyAlgorithm" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientAssertionSecurityKeyAlgorithm">
   ClientAssertionSecurityKeyAlgorithm
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L49"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L50"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Algorithm for the Security Key to use with Client Assertion</p>
@@ -289,7 +324,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientId" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientId">
   ClientId
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L31"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L32"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Client ID of the application.</p>
@@ -321,7 +356,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ClientSecret" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ClientSecret">
   ClientSecret
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L39"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L40"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Client Secret of the application.</p>
@@ -356,7 +391,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_CookieAuthenticationScheme" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.CookieAuthenticationScheme">
   CookieAuthenticationScheme
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L21"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L22"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>The name of the cookie scheme to use</p>
@@ -391,7 +426,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Domain" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Domain">
   Domain
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L26"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L27"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Auth0 domain name, e.g. tenant.auth0.com.</p>
@@ -423,7 +458,7 @@
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_LoginParameters" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.LoginParameters">
   LoginParameters
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L86"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L87"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Parameters to be send to Auth0's <code>/authorize</code> endpoint.</p>
@@ -461,7 +496,7 @@ options.LoginParameters = new Dictionary{string, string}() { {&quot;Test&quot;, 
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_MaxAge" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.MaxAge">
   MaxAge
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L111"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L112"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>If provided, will set the 'max_age' parameter with the authentication request.
@@ -495,7 +530,7 @@ the user will be prompted to re-authenticate.</p>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_OpenIdConnectEvents" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.OpenIdConnectEvents">
   OpenIdConnectEvents
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L91"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L92"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Events allowing you to hook into specific moments in the OpenID Connect pipeline.</p>
@@ -527,7 +562,7 @@ the user will be prompted to re-authenticate.</p>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Organization" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Organization">
   Organization
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L75"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L76"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>The Organization to which the users should log in to.</p>
@@ -565,7 +600,7 @@ the user will be prompted to re-authenticate.</p>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ResponseType" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ResponseType">
   ResponseType
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L99"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L100"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Set the ResponseType to be used.</p>
@@ -600,7 +635,7 @@ the user will be prompted to re-authenticate.</p>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Scope" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Scope">
   Scope
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L54"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L55"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Scopes to be used to request token(s). (e.g. &quot;Scope1 Scope2 Scope3&quot;)</p>
@@ -632,7 +667,7 @@ the user will be prompted to re-authenticate.</p>
 
   <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SkipCookieMiddleware" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SkipCookieMiddleware">
   SkipCookieMiddleware
-  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/chore/update-docs/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L66"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L67"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Whether or not to skip adding the Cookie Middleware.</p>
@@ -659,6 +694,38 @@ the user will be prompted to re-authenticate.</p>
   <h4 class="section" id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SkipCookieMiddleware_remarks">Remarks</h4>
   <div class="markdown level1 remarks"><p>Defaults to false.</p>
 </div>
+
+
+
+
+  <a id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_UsePushedAuthorization_" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization*"></a>
+
+  <h3 id="Auth0_AspNetCore_Authentication_Auth0WebAppOptions_UsePushedAuthorization" data-uid="Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization">
+  UsePushedAuthorization
+  <a class="header-action link-secondary" title="View source" href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/release/1.4.0/src/Auth0.AspNetCore.Authentication/Auth0WebAppOptions.cs/#L125"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Sets whether to use pushed authorization requests or not.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool UsePushedAuthorization { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
 
 
 
