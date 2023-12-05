@@ -21,7 +21,7 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
         {
             _tokenHandler = tokenHandler;
         }
-        
+
         public async Task HandleRequestAsync(HttpContext context)
         {
             try
@@ -66,7 +66,6 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
                     await context.WriteErrorAsync(400, "invalid_request",
                         "Only application/x-www-form-urlencoded is allowed.");
                 }
-
             }
             catch (LogoutTokenValidationException ex)
             {
@@ -76,7 +75,6 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
             {
                 await context.WriteErrorAsync(400, "invalid_request", ex.Message);
             }
-
         }
 
         private async Task<ClaimsPrincipal> ValidateLogoutToken(String token, OpenIdConnectOptions oidcOptions, HttpContext context)
@@ -88,20 +86,30 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
                 configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(context.RequestAborted);
             }
 
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
+                ValidIssuer = oidcOptions.TokenValidationParameters.ValidIssuer,
+                ValidAudience = oidcOptions.TokenValidationParameters.ValidAudience,
+            };
+
             if (configuration != null)
             {
-                var issuer = new[] { configuration.Issuer };
-                oidcOptions.TokenValidationParameters.ValidIssuers = oidcOptions.TokenValidationParameters.ValidIssuers?.Concat(issuer) ?? issuer;
-
-                oidcOptions.TokenValidationParameters.IssuerSigningKeys = oidcOptions.TokenValidationParameters.IssuerSigningKeys?.Concat(configuration.SigningKeys)
+                tokenValidationParameters.IssuerSigningKeys =
+                    oidcOptions.TokenValidationParameters.IssuerSigningKeys?.Concat(configuration.SigningKeys)
                     ?? configuration.SigningKeys;
             }
-            
+
+            var principal =
+                oidcOptions.SecurityTokenValidator.ValidateToken(token, tokenValidationParameters, out SecurityToken _);
+
             LogoutTokenValidator.Validate(new JwtSecurityTokenHandler().ReadJwtToken(token));
 
-            return oidcOptions.SecurityTokenValidator.ValidateToken(token, oidcOptions.TokenValidationParameters, out SecurityToken _);
+            return principal;
         }
-
     }
 
     public static class HttpContextExtensions
@@ -111,7 +119,7 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
             context.Response.StatusCode = statusCode;
             await context.Response.WriteAsJsonAsync(new { error, error_description = description });
         }
-        
+
         public static async Task WriteStatusCodeAsync(this HttpContext context, int statusCode)
         {
             context.Response.StatusCode = statusCode;
@@ -119,4 +127,3 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
         }
     }
 }
-

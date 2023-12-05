@@ -162,6 +162,8 @@ namespace Auth0.AspNetCore.Authentication
                         // Log out the user
                         context.RejectPrincipal();
                         await context.HttpContext.SignOutAsync();
+
+                        return;
                     }
                 }
 

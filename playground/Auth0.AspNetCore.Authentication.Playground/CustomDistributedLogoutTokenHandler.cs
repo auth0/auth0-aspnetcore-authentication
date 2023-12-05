@@ -8,16 +8,16 @@ namespace Auth0.AspNetCore.Authentication.Playground
 {
     public class CustomDistributedLogoutTokenHandler : ILogoutTokenHandler
     {
-        private readonly IDistributedCache cache;
+        private readonly IDistributedCache _cache;
 
         public CustomDistributedLogoutTokenHandler(IDistributedCache cache)
         {
-            this.cache = cache;
+            _cache = cache;
         }
 
         public async Task OnTokenReceivedAsync(string issuer, string sid, string logoutToken, TimeSpan expiration)
         {
-            await cache.SetAsync($"{issuer}|{sid}", Encoding.ASCII.GetBytes(logoutToken), new DistributedCacheEntryOptions
+            await _cache.SetAsync($"{issuer}|{sid}", Encoding.ASCII.GetBytes(logoutToken), new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = expiration
             });
@@ -25,7 +25,7 @@ namespace Auth0.AspNetCore.Authentication.Playground
 
         public async Task<bool> IsLoggedOutAsync(string issuer, string sid)
         {
-            var token = await cache.GetAsync($"{issuer}|{sid}");
+            var token = await _cache.GetAsync($"{issuer}|{sid}");
             return token != null;
         }
     }
