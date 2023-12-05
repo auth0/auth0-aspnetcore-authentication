@@ -115,10 +115,110 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BackchannelLogout.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.BackchannelLogout.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.yml",
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.DictionaryExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.DictionaryExtensions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.Exceptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.Exceptions.html"
         }
       },
       "version": ""
@@ -139,6 +239,16 @@
       "output": {
         ".html": {
           "relative_path": "api/Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "obj/api/Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.html"
         }
       },
       "version": ""

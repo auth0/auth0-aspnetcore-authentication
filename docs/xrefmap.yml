@@ -115,12 +115,38 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithAccessToken
   nameWithType: Auth0WebAppAuthenticationBuilder.WithAccessToken
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout
+  name: WithBackchannelLogout()
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithBackchannelLogout
+  commentId: M:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout()
+  nameWithType: Auth0WebAppAuthenticationBuilder.WithBackchannelLogout()
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout*
+  name: WithBackchannelLogout
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.html#Auth0_AspNetCore_Authentication_Auth0WebAppAuthenticationBuilder_WithBackchannelLogout_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppAuthenticationBuilder.WithBackchannelLogout
+  nameWithType: Auth0WebAppAuthenticationBuilder.WithBackchannelLogout
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions
   name: Auth0WebAppOptions
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html
   commentId: T:Auth0.AspNetCore.Authentication.Auth0WebAppOptions
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions
   nameWithType: Auth0WebAppOptions
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath
+  name: AccessDeniedPath
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_AccessDeniedPath
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath
+  nameWithType: Auth0WebAppOptions.AccessDeniedPath
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath*
+  name: AccessDeniedPath
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_AccessDeniedPath_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.AccessDeniedPath
+  nameWithType: Auth0WebAppOptions.AccessDeniedPath
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Backchannel
   name: Backchannel
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_Backchannel
@@ -316,6 +342,19 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SkipCookieMiddleware
   nameWithType: Auth0WebAppOptions.SkipCookieMiddleware
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization
+  name: UsePushedAuthorization
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_UsePushedAuthorization
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization
+  nameWithType: Auth0WebAppOptions.UsePushedAuthorization
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization*
+  name: UsePushedAuthorization
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_UsePushedAuthorization_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.UsePushedAuthorization
+  nameWithType: Auth0WebAppOptions.UsePushedAuthorization
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder
   name: Auth0WebAppWithAccessTokenAuthenticationBuilder
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenAuthenticationBuilder.html
@@ -471,6 +510,205 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication
   nameWithType: AuthenticationBuilderExtensions.AddAuth0WebAppAuthentication
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout
+  name: Auth0.AspNetCore.Authentication.BackchannelLogout
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.html
+  commentId: N:Auth0.AspNetCore.Authentication.BackchannelLogout
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout
+  nameWithType: Auth0.AspNetCore.Authentication.BackchannelLogout
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions
+  name: ApplicationBuilderExtensions
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.html
+  commentId: T:Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions
+  nameWithType: ApplicationBuilderExtensions
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)
+  name: UseBackchannelLogout(IApplicationBuilder, string)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ApplicationBuilderExtensions_UseBackchannelLogout_Microsoft_AspNetCore_Builder_IApplicationBuilder_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)
+  name.vb: UseBackchannelLogout(IApplicationBuilder, String)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout(Microsoft.AspNetCore.Builder.IApplicationBuilder, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout(Microsoft.AspNetCore.Builder.IApplicationBuilder, String)
+  nameWithType: ApplicationBuilderExtensions.UseBackchannelLogout(IApplicationBuilder, string)
+  nameWithType.vb: ApplicationBuilderExtensions.UseBackchannelLogout(IApplicationBuilder, String)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout*
+  name: UseBackchannelLogout
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ApplicationBuilderExtensions_UseBackchannelLogout_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ApplicationBuilderExtensions.UseBackchannelLogout
+  nameWithType: ApplicationBuilderExtensions.UseBackchannelLogout
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler
+  name: BackchannelLogoutHandler
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html
+  commentId: T:Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler
+  nameWithType: BackchannelLogoutHandler
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.#ctor(Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler)
+  name: BackchannelLogoutHandler(ILogoutTokenHandler)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_BackchannelLogoutHandler__ctor_Auth0_AspNetCore_Authentication_BackchannelLogout_ILogoutTokenHandler_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.#ctor(Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler)
+  name.vb: New(ILogoutTokenHandler)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.BackchannelLogoutHandler(Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.New(Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler)
+  nameWithType: BackchannelLogoutHandler.BackchannelLogoutHandler(ILogoutTokenHandler)
+  nameWithType.vb: BackchannelLogoutHandler.New(ILogoutTokenHandler)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.#ctor*
+  name: BackchannelLogoutHandler
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_BackchannelLogoutHandler__ctor_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.BackchannelLogoutHandler
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.New
+  nameWithType: BackchannelLogoutHandler.BackchannelLogoutHandler
+  nameWithType.vb: BackchannelLogoutHandler.New
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync(Microsoft.AspNetCore.Http.HttpContext)
+  name: HandleRequestAsync(HttpContext)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_BackchannelLogoutHandler_HandleRequestAsync_Microsoft_AspNetCore_Http_HttpContext_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync(Microsoft.AspNetCore.Http.HttpContext)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync(Microsoft.AspNetCore.Http.HttpContext)
+  nameWithType: BackchannelLogoutHandler.HandleRequestAsync(HttpContext)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync*
+  name: HandleRequestAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_BackchannelLogoutHandler_HandleRequestAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.BackchannelLogoutHandler.HandleRequestAsync
+  nameWithType: BackchannelLogoutHandler.HandleRequestAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler
+  name: DefaultLogoutTokenHandler
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html
+  commentId: T:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler
+  nameWithType: DefaultLogoutTokenHandler
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.Logging.ILoggerFactory)
+  name: DefaultLogoutTokenHandler(IMemoryCache, ILoggerFactory)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler__ctor_Microsoft_Extensions_Caching_Memory_IMemoryCache_Microsoft_Extensions_Logging_ILoggerFactory_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.#ctor(Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.Logging.ILoggerFactory)
+  name.vb: New(IMemoryCache, ILoggerFactory)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.DefaultLogoutTokenHandler(Microsoft.Extensions.Caching.Memory.IMemoryCache, Microsoft.Extensions.Logging.ILoggerFactory)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.New(Microsoft.Extensions.Caching.Memory.IMemoryCache, Microsoft.Extensions.Logging.ILoggerFactory)
+  nameWithType: DefaultLogoutTokenHandler.DefaultLogoutTokenHandler(IMemoryCache, ILoggerFactory)
+  nameWithType.vb: DefaultLogoutTokenHandler.New(IMemoryCache, ILoggerFactory)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.#ctor*
+  name: DefaultLogoutTokenHandler
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler__ctor_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.DefaultLogoutTokenHandler
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.New
+  nameWithType: DefaultLogoutTokenHandler.DefaultLogoutTokenHandler
+  nameWithType.vb: DefaultLogoutTokenHandler.New
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync(System.String,System.String)
+  name: IsLoggedOutAsync(string, string)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler_IsLoggedOutAsync_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync(System.String,System.String)
+  name.vb: IsLoggedOutAsync(String, String)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync(string, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync(String, String)
+  nameWithType: DefaultLogoutTokenHandler.IsLoggedOutAsync(string, string)
+  nameWithType.vb: DefaultLogoutTokenHandler.IsLoggedOutAsync(String, String)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync*
+  name: IsLoggedOutAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler_IsLoggedOutAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.IsLoggedOutAsync
+  nameWithType: DefaultLogoutTokenHandler.IsLoggedOutAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync(System.String,System.String,System.String,System.TimeSpan)
+  name: OnTokenReceivedAsync(string, string, string, TimeSpan)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler_OnTokenReceivedAsync_System_String_System_String_System_String_System_TimeSpan_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync(System.String,System.String,System.String,System.TimeSpan)
+  name.vb: OnTokenReceivedAsync(String, String, String, TimeSpan)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync(string, string, string, System.TimeSpan)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync(String, String, String, System.TimeSpan)
+  nameWithType: DefaultLogoutTokenHandler.OnTokenReceivedAsync(string, string, string, TimeSpan)
+  nameWithType.vb: DefaultLogoutTokenHandler.OnTokenReceivedAsync(String, String, String, TimeSpan)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync*
+  name: OnTokenReceivedAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_DefaultLogoutTokenHandler_OnTokenReceivedAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.DefaultLogoutTokenHandler.OnTokenReceivedAsync
+  nameWithType: DefaultLogoutTokenHandler.OnTokenReceivedAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions
+  name: HttpContextExtensions
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html
+  commentId: T:Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions
+  nameWithType: HttpContextExtensions
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync(Microsoft.AspNetCore.Http.HttpContext,System.Int32,System.String,System.String)
+  name: WriteErrorAsync(HttpContext, int, string, string)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_HttpContextExtensions_WriteErrorAsync_Microsoft_AspNetCore_Http_HttpContext_System_Int32_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync(Microsoft.AspNetCore.Http.HttpContext,System.Int32,System.String,System.String)
+  name.vb: WriteErrorAsync(HttpContext, Integer, String, String)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync(Microsoft.AspNetCore.Http.HttpContext, int, string, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync(Microsoft.AspNetCore.Http.HttpContext, Integer, String, String)
+  nameWithType: HttpContextExtensions.WriteErrorAsync(HttpContext, int, string, string)
+  nameWithType.vb: HttpContextExtensions.WriteErrorAsync(HttpContext, Integer, String, String)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync*
+  name: WriteErrorAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_HttpContextExtensions_WriteErrorAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteErrorAsync
+  nameWithType: HttpContextExtensions.WriteErrorAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync(Microsoft.AspNetCore.Http.HttpContext,System.Int32)
+  name: WriteStatusCodeAsync(HttpContext, int)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_HttpContextExtensions_WriteStatusCodeAsync_Microsoft_AspNetCore_Http_HttpContext_System_Int32_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync(Microsoft.AspNetCore.Http.HttpContext,System.Int32)
+  name.vb: WriteStatusCodeAsync(HttpContext, Integer)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync(Microsoft.AspNetCore.Http.HttpContext, int)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync(Microsoft.AspNetCore.Http.HttpContext, Integer)
+  nameWithType: HttpContextExtensions.WriteStatusCodeAsync(HttpContext, int)
+  nameWithType.vb: HttpContextExtensions.WriteStatusCodeAsync(HttpContext, Integer)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync*
+  name: WriteStatusCodeAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.html#Auth0_AspNetCore_Authentication_BackchannelLogout_HttpContextExtensions_WriteStatusCodeAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.HttpContextExtensions.WriteStatusCodeAsync
+  nameWithType: HttpContextExtensions.WriteStatusCodeAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler
+  name: ILogoutTokenHandler
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html
+  commentId: T:Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler
+  nameWithType: ILogoutTokenHandler
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync(System.String,System.String)
+  name: IsLoggedOutAsync(string, string)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ILogoutTokenHandler_IsLoggedOutAsync_System_String_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync(System.String,System.String)
+  name.vb: IsLoggedOutAsync(String, String)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync(string, string)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync(String, String)
+  nameWithType: ILogoutTokenHandler.IsLoggedOutAsync(string, string)
+  nameWithType.vb: ILogoutTokenHandler.IsLoggedOutAsync(String, String)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync*
+  name: IsLoggedOutAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ILogoutTokenHandler_IsLoggedOutAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.IsLoggedOutAsync
+  nameWithType: ILogoutTokenHandler.IsLoggedOutAsync
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync(System.String,System.String,System.String,System.TimeSpan)
+  name: OnTokenReceivedAsync(string, string, string, TimeSpan)
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ILogoutTokenHandler_OnTokenReceivedAsync_System_String_System_String_System_String_System_TimeSpan_
+  commentId: M:Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync(System.String,System.String,System.String,System.TimeSpan)
+  name.vb: OnTokenReceivedAsync(String, String, String, TimeSpan)
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync(string, string, string, System.TimeSpan)
+  fullName.vb: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync(String, String, String, System.TimeSpan)
+  nameWithType: ILogoutTokenHandler.OnTokenReceivedAsync(string, string, string, TimeSpan)
+  nameWithType.vb: ILogoutTokenHandler.OnTokenReceivedAsync(String, String, String, TimeSpan)
+- uid: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync*
+  name: OnTokenReceivedAsync
+  href: api/Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.html#Auth0_AspNetCore_Authentication_BackchannelLogout_ILogoutTokenHandler_OnTokenReceivedAsync_
+  commentId: Overload:Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.BackchannelLogout.ILogoutTokenHandler.OnTokenReceivedAsync
+  nameWithType: ILogoutTokenHandler.OnTokenReceivedAsync
 - uid: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder
   name: BaseAuthenticationPropertiesBuilder
   href: api/Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.html
@@ -502,6 +740,166 @@ references:
   commentId: F:Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
   fullName: Auth0.AspNetCore.Authentication.BaseAuthenticationPropertiesBuilder.AuthenticationProperties
   nameWithType: BaseAuthenticationPropertiesBuilder.AuthenticationProperties
+- uid: Auth0.AspNetCore.Authentication.DictionaryExtensions
+  name: DictionaryExtensions
+  href: api/Auth0.AspNetCore.Authentication.DictionaryExtensions.html
+  commentId: T:Auth0.AspNetCore.Authentication.DictionaryExtensions
+  fullName: Auth0.AspNetCore.Authentication.DictionaryExtensions
+  nameWithType: DictionaryExtensions
+- uid: Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault*
+  name: GetBooleanOrDefault
+  href: api/Auth0.AspNetCore.Authentication.DictionaryExtensions.html#Auth0_AspNetCore_Authentication_DictionaryExtensions_GetBooleanOrDefault_
+  commentId: Overload:Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault
+  nameWithType: DictionaryExtensions.GetBooleanOrDefault
+- uid: Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault``2(System.Collections.Generic.IDictionary{``0,``1},``0,System.Boolean)
+  name: GetBooleanOrDefault<TKey, TValue>(IDictionary<TKey, TValue>, TKey, bool)
+  href: api/Auth0.AspNetCore.Authentication.DictionaryExtensions.html#Auth0_AspNetCore_Authentication_DictionaryExtensions_GetBooleanOrDefault__2_System_Collections_Generic_IDictionary___0___1____0_System_Boolean_
+  commentId: M:Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault``2(System.Collections.Generic.IDictionary{``0,``1},``0,System.Boolean)
+  name.vb: GetBooleanOrDefault(Of TKey, TValue)(IDictionary(Of TKey, TValue), TKey, Boolean)
+  fullName: Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault<TKey, TValue>(System.Collections.Generic.IDictionary<TKey, TValue>, TKey, bool)
+  fullName.vb: Auth0.AspNetCore.Authentication.DictionaryExtensions.GetBooleanOrDefault(Of TKey, TValue)(System.Collections.Generic.IDictionary(Of TKey, TValue), TKey, Boolean)
+  nameWithType: DictionaryExtensions.GetBooleanOrDefault<TKey, TValue>(IDictionary<TKey, TValue>, TKey, bool)
+  nameWithType.vb: DictionaryExtensions.GetBooleanOrDefault(Of TKey, TValue)(IDictionary(Of TKey, TValue), TKey, Boolean)
+- uid: Auth0.AspNetCore.Authentication.Exceptions
+  name: Auth0.AspNetCore.Authentication.Exceptions
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.html
+  commentId: N:Auth0.AspNetCore.Authentication.Exceptions
+  fullName: Auth0.AspNetCore.Authentication.Exceptions
+  nameWithType: Auth0.AspNetCore.Authentication.Exceptions
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError
+  name: ApiError
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html
+  commentId: T:Auth0.AspNetCore.Authentication.Exceptions.ApiError
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError
+  nameWithType: ApiError
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error
+  name: Error
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Error
+  commentId: P:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error
+  nameWithType: ApiError.Error
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error*
+  name: Error
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Error_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Error
+  nameWithType: ApiError.Error
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message
+  name: Message
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Message
+  commentId: P:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message
+  nameWithType: ApiError.Message
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message*
+  name: Message
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Message_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Message
+  nameWithType: ApiError.Message
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse(System.Net.Http.HttpResponseMessage)
+  name: Parse(HttpResponseMessage)
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Parse_System_Net_Http_HttpResponseMessage_
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse(System.Net.Http.HttpResponseMessage)
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse(System.Net.Http.HttpResponseMessage)
+  nameWithType: ApiError.Parse(HttpResponseMessage)
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse*
+  name: Parse
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ApiError.html#Auth0_AspNetCore_Authentication_Exceptions_ApiError_Parse_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ApiError.Parse
+  nameWithType: ApiError.Parse
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException
+  name: ErrorApiException
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html
+  commentId: T:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException
+  nameWithType: ErrorApiException
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor
+  name: ErrorApiException()
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor
+  name.vb: New()
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException()
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New()
+  nameWithType: ErrorApiException.ErrorApiException()
+  nameWithType.vb: ErrorApiException.New()
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.Net.HttpStatusCode,Auth0.AspNetCore.Authentication.Exceptions.ApiError)
+  name: ErrorApiException(HttpStatusCode, ApiError?)
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor_System_Net_HttpStatusCode_Auth0_AspNetCore_Authentication_Exceptions_ApiError_
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.Net.HttpStatusCode,Auth0.AspNetCore.Authentication.Exceptions.ApiError)
+  name.vb: New(HttpStatusCode, ApiError)
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException(System.Net.HttpStatusCode, Auth0.AspNetCore.Authentication.Exceptions.ApiError?)
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New(System.Net.HttpStatusCode, Auth0.AspNetCore.Authentication.Exceptions.ApiError)
+  nameWithType: ErrorApiException.ErrorApiException(HttpStatusCode, ApiError?)
+  nameWithType.vb: ErrorApiException.New(HttpStatusCode, ApiError)
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)
+  name: ErrorApiException(SerializationInfo, StreamingContext)
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor_System_Runtime_Serialization_SerializationInfo_System_Runtime_Serialization_StreamingContext_
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)
+  name.vb: New(SerializationInfo, StreamingContext)
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)
+  nameWithType: ErrorApiException.ErrorApiException(SerializationInfo, StreamingContext)
+  nameWithType.vb: ErrorApiException.New(SerializationInfo, StreamingContext)
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.String)
+  name: ErrorApiException(string)
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor_System_String_
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.String)
+  name.vb: New(String)
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException(string)
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New(String)
+  nameWithType: ErrorApiException.ErrorApiException(string)
+  nameWithType.vb: ErrorApiException.New(String)
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.String,System.Exception)
+  name: ErrorApiException(string, Exception)
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor_System_String_System_Exception_
+  commentId: M:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor(System.String,System.Exception)
+  name.vb: New(String, Exception)
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException(string, System.Exception)
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New(String, System.Exception)
+  nameWithType: ErrorApiException.ErrorApiException(string, Exception)
+  nameWithType.vb: ErrorApiException.New(String, Exception)
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor*
+  name: ErrorApiException
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException__ctor_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ErrorApiException
+  fullName.vb: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.New
+  nameWithType: ErrorApiException.ErrorApiException
+  nameWithType.vb: ErrorApiException.New
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError
+  name: ApiError
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException_ApiError
+  commentId: P:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError
+  nameWithType: ErrorApiException.ApiError
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError*
+  name: ApiError
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException_ApiError_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.ApiError
+  nameWithType: ErrorApiException.ApiError
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode
+  name: StatusCode
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException_StatusCode
+  commentId: P:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode
+  nameWithType: ErrorApiException.StatusCode
+- uid: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode*
+  name: StatusCode
+  href: api/Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.html#Auth0_AspNetCore_Authentication_Exceptions_ErrorApiException_StatusCode_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Exceptions.ErrorApiException.StatusCode
+  nameWithType: ErrorApiException.StatusCode
 - uid: Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder
   name: LoginAuthenticationPropertiesBuilder
   href: api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html
@@ -706,6 +1104,24 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.LogoutAuthenticationPropertiesBuilder.WithRedirectUri
   nameWithType: LogoutAuthenticationPropertiesBuilder.WithRedirectUri
+- uid: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys
+  name: OpenIdConnectConfigurationKeys
+  href: api/Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.html
+  commentId: T:Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys
+  fullName: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys
+  nameWithType: OpenIdConnectConfigurationKeys
+- uid: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+  name: BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+  href: api/Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.html#Auth0_AspNetCore_Authentication_OpenIdConnectConfigurationKeys_BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+  commentId: F:Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+  fullName: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+  nameWithType: OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED
+- uid: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED
+  name: BACKCHANNEL_LOGOUT_SUPPORTED
+  href: api/Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.html#Auth0_AspNetCore_Authentication_OpenIdConnectConfigurationKeys_BACKCHANNEL_LOGOUT_SUPPORTED
+  commentId: F:Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED
+  fullName: Auth0.AspNetCore.Authentication.OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED
+  nameWithType: OpenIdConnectConfigurationKeys.BACKCHANNEL_LOGOUT_SUPPORTED
 - uid: Auth0.AspNetCore.Authentication.ServiceCollectionExtensions
   name: ServiceCollectionExtensions
   href: api/Auth0.AspNetCore.Authentication.ServiceCollectionExtensions.html

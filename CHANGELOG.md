@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.4.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.4.0) (2023-12-05)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.3.1...1.4.0)
+
+**Added**
+- Add support for backchannel logout [\#125](https://github.com/auth0/auth0-aspnetcore-authentication/pull/125) ([frederikprijck](https://github.com/frederikprijck))
+- Add support for Pushed Authorization Request [\#124](https://github.com/auth0/auth0-aspnetcore-authentication/pull/124) ([frederikprijck](https://github.com/frederikprijck))
+
+**Changed**
+- Support OpenIdConnectOptions.AccessDeniedPath [\#123](https://github.com/auth0/auth0-aspnetcore-authentication/pull/123) ([frederikprijck](https://github.com/frederikprijck))
+
+**Fixed**
+- Allow using ClientAssertion when setting ResponseType [\#119](https://github.com/auth0/auth0-aspnetcore-authentication/pull/119) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [1.3.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.3.1) (2023-07-18)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.3.0...1.3.1)
 
