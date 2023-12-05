@@ -35,7 +35,7 @@ public class ApiError
         return Parse(content);
     }
 
-    internal static ApiError? Parse(string content)
+    internal static ApiError Parse(string content)
     {
         try
         {
