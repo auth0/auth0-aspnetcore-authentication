@@ -362,6 +362,35 @@ The implementation of `CustomLogoutTokenHandler` will heaviliy depend on your si
 }
 ```
 
+### Distributed caching
+If you want to connect the backchannel logout to a [distributed cache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/distributed), such as redis, to store the logout tokens, you can use:
+
+```csharp
+public class CustomDistributedLogoutTokenHandler : ILogoutTokenHandler
+{
+    private readonly IDistributedCache _cache;
+
+    public CustomDistributedLogoutTokenHandler(IDistributedCache cache)
+    {
+        _cache = cache;
+    }
+
+    public async Task OnTokenReceivedAsync(string issuer, string sid, string logoutToken, TimeSpan expiration)
+    {
+        await _cache.SetAsync($"{issuer}|{sid}", Encoding.ASCII.GetBytes(logoutToken), new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = expiration
+        });
+    }
+
+    public async Task<bool> IsLoggedOutAsync(string issuer, string sid)
+    {
+        var token = await _cache.GetAsync($"{issuer}|{sid}");
+        return token != null;
+    }
+}
+```
+
 ## Blazor Server
 
 The `Auth0-AspNetCore-Authentication` SDK works with Blazor Server in an almost identical way as how it's integrated in ASP.NET Core MVC.
