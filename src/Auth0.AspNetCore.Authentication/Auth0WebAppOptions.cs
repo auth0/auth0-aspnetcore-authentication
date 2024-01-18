@@ -123,5 +123,33 @@ namespace Auth0.AspNetCore.Authentication
         /// Sets whether to use pushed authorization requests or not.
         /// </summary>
         public bool UsePushedAuthorization { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the authentication scheme corresponding to the middleware
+        /// responsible of persisting user's identity after a successful authentication.
+        /// This value typically corresponds to a cookie middleware registered in the Startup class.
+        /// When omitted, <see cref="P:Microsoft.AspNetCore.Authentication.AuthenticationOptions.DefaultSignInScheme" /> is used as a fallback value.
+        /// </summary>
+        public string? SignInScheme { get; set; }
+        
+        /// <summary>
+        /// If set, this specifies the target scheme that this scheme should forward SignInAsync calls to.
+        /// For example Context.SignInAsync("ThisScheme") =&gt; Context.SignInAsync("ForwardSignInValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
+        /// </summary>
+        public string? ForwardSignIn { get; set; }
+        
+        /// <summary>
+        /// The Authentication Scheme to use with SignOut on the SignOutPath. SignInScheme will be used if this
+        /// is not set.
+        /// </summary>
+        public string? SignOutScheme { get; set; }
+        
+        /// <summary>
+        /// If set, this specifies the target scheme that this scheme should forward SignOutAsync calls to.
+        /// For example Context.SignOutAsync("ThisScheme") =&gt; Context.SignOutAsync("ForwardSignOutValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
+        /// </summary>
+        public string? ForwardSignOut { get; set; }
     }
 }
