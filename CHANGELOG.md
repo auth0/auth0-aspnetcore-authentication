@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.4.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.4.1) (2024-01-25)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.4.0...1.4.1)
+
+**Added**
+- Adds SignInScheme, SignOutScheme, ForwardSignIn, and ForwardSignOut [\#136](https://github.com/auth0/auth0-aspnetcore-authentication/pull/136) ([CasperWSchmidt](https://github.com/CasperWSchmidt))
+
+**Changed**
+- Explicitly add .NET8 support [\#130](https://github.com/auth0/auth0-aspnetcore-authentication/pull/130) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [1.4.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.4.0) (2023-12-05)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.3.1...1.4.0)
 

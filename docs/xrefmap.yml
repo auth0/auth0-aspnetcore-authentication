@@ -251,6 +251,32 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Domain
   nameWithType: Auth0WebAppOptions.Domain
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn
+  name: ForwardSignIn
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ForwardSignIn
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn
+  nameWithType: Auth0WebAppOptions.ForwardSignIn
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn*
+  name: ForwardSignIn
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ForwardSignIn_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignIn
+  nameWithType: Auth0WebAppOptions.ForwardSignIn
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut
+  name: ForwardSignOut
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ForwardSignOut
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut
+  nameWithType: Auth0WebAppOptions.ForwardSignOut
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut*
+  name: ForwardSignOut
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_ForwardSignOut_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.ForwardSignOut
+  nameWithType: Auth0WebAppOptions.ForwardSignOut
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.LoginParameters
   name: LoginParameters
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_LoginParameters
@@ -329,6 +355,32 @@ references:
   isSpec: "True"
   fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.Scope
   nameWithType: Auth0WebAppOptions.Scope
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme
+  name: SignInScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SignInScheme
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme
+  nameWithType: Auth0WebAppOptions.SignInScheme
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme*
+  name: SignInScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SignInScheme_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignInScheme
+  nameWithType: Auth0WebAppOptions.SignInScheme
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme
+  name: SignOutScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SignOutScheme
+  commentId: P:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme
+  nameWithType: Auth0WebAppOptions.SignOutScheme
+- uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme*
+  name: SignOutScheme
+  href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SignOutScheme_
+  commentId: Overload:Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme
+  isSpec: "True"
+  fullName: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SignOutScheme
+  nameWithType: Auth0WebAppOptions.SignOutScheme
 - uid: Auth0.AspNetCore.Authentication.Auth0WebAppOptions.SkipCookieMiddleware
   name: SkipCookieMiddleware
   href: api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html#Auth0_AspNetCore_Authentication_Auth0WebAppOptions_SkipCookieMiddleware
