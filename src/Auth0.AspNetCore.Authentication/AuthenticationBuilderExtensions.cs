@@ -96,6 +96,10 @@ namespace Auth0.AspNetCore.Authentication
             oidcOptions.Backchannel = auth0Options.Backchannel!;
             oidcOptions.MaxAge = auth0Options.MaxAge;
             oidcOptions.AccessDeniedPath = auth0Options.AccessDeniedPath;
+            oidcOptions.SignInScheme = auth0Options.SignInScheme;
+            oidcOptions.ForwardSignIn = auth0Options.ForwardSignIn;
+            oidcOptions.SignOutScheme = auth0Options.SignOutScheme;
+            oidcOptions.ForwardSignOut = auth0Options.ForwardSignOut;
 
             if (!oidcOptions.Scope.Contains("openid"))
             {
