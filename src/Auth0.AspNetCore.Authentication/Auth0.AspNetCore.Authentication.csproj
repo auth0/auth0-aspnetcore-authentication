@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Auth0Icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <PropertyGroup>
     <Product>Auth0.AspNetCore.Authentication</Product>
@@ -37,6 +38,7 @@
     <CLSCompliant>true</CLSCompliant>
     <ComVisible>false</ComVisible>
     <Nullable>enable</Nullable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup>
     <Version>1.4.1</Version>
