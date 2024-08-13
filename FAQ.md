@@ -9,7 +9,7 @@ Here are some helpful resources:
 - https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-8.0
 - https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/linux-nginx?view=aspnetcore-8.0&tabs=linux-ubuntu#configure-nginx
 
-  Additiobnally, to help troubleshoot, you can have a look at what is going on:
+Additionally, to help troubleshoot, you can have a look at what is going on:
 
 - `CallbackPath = "/callback"` is passed to our SDK (or omits it to use `/callback` as a default)
 - Our SDK passes it down to the ASP.NET Framework as-is [here](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/src/Auth0.AspNetCore.Authentication/AuthenticationBuilderExtensions.cs#L93), and this is then passed to `BuildRedirectUri` inside the ASP.NET Framework [here](https://github.com/dotnet/aspnetcore/blob/main/src/Security/Authentication/OpenIdConnect/src/OpenIdConnectHandler.cs#L403)
