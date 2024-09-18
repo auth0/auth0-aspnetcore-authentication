@@ -151,5 +151,13 @@ namespace Auth0.AspNetCore.Authentication
         /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string? ForwardSignOut { get; set; }
+        
+        /// <summary>
+        /// Defines whether access and refresh tokens should be stored in the <see cref="AuthenticationProperties"/> 
+        /// after a successful authorization.  This property is set to <c>true</c> by default to
+        /// ensure there are no breaking changes with previous versions of the sdk.  Storing tokens will
+        /// increase the size of the final authentication cookie.  
+        /// </summary>
+        public bool SaveTokens { get; set; } = true;
     }
 }
