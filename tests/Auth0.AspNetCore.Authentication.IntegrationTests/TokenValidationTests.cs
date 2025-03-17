@@ -526,7 +526,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => GenerateToken(1, $"https://{domain}/", clientId, nonce, "1", null, false, null, null, DateTime.Now.Subtract(TimeSpan.FromHours(3))), (me) => me.HasAuth0ClientHeader())
+                .MockToken(() => GenerateToken(1, $"https://{domain}/", clientId, nonce, "1", null, false, null, null, DateTime.UtcNow.Subtract(TimeSpan.FromHours(3))), (me) => me.HasAuth0ClientHeader())
                 .Build();
 
             using (var server = TestServerBuilder.CreateServer(opt =>
