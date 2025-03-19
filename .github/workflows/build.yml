@@ -13,17 +13,20 @@ jobs:
 
     strategy:
       matrix:
-        dotnet-version: ['6.0.x', '7.0.x', '8.0.x']
+        dotnet-version: ['net6.0', 'net7.0', 'net8.0']
 
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: |
+          6.0.x
+          7.0.x
+          8.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --framework ${{ matrix.dotnet-version }} src/Auth0.AspNetCore.Authentication/Auth0.AspNetCore.Authentication.csproj
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --verbosity normal
