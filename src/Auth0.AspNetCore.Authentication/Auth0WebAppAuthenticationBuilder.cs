@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Auth0.AuthenticationApi;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -57,6 +58,23 @@ namespace Auth0.AspNetCore.Authentication
         public Auth0WebAppAuthenticationBuilder WithBackchannelLogout()
         {
             _services.AddTransient<BackchannelLogoutHandler>();
+            _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the IAuthenticationApiClient to leverage Auth0.AuthenticationApi 
+        /// </summary>
+        /// <returns></returns>
+        public Auth0WebAppAuthenticationBuilder WithAuthenticationApiClient()
+        {
+            _services.AddSingleton<IAuthenticationApiClient>(
+                sp =>
+                {
+                    var options = sp.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Value;
+                    return new AuthenticationApiClient(new Uri($"https://{options.Domain}"));
+                }
+            );
             _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
             return this;
         }
