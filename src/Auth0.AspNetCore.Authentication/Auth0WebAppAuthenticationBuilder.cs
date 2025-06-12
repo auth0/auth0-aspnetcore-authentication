@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
 using Auth0.AspNetCore.Authentication.ClientInitiatedBackChannelAuthentication;
 using Auth0.AuthenticationApi;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -81,7 +82,10 @@ namespace Auth0.AspNetCore.Authentication
         /// <returns></returns>
         public Auth0WebAppAuthenticationBuilder WithClientInitiatedBackchannelAuthentication()
         {
-            _services.AddScoped<IAuth0CibaService, Auth0CibaService>();
+            _services.TryAddSingleton<IAuthenticationApiClient>(
+                _ => new AuthenticationApiClient(new Uri($"https://{_options.Domain}")));
+            _services.TryAddScoped<IAuth0CibaService, Auth0CibaService>();
+
             return this;
         }
         

@@ -518,6 +518,8 @@ public async Task<IActionResult> InitiateLoginWithCiba(string returnUrl = "/")
     return RedirectToAction("Waiting");
 }
 
+// You could use the built-in polling mechanism or could implement your own polling mechanism by 
+// accessing the `GetTokenAsync` method using the AuthenticationApiClient as shown in the example before.
 [HttpGet]
 public async Task<IActionResult> CheckCibaStatus()
 {

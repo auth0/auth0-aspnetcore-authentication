@@ -1,16 +1,21 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Auth0.AuthenticationApi.Models.Ciba;
 
 namespace Auth0.AspNetCore.Authentication.ClientInitiatedBackChannelAuthentication;
 
-public class CibaInitiationDetails
+public class CibaInitiationDetails : ClientInitiatedBackchannelAuthorizationResponse
 {
-    public string? AuthRequestId { get; init; }
-    public int ExpiresIn { get; init; }
-    public int? Interval { get; init; }
+    /// <summary>
+    /// Indicates whether the polling was successful.
+    /// </summary>
     public bool IsSuccessful { get; init; } = true;
+    
+    /// <summary>
+    /// Indicates any errors that occurred during the initiation of the CIBA request.
+    /// </summary>
     public string? ErrorMessage { get; init; }
 }
 
@@ -70,6 +75,7 @@ public interface IAuth0CibaService
     /// Polls the token endpoint to check the status of a CIBA request and retrieve tokens upon completion.
     /// </summary>
     /// <param name="cibaInitiationDetails">The information required to poll for the CIBA status.</param>
+    /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
     /// <returns>Details about the CIBA completion status or the retrieved tokens.</returns>
-    Task<CibaCompletionDetails> PollForTokensAsync(CibaInitiationDetails cibaInitiationDetails);
+    Task<CibaCompletionDetails> PollForTokensAsync(CibaInitiationDetails cibaInitiationDetails, CancellationToken cancellationToken = default);
 }
