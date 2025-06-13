@@ -8,6 +8,8 @@
 - [Roles](#roles)
 - [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
+- [Accessing Auth0.AuthenticationApi features](#accessing-auth0authenticationapi-features)
+- [Accessing specific features like CIBA](#accessing-specific-features-like-ciba)
 
 ## Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
@@ -445,9 +447,9 @@ public class LogoutModel : PageModel
 }
 ```
 
-# Accessing Auth0.AuthenticationApi features
+## Accessing Auth0.AuthenticationApi features
 `Auth0.AuthenticationApi` package is our standalone Authentication package that supports a wide range of
-options for Authentication. We can access these features like below : 
+options for Authentication. For example, you can use it to implement the [client credentials flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/client-credentials-flow), as shown below : 
 
 ```csharp
 /// Register the dependency in the container as below. 
@@ -477,7 +479,7 @@ public async Task LoginWithAuthenticationApi()
 }
 ```
 
-# Accessing specific features like CIBA
+## Accessing specific features like CIBA
 Although `Auth0.AuthenticationApi` package has a wide range of options for Authentication.
 We can access the CIBA feature as below. It aims to make it easy to integrate into an appllication.
 
@@ -486,7 +488,7 @@ We can access the CIBA feature as below. It aims to make it easy to integrate in
 /// Program.cs / Startup.cs
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
-    options.Domain = "domain";
+    options.Domain = "domain"; // required
     options.ClientId = "ClientId"; // required
     options.ClientSecret = "clientSecret"; // required
 }).WithClientInitiatedBackchannelAuthentication();
@@ -507,7 +509,7 @@ public async Task<IActionResult> InitiateLoginWithCiba(string returnUrl = "/")
         LoginHint = new LoginHint()
         {
             Format = "iss_sub",
-            Issuer = "https://dx-sdks-testing.us.auth0.com/",
+            Issuer = "https://your-domain/",
             Subject = "userId"
         }
     });
