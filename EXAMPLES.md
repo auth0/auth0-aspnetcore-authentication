@@ -8,6 +8,8 @@
 - [Roles](#roles)
 - [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
+- [Accessing Auth0.AuthenticationApi features](#accessing-auth0authenticationapi-features)
+- [Accessing specific features like CIBA](#accessing-specific-features-like-ciba)
 
 ## Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
@@ -441,6 +443,100 @@ public class LogoutModel : PageModel
 
         await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+}
+```
+
+## Accessing Auth0.AuthenticationApi features
+`Auth0.AuthenticationApi` package is our standalone Authentication package that supports a wide range of
+options for Authentication. For example, you can use it to implement the [client credentials flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/client-credentials-flow), as shown below : 
+
+```csharp
+/// Register the dependency in the container as below. 
+/// Program.cs / Startup.cs
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = "domain";
+    options.ClientId = "ClientId";
+    options.ClientSecret = "clientSecret";
+}).WithAuthenticationApiClient(); 
+
+
+/// Accessing the Api Client in the controller
+public AccountController(IAuthenticationApiClient apiClient)
+{
+    _apiClient = apiClient;
+}
+
+[Authorize]
+public async Task LoginWithAuthenticationApi()
+{
+    await _apiClient.GetTokenAsync(new ClientCredentialsTokenRequest()
+    {
+        ClientId = "",
+        ClientSecret = ""
+    }, new CancellationToken());
+}
+```
+
+## Accessing specific features like CIBA
+Although `Auth0.AuthenticationApi` package has a wide range of options for Authentication.
+We can access the CIBA feature as below. It aims to make it easy to integrate into an appllication.
+
+```csharp
+/// Register the dependency in the container as below. 
+/// Program.cs / Startup.cs
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = "domain"; // required
+    options.ClientId = "ClientId"; // required
+    options.ClientSecret = "clientSecret"; // required
+}).WithClientInitiatedBackchannelAuthentication();
+
+
+/// Accessing the Auth0CibaService in the controller
+public AccountController(IAuth0CibaService auth0CibaService)
+{
+    _auth0CibaService = auth0CibaService;
+}
+
+public async Task<IActionResult> InitiateLoginWithCiba(string returnUrl = "/")
+{
+    var response = await _auth0CibaService.InitiateAuthenticationAsync(new CibaInitiationRequest()
+    {
+        Scope = "openid profile",
+        BindingMessage = "BindingMessage",
+        LoginHint = new LoginHint()
+        {
+            Format = "iss_sub",
+            Issuer = "https://your-domain/",
+            Subject = "userId"
+        }
+    });
+
+    // Cache the details for polling.
+    TempData["AuthRequestId"] = response.AuthRequestId;
+    TempData["CibaInitiationDetails"] = JsonSerializer.Serialize(response);
+    return RedirectToAction("Waiting");
+}
+
+// You could use the built-in polling mechanism or could implement your own polling mechanism by 
+// accessing the `GetTokenAsync` method using the AuthenticationApiClient as shown in the example before.
+[HttpGet]
+public async Task<IActionResult> CheckCibaStatus()
+{
+    var cibaInitiateResponse = JsonSerializer.Deserialize<CibaInitiationDetails>(TempData["CibaInitiationDetails"]?.ToString() ?? string.Empty);
+    var authRequestId = cibaInitiateResponse?.AuthRequestId;
+    if (string.IsNullOrEmpty(authRequestId))
+    {
+        return Json(new { isError = true });
+    }
+
+    var status = await _auth0CibaService.PollForTokensAsync(cibaInitiateResponse);
+
+    if (status.IsSuccessful)
+    {
+        // Parse the accessToken / IdToken and use it as required.
     }
 }
 ```

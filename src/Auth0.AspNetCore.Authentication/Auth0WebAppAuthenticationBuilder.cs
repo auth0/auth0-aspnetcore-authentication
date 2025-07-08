@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Auth0.AspNetCore.Authentication.ClientInitiatedBackChannelAuthentication;
+using Auth0.AuthenticationApi;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -61,6 +64,31 @@ namespace Auth0.AspNetCore.Authentication
             return this;
         }
 
+        /// <summary>
+        /// Configures the IAuthenticationApiClient to leverage Auth0.AuthenticationApi 
+        /// </summary>
+        /// <returns></returns>
+        public Auth0WebAppAuthenticationBuilder WithAuthenticationApiClient()
+        {
+            _services.AddSingleton<IAuthenticationApiClient>(
+                _ => new AuthenticationApiClient(new Uri($"https://{_options.Domain}")));
+            _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the IAuth0CibaService to leverage the CIBA features. 
+        /// </summary>
+        /// <returns></returns>
+        public Auth0WebAppAuthenticationBuilder WithClientInitiatedBackchannelAuthentication()
+        {
+            _services.TryAddSingleton<IAuthenticationApiClient>(
+                _ => new AuthenticationApiClient(new Uri($"https://{_options.Domain}")));
+            _services.TryAddScoped<IAuth0CibaService, Auth0CibaService>();
+
+            return this;
+        }
+        
         private void EnableWithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
         {
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
