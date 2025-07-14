@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Linq;
 using Auth0.AspNetCore.Authentication.Exceptions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
@@ -951,12 +952,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Organization claim (org_id) must be a string present in the ID token.");
                 }
             }
@@ -1007,12 +1009,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Organization claim (org_id) mismatch in the ID token; expected \"org_123\", found \"org_456\".");
                 }
             }
@@ -1070,12 +1073,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Triggered Custom Validation.");
                 }
             }
