@@ -24,11 +24,20 @@ internal static class PushedAuthorizationRequestHandler
         var oidcConfiguration =
             await oidcOptions.ConfigurationManager?.GetConfigurationAsync(default)!;
 
-        object? rawParEndpoint = string.Empty;
-        oidcConfiguration?.AdditionalData.TryGetValue("pushed_authorization_request_endpoint", out rawParEndpoint);
-        string? parEndpoint = rawParEndpoint as string;
+        // Trying to get the PAR endpoint from the property first, fallback to AdditionalData for older configs.
+        string? parEndpoint = null;
+        if (oidcConfiguration != null)
+        {
+            parEndpoint = oidcConfiguration?.PushedAuthorizationRequestEndpoint;
+            if (string.IsNullOrEmpty(parEndpoint))
+            {
+                object? rawParEndpoint = string.Empty;
+                oidcConfiguration.AdditionalData?.TryGetValue("pushed_authorization_request_endpoint", out rawParEndpoint);
+                parEndpoint = rawParEndpoint as string;
+            }
+        }
 
-        // If PAR was enabled in the options, but no `pushed_authorization_request_endpoint` value is find
+        // If PAR was enabled in the options, but no `pushed_authorization_request_endpoint` value is found
         // in the OIDC configuration, we will throw an error.
         if (string.IsNullOrEmpty(parEndpoint))
         {
