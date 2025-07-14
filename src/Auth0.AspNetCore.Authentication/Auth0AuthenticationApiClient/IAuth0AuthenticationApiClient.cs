@@ -11,6 +11,10 @@ using IAuthenticationApiClient = Auth0.AuthenticationApi.IAuthenticationApiClien
 
 namespace Auth0.AspNetCore.Authentication.Auth0AuthenticationApiClient;
 
+/// <summary>
+/// Encapsulates the <see cref="IAuthenticationApiClient"/> to provide a strongly-typed interface for
+/// Auth0 Authentication API related operations. 
+/// </summary>
 public interface IAuth0AuthenticationApiClient : IDisposable
 {
     /// <inheritdoc cref="IAuthenticationApiClient.BaseUri"/>
