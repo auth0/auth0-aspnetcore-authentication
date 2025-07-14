@@ -7,6 +7,7 @@ using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.AuthenticationApi.Models.Ciba;
 using Auth0.AuthenticationApi.Models.Mfa;
+using Models = Auth0.AuthenticationApi.Models;
 
 namespace Auth0.AspNetCore.Authentication.Auth0AuthenticationApiClient;
 
@@ -33,37 +34,37 @@ public class Auth0AuthenticationApiClient : IAuth0AuthenticationApiClient
     }
     
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(AuthorizationCodeTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(AuthorizationCodeTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(AuthorizationCodePkceTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(AuthorizationCodePkceTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(ClientCredentialsTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(ClientCredentialsTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(PasswordlessEmailTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(PasswordlessEmailTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<AccessTokenResponse> GetTokenAsync(PasswordlessSmsTokenRequest request, CancellationToken cancellationToken = default)
+    public Task<Models.AccessTokenResponse> GetTokenAsync(PasswordlessSmsTokenRequest request, CancellationToken cancellationToken = default)
     {
         return _authenticationApiClient.GetTokenAsync(request, cancellationToken);
     }
