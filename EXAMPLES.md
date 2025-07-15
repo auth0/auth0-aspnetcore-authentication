@@ -8,6 +8,7 @@
 - [Roles](#roles)
 - [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
+- [Using AuthenticationApiClient within a Controller](#using-authenticationapiclient-within-a-controller)
 
 ## Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
@@ -441,6 +442,48 @@ public class LogoutModel : PageModel
 
         await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+}
+```
+
+## Using AuthenticationApiClient within a Controller
+We can setup the dependency injection for `Auth0AuthenticationApiClient` using the `WithAuth0AuthenticationApiClient` extension method as below.
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.WithAuth0AuthenticationApiClient(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    });
+}
+```
+
+For using `Auth0AuthenticationApiClient`, request an instance of `IAuth0AuthenticationApiClient` in the constructor as below.
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class MyController : ControllerBase
+{
+    private readonly IAuth0AuthenticationApiClient _auth0Client;
+
+    public MyController(IAuth0AuthenticationApiClient auth0Client)
+    {
+        _auth0Client = auth0Client;
+    }
+
+    [HttpGet("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeRefreshToken()
+    {
+        var request = new RevokeRefreshTokenRequest
+        {
+            Token = "your_refresh_token"
+        };
+        await _auth0Client.RevokeRefreshTokenAsync(request);
+        return Ok();
     }
 }
 ```
