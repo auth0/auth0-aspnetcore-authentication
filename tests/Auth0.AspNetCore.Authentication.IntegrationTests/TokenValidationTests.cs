@@ -11,6 +11,7 @@ using Auth0.AspNetCore.Authentication.IntegrationTests.Builders;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Utils;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
@@ -69,7 +70,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
@@ -123,7 +125,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
@@ -177,12 +180,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Subject (sub) claim must be a string present in the ID token.");
                 }
             }
@@ -232,7 +236,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
@@ -286,7 +291,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
@@ -340,7 +346,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
@@ -394,12 +401,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Authorized Party (azp) claim must be a string present in the ID token when Audiences (aud) claim has multiple values.");
                 }
             }
@@ -449,12 +457,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Authorized Party (azp) claim mismatch in the ID token; expected \"123\", found \"789\".");
                 }
             }
@@ -505,12 +514,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Authentication Time (auth_time) claim must be an integer present in the ID token when MaxAge specified.");
                 }
             }
@@ -561,12 +571,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().StartWith("Authentication Time (auth_time) claim in the ID token indicates that too much time has passed since the last end-user authentication.");
                 }
             }
@@ -644,12 +655,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Organization claim (org_id) must be a string present in the ID token.");
                 }
             }
@@ -699,12 +711,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be($"Organization claim (org_id) mismatch in the ID token; expected \"org_123\", found \"org_abc\".");
                 }
             }
@@ -795,12 +808,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be("Organization claim (org_name) must be a string present in the ID token.");
                 }
             }
@@ -850,12 +864,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
                     var innerException = act
                         .Should()
-                        .Throw<Exception>()
+                        .ThrowAsync<Exception>()
+                        .Result
                         .And.InnerException;
 
                     innerException
                         .Should()
-                        .BeOfType<Exception>()
+                        .BeOfType<AuthenticationFailureException>()
                         .Which.Message.Should().Be($"Organization claim (org_name) mismatch in the ID token; expected \"organizationa\", found \"organizationb\".");
                 }
             }

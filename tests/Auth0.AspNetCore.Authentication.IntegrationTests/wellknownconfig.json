@@ -60,5 +60,5 @@
     "picture",
     "sub"
   ],
-  "request_uri_parameter_supported": "false"
+  "request_uri_parameter_supported": false
 }

@@ -38,7 +38,7 @@ public class BackchannelLogoutTests
         using var client = server.CreateClient();
         var res = await client.SendAsync($"{TestServerBuilder.Host}/backchannel-logout");
 
-        res.StatusCode.Should().Be(405);
+        res.StatusCode.Should().Be((HttpStatusCode)405);
     }
     
     [Fact]
@@ -67,7 +67,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Be("Only application/x-www-form-urlencoded is allowed.");
     }
     
@@ -99,7 +99,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Be("Missing logout_token.");
     }
     
@@ -139,7 +139,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Signature validation failed.");
     }
     
@@ -177,7 +177,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Issuer validation failed.");
     }
     
@@ -216,7 +216,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Audience validation failed.");
     }
     
@@ -254,7 +254,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Session Id (sid) claim must be a string present in the logout token.");
     }
     
@@ -295,7 +295,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Nonce (nonce) claim must not be present in the logout token.");
     }
     
@@ -333,7 +333,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Events (events) claim must be present in the logout token.");
     }
 
@@ -372,7 +372,7 @@ public class BackchannelLogoutTests
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
                 
-        response.StatusCode.Should().Be(400);
+        response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Events (events) claim must contain a 'http://schemas.openid.net/event/backchannel-logout' property in the logout token.");
     }
     
@@ -408,7 +408,7 @@ public class BackchannelLogoutTests
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
                 
-        response.StatusCode.Should().Be(200);
+        response.StatusCode.Should().Be((HttpStatusCode)200);
     }
 
     [Fact]
