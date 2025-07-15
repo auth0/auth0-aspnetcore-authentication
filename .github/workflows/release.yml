@@ -20,7 +20,7 @@ jobs:
   rl-scanner:    
     uses: ./.github/workflows/rl-secure.yml
     with:
-      project-path: "src/Auth0.AspNetCore.Authentication/Auth0.AspNetCore.Authentication.csproj"
+      project-path: " "
       artifact-name: "auth0-aspnetcore-authentication.tgz"
     secrets:
       RLSECURE_LICENSE: ${{ secrets.RLSECURE_LICENSE }}
@@ -35,7 +35,7 @@ jobs:
     needs: rl-scanner
     uses: ./.github/workflows/nuget-release.yml    
     with:
-      dotnet-version: 6.0.x
+      dotnet-version: 8.0.x
       project-paths: "['src/Auth0.AspNetCore.Authentication/Auth0.AspNetCore.Authentication.csproj']"
     secrets:
       nuget-token: ${{ secrets.NUGET_APIKEY }}
