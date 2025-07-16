@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-using Auth0.AspNetCore.Authentication.Auth0AuthenticationApiClient;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests;
 
@@ -18,9 +18,9 @@ public class Auth0WebAppAuthenticationBuilderTests
         var options = new Auth0WebAppOptions { Domain = "test-domain.auth0.com" };
         var builder = new Auth0WebAppAuthenticationBuilder(services, options);
 
-        builder.WithAuth0AuthenticationApiClient();
+        builder.WithAuthenticationApiClient();
 
-        var serviceDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IAuth0AuthenticationApiClient));
+        var serviceDescriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IAuthenticationApiClient));
         serviceDescriptor.Should().NotBeNull();
         serviceDescriptor?.Lifetime.Should().Be(ServiceLifetime.Transient);
     }
@@ -32,7 +32,7 @@ public class Auth0WebAppAuthenticationBuilderTests
         var options = new Auth0WebAppOptions { Domain = "test-domain.auth0.com" };
         var builder = new Auth0WebAppAuthenticationBuilder(services, options);
 
-        var result = builder.WithAuth0AuthenticationApiClient();
+        var result = builder.WithAuthenticationApiClient();
 
         result.Should().BeSameAs(builder);
     }
@@ -45,13 +45,13 @@ public class Auth0WebAppAuthenticationBuilderTests
         services.AddSingleton(Options.Create(options));
         var builder = new Auth0WebAppAuthenticationBuilder(services, options);
 
-        builder.WithAuth0AuthenticationApiClient();
+        builder.WithAuthenticationApiClient();
 
         var serviceProvider = services.BuildServiceProvider();
-        var client = serviceProvider.GetRequiredService<IAuth0AuthenticationApiClient>();
+        var client = serviceProvider.GetRequiredService<IAuthenticationApiClient>();
 
         client.Should().NotBeNull();
-        client.Should().BeOfType<Auth0AuthenticationApiClient.Auth0AuthenticationApiClient>();
+        client.Should().BeOfType<AuthenticationApiClient>();
     }
 
     [Fact]
@@ -61,10 +61,10 @@ public class Auth0WebAppAuthenticationBuilderTests
         var options = new Auth0WebAppOptions { Domain = "test-domain.auth0.com" };
         var builder = new Auth0WebAppAuthenticationBuilder(services, options);
 
-        builder.WithAuth0AuthenticationApiClient();
-        builder.WithAuth0AuthenticationApiClient();
+        builder.WithAuthenticationApiClient();
+        builder.WithAuthenticationApiClient();
 
-        var serviceDescriptors = services.Where(s => s.ServiceType == typeof(IAuth0AuthenticationApiClient));
+        var serviceDescriptors = services.Where(s => s.ServiceType == typeof(IAuthenticationApiClient));
         serviceDescriptors.Should().HaveCount(2);
     }
 }

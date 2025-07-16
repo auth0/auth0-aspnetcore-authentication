@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Auth0.AuthenticationApi;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.AuthenticationApi.Models.Ciba;
 using Auth0.AuthenticationApi.Models.Mfa;
@@ -15,21 +14,21 @@ using Models = Auth0.AuthenticationApi.Models;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests;
 
-public class Auth0AuthenticationApiClientTests
+public class AuthenticationApiClientTests
 {
-    private readonly Mock<IAuthenticationApiClient> _mockAuthenticationApiClient;
-    private readonly Auth0AuthenticationApiClient.Auth0AuthenticationApiClient _auth0AuthenticationApiClient;
+    private readonly Mock<Auth0.AuthenticationApi.IAuthenticationApiClient> _mockAuthenticationApiClient;
+    private readonly AuthenticationApiClient _authenticationApiClient;
 
-    public Auth0AuthenticationApiClientTests()
+    public AuthenticationApiClientTests()
     {
-        _mockAuthenticationApiClient = new Mock<IAuthenticationApiClient>();
-        _auth0AuthenticationApiClient = new Auth0AuthenticationApiClient.Auth0AuthenticationApiClient(_mockAuthenticationApiClient.Object);
+        _mockAuthenticationApiClient = new Mock<Auth0.AuthenticationApi.IAuthenticationApiClient>();
+        _authenticationApiClient = new AuthenticationApiClient(_mockAuthenticationApiClient.Object);
     }
 
     [Fact]
     public void Constructor_When_AuthenticationApiClient_Is_Null_Throws_ArgumentNullException()
     {
-        var act = () => new Auth0AuthenticationApiClient.Auth0AuthenticationApiClient(null);
+        var act = () => new AuthenticationApiClient(null);
 
         act.Should().Throw<ArgumentNullException>()
             .And.ParamName.Should().Be("authenticationApiClient");
@@ -38,7 +37,7 @@ public class Auth0AuthenticationApiClientTests
     [Fact]
     public void Constructor_When_AuthenticationApiClient_Is_Valid_Creates_Instance()
     {
-        var result = new Auth0AuthenticationApiClient.Auth0AuthenticationApiClient(_mockAuthenticationApiClient.Object);
+        var result = new AuthenticationApiClient(_mockAuthenticationApiClient.Object);
 
         result.Should().NotBeNull();
     }
@@ -46,7 +45,7 @@ public class Auth0AuthenticationApiClientTests
     [Fact]
     public void Dispose_Calls_Dispose_On_Underlying_Client()
     {
-        _auth0AuthenticationApiClient.Dispose();
+        _authenticationApiClient.Dispose();
         _mockAuthenticationApiClient.Verify(x => x.Dispose(), Times.Once);
     }
 
@@ -56,7 +55,7 @@ public class Auth0AuthenticationApiClientTests
         var expectedUri = new Uri("https://example.auth0.com");
         _mockAuthenticationApiClient.Setup(x => x.BaseUri).Returns(expectedUri);
 
-        var result = _auth0AuthenticationApiClient.BaseUri;
+        var result = _authenticationApiClient.BaseUri;
 
         result.Should().Be(expectedUri);
         _mockAuthenticationApiClient.Verify(x => x.BaseUri, Times.Once);
@@ -71,7 +70,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.ChangePasswordAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.ChangePasswordAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.ChangePasswordAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -87,7 +86,7 @@ public class Auth0AuthenticationApiClientTests
                 x => x.ChangePasswordAsync(request, default))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.ChangePasswordAsync(request);
+        var result = await _authenticationApiClient.ChangePasswordAsync(request);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -103,7 +102,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -119,7 +118,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -135,7 +134,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -151,7 +150,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -167,7 +166,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -183,7 +182,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -199,7 +198,7 @@ public class Auth0AuthenticationApiClientTests
                 x => x.RevokeRefreshTokenAsync(request, cancellationToken))
             .Returns(Task.CompletedTask);
 
-        await _auth0AuthenticationApiClient.RevokeRefreshTokenAsync(request, cancellationToken);
+        await _authenticationApiClient.RevokeRefreshTokenAsync(request, cancellationToken);
 
         _mockAuthenticationApiClient.Verify(
             x => x.RevokeRefreshTokenAsync(request, cancellationToken), Times.Once);
@@ -215,7 +214,7 @@ public class Auth0AuthenticationApiClientTests
                 x => x.SignupUserAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.SignupUserAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.SignupUserAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -233,7 +232,7 @@ public class Auth0AuthenticationApiClientTests
             .ReturnsAsync(expectedResult);
 
         var result = 
-            await _auth0AuthenticationApiClient.StartPasswordlessEmailFlowAsync(request, cancellationToken);
+            await _authenticationApiClient.StartPasswordlessEmailFlowAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -251,7 +250,7 @@ public class Auth0AuthenticationApiClientTests
             .ReturnsAsync(expectedResult);
 
         var result = 
-            await _auth0AuthenticationApiClient.StartPasswordlessSmsFlowAsync(request, cancellationToken);
+            await _authenticationApiClient.StartPasswordlessSmsFlowAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -269,7 +268,7 @@ public class Auth0AuthenticationApiClientTests
             .ReturnsAsync(expectedResult);
 
         var result = 
-            await _auth0AuthenticationApiClient.ClientInitiatedBackchannelAuthorization(request, cancellationToken);
+            await _authenticationApiClient.ClientInitiatedBackchannelAuthorization(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -286,7 +285,7 @@ public class Auth0AuthenticationApiClientTests
             .ReturnsAsync(expectedResult);
 
         var result = 
-            await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+            await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -303,7 +302,7 @@ public class Auth0AuthenticationApiClientTests
             .ReturnsAsync(expectedResult);
 
         var result = 
-            await _auth0AuthenticationApiClient.AssociateMfaAuthenticatorAsync(request, cancellationToken);
+            await _authenticationApiClient.AssociateMfaAuthenticatorAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -320,7 +319,7 @@ public class Auth0AuthenticationApiClientTests
                 x => x.ListMfaAuthenticatorsAsync(accessToken, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.ListMfaAuthenticatorsAsync(accessToken, cancellationToken);
+        var result = await _authenticationApiClient.ListMfaAuthenticatorsAsync(accessToken, cancellationToken);
 
         result.Should().BeEquivalentTo(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -335,7 +334,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.DeleteMfaAuthenticatorAsync(request, cancellationToken))
             .Returns(Task.CompletedTask);
 
-        await _auth0AuthenticationApiClient.DeleteMfaAuthenticatorAsync(request, cancellationToken);
+        await _authenticationApiClient.DeleteMfaAuthenticatorAsync(request, cancellationToken);
 
         _mockAuthenticationApiClient.Verify(
             x => x.DeleteMfaAuthenticatorAsync(request, cancellationToken), Times.Once);
@@ -350,7 +349,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -366,7 +365,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -382,7 +381,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.GetTokenAsync(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.GetTokenAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.GetTokenAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(
@@ -398,7 +397,7 @@ public class Auth0AuthenticationApiClientTests
         _mockAuthenticationApiClient.Setup(x => x.MfaChallenge(request, cancellationToken))
             .ReturnsAsync(expectedResult);
 
-        var result = await _auth0AuthenticationApiClient.MfaChallengeAsync(request, cancellationToken);
+        var result = await _authenticationApiClient.MfaChallengeAsync(request, cancellationToken);
 
         result.Should().Be(expectedResult);
         _mockAuthenticationApiClient.Verify(x => x.MfaChallenge(request, cancellationToken), Times.Once);

@@ -471,15 +471,15 @@ the `AuthenticationApiClient` which is a part of [`Auth0.AuthenticationApi`](htt
 There can be multiple scenarios where the conventional authentication flows might not suffice. There could be scenarios where we need to directly call Auth0's APIs for specific tasks, such as user management or advanced authentication scenarios. 
 In such cases, `Auth0.AuthenticationApi` provides a powerful way to interact with Auth0's Authentication API endpoints.
 
-**Note :** While `Auth0.AspNetCore.Authentication` is focused on integrating Auth0 authentication flows into ASP.NET Core applications, the scope of `Auth0AuthenticationApiClient` goes beyond this SDK. The interaction with Auth0's APIs happen via `Auth0AuthenticationApiClient` (via `Auth0.AuthenticationApi` package internally).
+**Note :** For interactions with the Auth0 API's end-points we leverage the rich support and infrastructure provided by `Auth0.AuthenticationApi` (via `Auth0.AspNetCore.Authentication.AuthenticationApiClient`). There is no implementation in `Auth0.AspNetCore.Authentication` that directly talks to Auth0's API endpoints.
 
 ### 9.1. Configuring your application to use Auth0.AuthenticationApi
-Your application needs to be configured to use the `Auth0.AuthenticationApi` client. This involves calling `services.WithAuth0AuthenticationApiClient()` in your `Startup.cs` or `Program.cs` file with the appropriate options as below.
+Your application needs to be configured to use the `Auth0.AuthenticationApi` client. This involves calling `services.WithAuthenticationApiClient()` in your `Startup.cs` or `Program.cs` file with the appropriate options as below.
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.WithAuth0AuthenticationApiClient(options =>
+    services.WithAuthenticationApiClient(options =>
     {
         options.Domain = Configuration["Auth0:Domain"];
         options.ClientId = Configuration["Auth0:ClientId"];
@@ -488,19 +488,19 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-The above configuration will register the `Auth0AuthenticationApiClient` with the specified options, allowing you to use it throughout your application.
+The above configuration will register the `AuthenticationApiClient` with the specified options, allowing you to use it throughout your application.
 
 ### 9.2. Example Use Case 1: Passwordless Email Login
 
-A user might want to implement passwordless authentication in their ASP.NET Core application, such as sending a magic link to a user's email. This flow is not handled by `auth0-aspnet-core` authentication middleware and requires direct interaction with Auth0's Authentication API. The below example demonstrates how we can leverage `Auth0AuthenticationApiClient` to initiate the passwordless email flow.
+A user might want to implement passwordless authentication in their ASP.NET Core application, such as sending a magic link to a user's email. This flow is not handled by `auth0-aspnet-core` authentication middleware and requires direct interaction with Auth0's Authentication API. The below example demonstrates how we can leverage `AuthenticationApiClient` to initiate the passwordless email flow.
 
 ```csharp
-// Assuming you have already configured the Auth0AuthenticationApiClient
+// Assuming you have already configured the AuthenticationApiClient
 public class PasswordlessController : ControllerBase
 {
-    private readonly IAuth0AuthenticationApiClient _auth0Client;
+    private readonly IAuthenticationApiClient _auth0Client;
 
-    public PasswordlessController(IAuth0AuthenticationApiClient auth0Client)
+    public PasswordlessController(IAuthenticationApiClient auth0Client)
     {
         _auth0Client = auth0Client;
     }
@@ -524,17 +524,17 @@ public class PasswordlessController : ControllerBase
 
 ### 9.3. Example Use Case 2: Revoking a Refresh Token
 
-In some scenarios, you may want to revoke a refresh token that was previously issued to a user, such as during logout or when you suspect the token has been compromised. You can use the `Auth0AuthenticationApiClient` to call Auth0's token revocation endpoint.
+In some scenarios, you may want to revoke a refresh token that was previously issued to a user, such as during logout or when you suspect the token has been compromised. You can use the `AuthenticationApiClient` to call Auth0's token revocation endpoint.
 
 Below is an example of how to revoke a refresh token using the client.
 
 ```csharp
-// Assuming you have already configured the Auth0AuthenticationApiClient
+// Assuming you have already configured the AuthenticationApiClient
 public class TokenRevocationService
 {
-    private readonly IAuth0AuthenticationApiClient _auth0Client;
+    private readonly IAuthenticationApiClient _auth0Client;
 
-    public TokenRevocationService(IAuth0AuthenticationApiClient auth0Client)
+    public TokenRevocationService(IAuthenticationApiClient auth0Client)
     {
         _auth0Client = auth0Client;
     }

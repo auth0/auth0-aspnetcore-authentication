@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-using Auth0.AspNetCore.Authentication.Auth0AuthenticationApiClient;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
-using Auth0.AuthenticationApi;
+using AuthenticationApiClient = Auth0.AuthenticationApi.AuthenticationApiClient;
+using IAuthenticationApiClient = Auth0.AspNetCore.Authentication.AuthenticationApi.IAuthenticationApiClient;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -66,16 +66,16 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Configures the <see cref="IAuth0AuthenticationApiClient"/> to leverage Auth0.AuthenticationApi 
+        /// Configures the <see cref="Authentication.AuthenticationApi.IAuthenticationApiClient"/> to leverage Auth0.AuthenticationApi 
         /// </summary>
         /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
-        public Auth0WebAppAuthenticationBuilder WithAuth0AuthenticationApiClient()
+        public Auth0WebAppAuthenticationBuilder WithAuthenticationApiClient()
         {
-            _services.AddTransient<IAuth0AuthenticationApiClient>(
+            _services.AddTransient<IAuthenticationApiClient>(
                 sp =>
                 {
                     var options = sp.GetRequiredService<IOptions<Auth0WebAppOptions>>().Value;
-                    return new Auth0AuthenticationApiClient.Auth0AuthenticationApiClient(
+                    return new AuthenticationApi.AuthenticationApiClient(
                         new AuthenticationApiClient(new Uri($"https://{options.Domain}")));
                 }
             );

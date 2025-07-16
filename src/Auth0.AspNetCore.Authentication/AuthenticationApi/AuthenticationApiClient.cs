@@ -2,21 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.AuthenticationApi.Models.Ciba;
 using Auth0.AuthenticationApi.Models.Mfa;
 using Models = Auth0.AuthenticationApi.Models;
 
-namespace Auth0.AspNetCore.Authentication.Auth0AuthenticationApiClient;
+namespace Auth0.AspNetCore.Authentication.AuthenticationApi;
 
-/// <inheritdoc cref="IAuth0AuthenticationApiClient"/>
-public class Auth0AuthenticationApiClient : IAuth0AuthenticationApiClient
+/// <inheritdoc cref="IAuthenticationApiClient"/>
+public class AuthenticationApiClient : IAuthenticationApiClient
 {
-    private readonly IAuthenticationApiClient _authenticationApiClient;
+    private readonly Auth0.AuthenticationApi.IAuthenticationApiClient _authenticationApiClient;
 
-    public Auth0AuthenticationApiClient(IAuthenticationApiClient authenticationApiClient)
+    public AuthenticationApiClient(Auth0.AuthenticationApi.IAuthenticationApiClient authenticationApiClient)
     {
         _authenticationApiClient = authenticationApiClient ?? throw new ArgumentNullException(nameof(authenticationApiClient));
     }
