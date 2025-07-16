@@ -1,15 +1,34 @@
 # Examples using auth0-aspnetcore-authentication
+## Table of Contents
 
-- [Login and Logout](#login-and-logout)
-- [Scopes](#scopes)
-- [Calling an API](#calling-an-api)
-- [Organizations](#organizations)
-- [Extra parameters](#extra-parameters)
-- [Roles](#roles)
-- [Backchannel Logout](#backchannel-logout)
-- [Blazor Server](#blazor-server)
+1. [Login and Logout](#1-login-and-logout)
+2. [Scopes](#2-scopes)
+3. [Calling an API](#3-calling-an-api)
+    - [Retrieving the access token](#31-retrieving-the-access-token)
+    - [Refresh tokens](#32-refresh-tokens)
+        - [Detecting the absence of a refresh token](#321-detecting-the-absense-of-a-refresh-token)
+4. [Organizations](#4-organizations)
+    - [Log in to an organization](#41-log-in-to-an-organization)
+    - [Organization claim validation](#42-organization-claim-validation)
+    - [Accept user invitations](#43-accept-user-invitations)
+5. [Extra Parameters](#5-extra-parameters)
+    - [Extra parameters when logging in](#51-extra-parameters-when-logging-in)
+    - [Extra parameters when logging out](#52-extra-parameters-when-logging-out)
+6. [Roles](#6-roles)
+    - [Integrate roles in your ASP.NET application](#61-integrate-roles-in-your-aspnet-application)
+7. [Backchannel Logout](#7-backchannel-logout)
+    - [Distributed caching](#71-distributed-caching)
+8. [Blazor Server](#8-blazor-server)
+    - [Register the SDK](#81-register-the-sdk)
+    - [Add login and logout](#82-add-login-and-logout)
+9. [AuthenticationApiClient in your ASP.NET Core](#9-authenticationapiclient-in-your-aspnet-core)
+    - [Configuring your application to use Auth0.AuthenticationApi](#91-configuring-your-application-to-use-auth0authenticationapi)
+    - [Example Use Case 1: Passwordless Email Login](#92-example-use-case-1-passwordless-email-login)
+    - [Example Use Case 2: Revoking a Refresh Token](#93-example-use-case-2-revoking-a-refresh-token)
 
-## Login and Logout
+
+
+## 1. Login and Logout
 Triggering login or logout is done using ASP.NET's `HttpContext`:
 
 ```csharp
@@ -37,7 +56,7 @@ public async Task Logout()
 }
 ```
 
-## Scopes
+## 2. Scopes
 
 By default, this SDK requests the `openid profile` scopes, if needed you can configure the SDK to request a different set of scopes.
 As `openid` is a [required scope](https://auth0.com/docs/scopes/openid-connect-scopes), the SDK will ensure the `openid` scope is always added, even when explicitly omitted when setting the scope.
@@ -63,7 +82,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the scopes when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured scopes.
 
-## Calling an API
+## 3. Calling an API
 
 If you want to call an API from your ASP.NET MVC application, you need to obtain an access token issued for the API you want to call. 
 As the SDK is configured to use OAuth's [Implicit Grant with Form Post](https://auth0.com/docs/flows/implicit-flow-with-form-post), no access token will be returned by default. In order to do so, we should be using the [Authorization Code Grant](https://auth0.com/docs/flows/authorization-code-flow), which requires the use of a `ClientSecret`.
@@ -96,7 +115,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Audience when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Audience.
 
-### Retrieving the access token
+### 3.1. Retrieving the access token
 
 As the SDK uses the OpenId Connect middleware, the ID token is decoded and the corresponding claims are added to the `ClaimsIdentity`, making them available by using `User.Claims`.
 
@@ -117,7 +136,7 @@ public async Task<IActionResult> Profile()
 }
 ```
 
-### Refresh tokens
+### 3.2. Refresh tokens
 
 In the case where the application needs to use an access token to access an API, there may be a situation where the access token expires before the application's session does. In order to ensure you have a valid access token at all times, you can configure the SDK to use refresh tokens:
 
@@ -139,7 +158,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-#### Detecting the absense of a refresh token
+#### 3.2.1. Detecting the absense of a refresh token
 
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of refresh tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a refresh token in order to react accordingly (e.g. log the user out locally and force them to re-login).
 
@@ -166,13 +185,13 @@ The above snippet checks whether the SDK is configured to use refresh tokens, if
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
 
-## Organizations
+## 4. Organizations
 
 [Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
 
 Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.
 
-### Log in to an organization
+### 4.1. Log in to an organization
 
 Log in to an organization by specifying the `Organization` when calling `AddAuth0WebAppAuthentication`:
 
@@ -197,7 +216,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying the Organization when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured Organization.
 
-### Organization claim validation
+### 4.2. Organization claim validation
 
 If you don't provide an `organization` parameter at login, the SDK can't validate the `org_id` (or `org_name`) claim you get back in the ID token. In that case, you should validate the `org_id` (or `org_name`) claim yourself (e.g. by checking it against a list of valid organization ID's (or names) or comparing it with the application's URL).
 
@@ -225,7 +244,7 @@ services.AddAuth0WebAppAuthentication(options =>
 
 For more information, please read [Work with Tokens and Organizations](https://auth0.com/docs/organizations/using-tokens) on Auth0 Docs.
 
-### Accept user invitations
+### 4.3. Accept user invitations
 Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL.
 
 ```csharp
@@ -237,17 +256,17 @@ public class InvitationController : Controller {
             .WithOrganization(organization)
             .WithInvitation(invitation)
             .Build();
-            
+
         await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
     }
 }
 ```
 
-## Extra Parameters
+## 5. Extra Parameters
 
 Auth0's `/authorize` and `/v2/logout` endpoint support additional querystring parameters that aren't first-class citizens in this SDK. If you need to support any of those parameters, you can configure the SDK to do so.
 
-### Extra parameters when logging in
+### 5.1. Extra parameters when logging in
 
 In order to send extra parameters to Auth0's `/authorize` endpoint upon logging in, set `LoginParameters` when calling `AddAuth0WebAppAuthentication`.
 
@@ -274,7 +293,7 @@ await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authentica
 
 > :information_source: Specifying any extra parameter when calling `HttpContext.ChallengeAsync` will take precedence over any globally configured parameter.
 
-### Extra parameters when logging out
+### 5.2. Extra parameters when logging out
 The same as with the login request, you can send parameters to the `logout` endpoint by calling `WithParameter` on the `LogoutAuthenticationPropertiesBuilder`.
 
 ```csharp
@@ -287,7 +306,7 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
 ```
 > :information_source: The example above uses a parameter without an actual value, for more information see https://auth0.com/docs/logout/log-users-out-of-idps.
 
-## Roles
+## 6. Roles
 
 Before you can add [Role Based Access Control](https://auth0.com/docs/manage-users/access-control/rbac), you will need to ensure the required roles are created and assigned to the corresponding user(s). Follow the guidance explained in [assign-roles-to-users](https://auth0.com/docs/users/assign-roles-to-users) to ensure your user gets assigned the admin role.
 
@@ -303,7 +322,7 @@ exports.onExecutePostLogin = async (event, api) => {
 
 > :information_source: As this SDK uses the OpenId Connect middleware, it expects roles to exist in the `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` claim.
 
-### Integrate roles in your ASP.NET application
+### 6.1. Integrate roles in your ASP.NET application
 You can use the [Role based authorization](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles) mechanism to make sure that only the users with specific roles can access certain actions. Add the `[Authorize(Roles = "...")]` attribute to your controller action.
 
 ```csharp
@@ -314,7 +333,7 @@ public IActionResult Admin()
 }
 ```
 
-## Backchannel Logout
+## 7. Backchannel Logout
 
 Backchannel logout can be configured by calling `WithBackchannelLogout()` when calling `AddAuth0WebAppAuthentication`.
 
@@ -362,7 +381,7 @@ The implementation of `CustomLogoutTokenHandler` will heaviliy depend on your si
 }
 ```
 
-### Distributed caching
+### 7.1. Distributed caching
 If you want to connect the backchannel logout to a [distributed cache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/distributed), such as redis, to store the logout tokens, you can use:
 
 ```csharp
@@ -391,11 +410,11 @@ public class CustomDistributedLogoutTokenHandler : ILogoutTokenHandler
 }
 ```
 
-## Blazor Server
+## 8. Blazor Server
 
 The `Auth0-AspNetCore-Authentication` SDK works with Blazor Server in an almost identical way as how it's integrated in ASP.NET Core MVC.
 
-### Register the SDK
+### 8.1. Register the SDK
 Registering the SDK is identical as with ASP.NET Core MVC, where you should call `builder.Services.AddAuth0WebAppAuthentication` inside `Program.cs`, and ensure the authentication middleware (`UseAuthentication()` and `UseAuthorization()`) is registered.
 
 ```csharp
@@ -414,7 +433,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-### Add login and logout
+### 8.2. Add login and logout
 Adding login and logout capabilities is different in the sense that you should create a `PageModel` implementation for both to allow the user to be redirected to Auth0.
 
 ```csharp
@@ -441,6 +460,95 @@ public class LogoutModel : PageModel
 
         await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+}
+```
+
+## 9. AuthenticationApiClient in your ASP.NET Core
+While `Auth0.AspNetCore.Authentication` is an SDK for integrating Auth0 authentication flows into ASP.NET Core applications,
+the `AuthenticationApiClient` which is a part of [`Auth0.AuthenticationApi`](https://www.nuget.org/packages/Auth0.AuthenticationApi/),provides comprehensive client functionality for interacting with Auth0's Authentication API endpoints. It handles user authentication, token management, and various OAuth 2.0/OpenID Connect flows.
+
+There can be multiple scenarios where the conventional authentication flows might not suffice. There could be scenarios where we need to directly call Auth0's APIs for specific tasks, such as user management or advanced authentication scenarios. 
+In such cases, `Auth0.AuthenticationApi` provides a powerful way to interact with Auth0's Authentication API endpoints.
+
+**Note :** For interactions with the Auth0 API's end-points we leverage the rich support and infrastructure provided by `Auth0.AuthenticationApi` (via `Auth0.AspNetCore.Authentication.AuthenticationApiClient`). There is no implementation in `Auth0.AspNetCore.Authentication` that directly talks to Auth0's API endpoints.
+
+### 9.1. Configuring your application to use Auth0.AuthenticationApi
+Your application needs to be configured to use the `Auth0.AuthenticationApi` client. This involves calling `services.WithAuthenticationApiClient()` in your `Startup.cs` or `Program.cs` file with the appropriate options as below.
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.WithAuthenticationApiClient(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    });
+}
+```
+
+The above configuration will register the `AuthenticationApiClient` with the specified options, allowing you to use it throughout your application.
+
+### 9.2. Example Use Case 1: Passwordless Email Login
+
+A user might want to implement passwordless authentication in their ASP.NET Core application, such as sending a magic link to a user's email. This flow is not handled by `auth0-aspnet-core` authentication middleware and requires direct interaction with Auth0's Authentication API. The below example demonstrates how we can leverage `AuthenticationApiClient` to initiate the passwordless email flow.
+
+```csharp
+// Assuming you have already configured the AuthenticationApiClient
+public class PasswordlessController : ControllerBase
+{
+    private readonly IAuthenticationApiClient _auth0Client;
+
+    public PasswordlessController(IAuthenticationApiClient auth0Client)
+    {
+        _auth0Client = auth0Client;
+    }
+
+    [HttpPost("start-passwordless")]
+    public async Task<IActionResult> StartPasswordless([FromBody] string email)
+    {
+        var request = new PasswordlessEmailRequest
+        {
+            Email = email,
+            Type = PasswordlessEmailRequestType.Link,
+            ClientId = "YOUR_CLIENT_ID",
+            ClientSecret = "YOUR_CLIENT_SECRET"
+        };
+
+        await _auth0Client.StartPasswordlessEmailFlowAsync(request);
+        return Ok("Magic link sent to email.");
+    }
+}
+```
+
+### 9.3. Example Use Case 2: Revoking a Refresh Token
+
+In some scenarios, you may want to revoke a refresh token that was previously issued to a user, such as during logout or when you suspect the token has been compromised. You can use the `AuthenticationApiClient` to call Auth0's token revocation endpoint.
+
+Below is an example of how to revoke a refresh token using the client.
+
+```csharp
+// Assuming you have already configured the AuthenticationApiClient
+public class TokenRevocationService
+{
+    private readonly IAuthenticationApiClient _auth0Client;
+
+    public TokenRevocationService(IAuthenticationApiClient auth0Client)
+    {
+        _auth0Client = auth0Client;
+    }
+
+    public async Task RevokeRefreshTokenAsync(string refreshToken)
+    {
+        var request = new RevokeRefreshTokenRequest
+        {
+            RefreshToken = refreshToken,
+            ClientId = "YOUR_CLIENT_ID",
+            ClientSecret = "YOUR_CLIENT_SECRET"
+        };
+
+        await _auth0Client.RevokeTokenAsync(request);
     }
 }
 ```

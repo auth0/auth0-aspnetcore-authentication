@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+﻿using System;
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System;
-using System.Threading.Tasks;
+
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using AuthenticationApiClient = Auth0.AuthenticationApi.AuthenticationApiClient;
+using IAuthenticationApiClient = Auth0.AspNetCore.Authentication.AuthenticationApi.IAuthenticationApiClient;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -58,6 +62,23 @@ namespace Auth0.AspNetCore.Authentication
         {
             _services.AddTransient<BackchannelLogoutHandler>();
             _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the <see cref="Authentication.AuthenticationApi.IAuthenticationApiClient"/> to leverage Auth0.AuthenticationApi 
+        /// </summary>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
+        public Auth0WebAppAuthenticationBuilder WithAuthenticationApiClient()
+        {
+            _services.AddTransient<IAuthenticationApiClient>(
+                sp =>
+                {
+                    var options = sp.GetRequiredService<IOptions<Auth0WebAppOptions>>().Value;
+                    return new AuthenticationApi.AuthenticationApiClient(
+                        new AuthenticationApiClient(new Uri($"https://{options.Domain}")));
+                }
+            );
             return this;
         }
 
