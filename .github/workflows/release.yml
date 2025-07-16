@@ -20,7 +20,7 @@ jobs:
   rl-scanner:    
     uses: ./.github/workflows/rl-secure.yml
     with:
-      project-path: " "
+      project-path: "src/Auth0.AspNetCore.Authentication/Auth0.AspNetCore.Authentication.csproj"
       artifact-name: "auth0-aspnetcore-authentication.tgz"
     secrets:
       RLSECURE_LICENSE: ${{ secrets.RLSECURE_LICENSE }}
