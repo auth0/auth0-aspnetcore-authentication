@@ -91,7 +91,7 @@ namespace Auth0.AspNetCore.Authentication
             oidcOptions.Scope.Clear();
             oidcOptions.Scope.AddRange(auth0Options.Scope.Split(" "));
             oidcOptions.CallbackPath = new PathString(auth0Options.CallbackPath ?? Auth0Constants.DefaultCallbackPath);
-            oidcOptions.SaveTokens = true;
+            oidcOptions.SaveTokens = auth0Options.SaveTokens;
             oidcOptions.ResponseType = auth0Options.ResponseType ?? oidcOptions.ResponseType;
             oidcOptions.Backchannel = auth0Options.Backchannel!;
             oidcOptions.MaxAge = auth0Options.MaxAge;
