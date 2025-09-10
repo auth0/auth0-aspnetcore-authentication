@@ -19,5 +19,36 @@
                 </p>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label><strong>Access Token:</strong></label>
+                    <div class="input-group">
+                        <pre id="accessToken" class="form-control" style="white-space: pre-wrap; word-break: break-all;">@Model.AccessToken</pre>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('accessToken')">Copy</button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label><strong>ID Token:</strong></label>
+                    <div class="input-group">
+                        <pre id="idToken" class="form-control" style="white-space: pre-wrap; word-break: break-all;">@Model.IdToken</pre>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('idToken')">Copy</button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label><strong>Refresh Token:</strong></label>
+                    <div class="input-group">
+                        <pre id="refreshToken" class="form-control" style="white-space: pre-wrap; word-break: break-all;">@Model.RefreshToken</pre>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('refreshToken')">Copy</button>
+                    </div>
+                </div>
+                <script>
+                    function copyToClipboard(elementId) {
+                        var text = document.getElementById(elementId).innerText;
+                        navigator.clipboard.writeText(text);
+                    }
+                </script>
+            </div>
+        </div>
     </div>
 </div>

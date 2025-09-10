@@ -3,24 +3,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Auth0.AspNetCore.Authentication.Playground.Controllers
+namespace Auth0.AspNetCore.Authentication.Playground.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Admin()
-        {
-            return View();
-        }
+    [Authorize(Roles = "Admin")]
+    public IActionResult Admin()
+    {
+        return View();
+    }
 
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
