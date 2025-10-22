@@ -5,6 +5,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 ![Release](https://img.shields.io/github/v/release/auth0/auth0-aspnetcore-authentication)
 ![Downloads](https://img.shields.io/nuget/dt/auth0.aspnetcore.authentication)
 [![License](https://img.shields.io/:license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/auth0/auth0-aspnetcore-authentication)
 ![AzureDevOps](https://img.shields.io/azure-devops/build/Auth0SDK/Auth0.AspNetCore.Authentication/8)
 
 :books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
