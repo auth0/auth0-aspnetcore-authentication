@@ -30,8 +30,9 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         /// </summary>
         /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
+        /// <param name="authenticationScheme">Optional custom authentication scheme to use.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false, string authenticationScheme = null)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -78,13 +79,21 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                             Auth0WebAppAuthenticationBuilder builder;
                             if (useServiceCollectionExtension)
                             {
-                                builder = services.AddAuth0WebAppAuthentication(options =>
-                                {
-                                    options.Domain = configuration["Auth0:Domain"];
-                                    options.ClientId = configuration["Auth0:ClientId"];
+                                builder = string.IsNullOrEmpty(authenticationScheme)
+                                    ? services.AddAuth0WebAppAuthentication(options =>
+                                    {
+                                        options.Domain = configuration["Auth0:Domain"];
+                                        options.ClientId = configuration["Auth0:ClientId"];
 
-                                    if (configureOptions != null) configureOptions(options);
-                                });
+                                        if (configureOptions != null) configureOptions(options);
+                                    })
+                                    : services.AddAuth0WebAppAuthentication(authenticationScheme, options =>
+                                    {
+                                        options.Domain = configuration["Auth0:Domain"];
+                                        options.ClientId = configuration["Auth0:ClientId"];
+
+                                        if (configureOptions != null) configureOptions(options);
+                                    });
                             }
                             else
                             {
@@ -98,13 +107,21 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                     }
                                 });
 
-                                builder = authenticationBuilder.AddAuth0WebAppAuthentication(options =>
-                                {
-                                    options.Domain = configuration["Auth0:Domain"];
-                                    options.ClientId = configuration["Auth0:ClientId"];
+                                builder = string.IsNullOrEmpty(authenticationScheme)
+                                    ? authenticationBuilder.AddAuth0WebAppAuthentication(options =>
+                                    {
+                                        options.Domain = configuration["Auth0:Domain"];
+                                        options.ClientId = configuration["Auth0:ClientId"];
 
-                                    if (configureOptions != null) configureOptions(options);
-                                });
+                                        if (configureOptions != null) configureOptions(options);
+                                    })
+                                    : authenticationBuilder.AddAuth0WebAppAuthentication(authenticationScheme, options =>
+                                    {
+                                        options.Domain = configuration["Auth0:Domain"];
+                                        options.ClientId = configuration["Auth0:ClientId"];
+
+                                        if (configureOptions != null) configureOptions(options);
+                                    });
 
                                 if (addExtraProvider)
                                 {
@@ -146,6 +163,27 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
 
             host.Start();
             return host.GetTestServer();
+        }
+        
+        /// <summary>
+        /// Create an instance of the TestServer with a custom authentication scheme to use for Integration Tests.
+        /// This is used to reproduce the issue where BackchannelLogoutHandler doesn't respect custom authentication schemes.
+        /// </summary>
+        /// <param name="authenticationScheme">The custom authentication scheme to use.</param>
+        /// <param name="configureOptions">Action used to provide custom configuration for the Auth0 middleware.</param>
+        /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked.</param>
+        /// <returns>The created TestServer instance.</returns>
+        public static TestServer CreateServerWithCustomScheme(string authenticationScheme, Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false)
+        {
+            return CreateServer(
+                configureOptions: configureOptions,
+                configureWithAccessTokensOptions: configureWithAccessTokensOptions,
+                mockAuthentication: mockAuthentication,
+                useServiceCollectionExtension: useServiceCollectionExtension,
+                addExtraProvider: addExtraProvider,
+                configureAdditionalOptions: configureAdditionalOptions,
+                enableBackchannelLogout: enableBackchannelLogout,
+                authenticationScheme: authenticationScheme);
         }
     }
 }

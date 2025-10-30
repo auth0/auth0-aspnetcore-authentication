@@ -56,7 +56,10 @@ namespace Auth0.AspNetCore.Authentication
         /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
         public Auth0WebAppAuthenticationBuilder WithBackchannelLogout()
         {
-            _services.AddTransient<BackchannelLogoutHandler>();
+            _services.AddTransient<BackchannelLogoutHandler>(sp => 
+                new BackchannelLogoutHandler(
+                    sp.GetRequiredService<ILogoutTokenHandler>(), 
+                    _authenticationScheme));
             _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
             return this;
         }

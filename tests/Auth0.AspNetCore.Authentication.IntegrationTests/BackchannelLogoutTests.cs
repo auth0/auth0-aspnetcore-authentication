@@ -553,4 +553,44 @@ public class BackchannelLogoutTests
             protectedResponse2.StatusCode.Should().Be(HttpStatusCode.OK);
             protectedResponse2.Headers.Location.Should().BeNull();
     }
+
+    [Fact]
+    public async Task Should_Support_Custom_Authentication_Scheme()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = configuration["Auth0:Domain"];
+        var clientId = configuration["Auth0:ClientId"];
+        var customScheme = "CustomScheme";
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .Build())
+            .Build();
+
+        // Create a server with a custom authentication scheme
+        using var server = TestServerBuilder.CreateServerWithCustomScheme(customScheme, opt =>
+        {
+            opt.Backchannel = new HttpClient(mockHandler.Object);
+        }, null, false, false, false, null, true);
+        using var client = server.CreateClient();
+
+        // Create a valid logout token
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)200);
+    }
 }
