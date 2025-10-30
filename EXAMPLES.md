@@ -335,6 +335,8 @@ Additionally, you will also need to call `UseBackchannelLogout();` on the Applic
 app.UseBackchannelLogout();
 ```
 
+When using a custom scheme, make sure to use the same scheme name consistently throughout your authentication flow (login, logout, and backchannel logout configuration).
+
 As logout tokens need to be stored, you will also need to provide something for our SDK to store the tokens in.
 
 ```csharp

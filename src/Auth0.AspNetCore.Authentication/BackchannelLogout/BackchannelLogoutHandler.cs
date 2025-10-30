@@ -16,10 +16,17 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
     public class BackchannelLogoutHandler
     {
         private readonly ILogoutTokenHandler _tokenHandler;
+        private readonly string _authenticationScheme;
 
-        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler)
+        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler) 
+            : this(tokenHandler, Auth0Constants.AuthenticationScheme)
+        {
+        }
+
+        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler, string authenticationScheme)
         {
             _tokenHandler = tokenHandler;
+            _authenticationScheme = authenticationScheme;
         }
 
         public async Task HandleRequestAsync(HttpContext context)
@@ -36,10 +43,10 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
                     {
                         var auth0Options = context.RequestServices
                             .GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>()
-                            .Get(Auth0Constants.AuthenticationScheme);
+                            .Get(_authenticationScheme);
                         var oidcOptions = context.RequestServices
                             .GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>()
-                            .Get(Auth0Constants.AuthenticationScheme);
+                            .Get(_authenticationScheme);
 
                         var principal = await ValidateLogoutToken(logoutToken, oidcOptions, context);
 
