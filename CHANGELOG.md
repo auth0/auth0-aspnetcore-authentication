@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.5.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.5.1) (2025-11-07)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.5.0...1.5.1)
+
+**Fixed**
+- Fix issue with using custom scheme with BackchannelLogout [\#185](https://github.com/auth0/auth0-aspnetcore-authentication/pull/185) ([kailash-b](https://github.com/kailash-b))
+
+**Security**
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.13.1 to 8.14.0 [\#172](https://github.com/auth0/auth0-aspnetcore-authentication/pull/172) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.12.1 to 8.13.1 [\#168](https://github.com/auth0/auth0-aspnetcore-authentication/pull/168) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.5.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.5.0) (2025-07-21)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.4.1...1.5.0)
 

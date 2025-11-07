@@ -42,7 +42,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Version>1.5.0</Version>
+    <Version>1.5.1</Version>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyVersion>$(Version)</AssemblyVersion>
