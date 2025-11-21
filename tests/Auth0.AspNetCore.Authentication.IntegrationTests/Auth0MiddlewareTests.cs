@@ -1758,5 +1758,86 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 }
             }
         }
+
+        [Fact]
+        public async Task Should_Call_OnMissingRefreshToken_After_Refresh_Fails()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var onMissingRefreshTokenCalled = false;
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                // Mock initial token with very short expiration (1 second) to trigger refresh on second request
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.UtcNow.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 1)
+                // Mock the refresh token endpoint to fail
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.UtcNow.AddSeconds(20)), (me) => me.HasGrantType("refresh_token"), 20, true, HttpStatusCode.BadRequest)
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnMissingRefreshToken = (context) =>
+                    {
+                        onMissingRefreshTokenCalled = true;
+                        context.Response.Redirect("http://missing.rt/");
+                        return Task.CompletedTask;
+                    }
+                };
+                opts.UseRefreshTokens = true;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    // - Include it in the generated ID Token
+                    nonce = queryParameters["nonce"];
+
+                    // Keep track of the state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    // Wait for token to expire (1 second + some buffer)
+                    await Task.Delay(2000);
+
+                    // First request after token expires - this will trigger refresh (which will fail), clearing the refresh token
+                    var firstResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+                    var firstContent = JObject.Parse(await firstResponse.Content.ReadAsStringAsync());
+
+                    // Verify refresh token was cleared after failed refresh
+                    firstContent.GetValue("RefreshToken").Value<string>().Should().BeNull();
+                    onMissingRefreshTokenCalled.Should().BeFalse();
+
+                    // Second request - now OnMissingRefreshToken should be called since refresh token is missing
+                    var secondResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", firstResponse.Headers.GetValues("Set-Cookie"));
+
+                    // Verify OnMissingRefreshToken was called
+                    onMissingRefreshTokenCalled.Should().BeTrue();
+                    secondResponse.Headers.Location.AbsoluteUri.Should().Be("http://missing.rt/");
+
+                    mockHandler.Verify();
+                }
+            }
+        }
     }
 }
