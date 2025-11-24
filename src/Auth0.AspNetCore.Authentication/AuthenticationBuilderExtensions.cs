@@ -210,7 +210,8 @@ namespace Auth0.AspNetCore.Authentication
                             }
                             else
                             {
-                                context.Properties.UpdateTokenValue("refresh_token", null!);
+                                // Remove the refresh token when refresh fails to ensure OnMissingRefreshToken is called on subsequent requests
+                                context.Properties.Items.Remove(".Token.refresh_token");
                             }
 
                             context.ShouldRenew = true;
