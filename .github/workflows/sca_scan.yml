@@ -1,0 +1,26 @@
+name: SCA
+
+on:
+  merge_group:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  snyk-cli:
+    uses: auth0/devsecops-tooling/.github/workflows/sca-scan.yml@main
+    with:
+      additional-arguments: "--exclude=README.md"
+      dotnet-version: "6"
+    secrets: inherit
