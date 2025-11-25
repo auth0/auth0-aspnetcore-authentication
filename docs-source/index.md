@@ -19,7 +19,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 ## Getting started
 ### Requirements
 
-This library supports .NET 6 and .NET 7.
+This library supports .NET 6.0 and above.
 
 ### Installation
 

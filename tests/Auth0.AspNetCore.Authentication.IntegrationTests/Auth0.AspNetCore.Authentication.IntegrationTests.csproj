@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="jwks.json" />
     <EmbeddedResource Include="jwks2.json" />
     <EmbeddedResource Include="wellknownconfig.json" />
+    <EmbeddedResource Include="wellknownconfig_with_par.json" />
     <EmbeddedResource Include="wellknownconfig_without_par.json" />
   </ItemGroup>
 
