@@ -124,7 +124,9 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
         public static async Task WriteErrorAsync(this HttpContext context, int statusCode, string error, string description)
         {
             context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(new { error, error_description = description });
+            context.Response.ContentType = "application/json";
+            var json = System.Text.Json.JsonSerializer.Serialize(new { error, error_description = description });
+            await context.Response.WriteAsync(json);
         }
 
         public static async Task WriteStatusCodeAsync(this HttpContext context, int statusCode)

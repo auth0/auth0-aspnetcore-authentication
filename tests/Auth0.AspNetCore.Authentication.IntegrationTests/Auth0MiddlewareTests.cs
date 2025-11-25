@@ -124,7 +124,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         public async Task Should_Post_To_PAR_Endpoint()
         {
             var mockHandler = new OidcMockBuilder()
-                .MockOpenIdConfig()
+                .MockOpenIdConfig("wellknownconfig_with_par.json")
                 .MockJwks()
                 .MockPAR("https://my-par-request-uri")
                 .Build();
@@ -152,7 +152,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         public async Task Should_Handle_Errors_From_PAR_Endpoint()
         {
             var mockHandler = new OidcMockBuilder()
-                .MockOpenIdConfig()
+                .MockOpenIdConfig("wellknownconfig_with_par.json")
                 .MockJwks()
                 .MockPAR("https://my-par-request-uri", null, 70, HttpStatusCode.BadRequest)
                 .Build();

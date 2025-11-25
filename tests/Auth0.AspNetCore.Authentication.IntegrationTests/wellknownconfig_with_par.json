@@ -1,7 +1,8 @@
-﻿{
+{
   "issuer": "https://tenant.eu.auth0.com/",
   "authorization_endpoint": "https://tenant.eu.auth0.com/authorize",
   "token_endpoint": "https://tenant.eu.auth0.com/oauth/token",
+  "pushed_authorization_request_endpoint": "https://tenant.eu.auth0.com/oauth/par",
   "device_authorization_endpoint": "https://tenant.eu.auth0.com/oauth/device/code",
   "userinfo_endpoint": "https://tenant.eu.auth0.com/userinfo",
   "mfa_challenge_endpoint": "https://tenant.eu.auth0.com/mfa/challenge",
