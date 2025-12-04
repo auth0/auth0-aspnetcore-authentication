@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.6.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.6.0) (2025-12-04)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.5.1...1.6.0)
+
+**Added**
+- Adds support for net10.0 [\#195](https://github.com/auth0/auth0-aspnetcore-authentication/pull/195) ([kailash-b](https://github.com/kailash-b))
+
+**Fixed**
+- Remove refresh_token from cookie instead of setting to NULL [\#193](https://github.com/auth0/auth0-aspnetcore-authentication/pull/193) ([kailash-b](https://github.com/kailash-b))
+
 ## [1.5.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.5.1) (2025-11-07)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.5.0...1.5.1)
 
