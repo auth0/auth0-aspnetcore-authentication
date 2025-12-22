@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.6.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.6.1) (2025-12-22)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.6.0...1.6.1)
+
+**Security**
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.0 to 10.0.1 [\#200](https://github.com/auth0/auth0-aspnetcore-authentication/pull/200) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.14.0 to 8.15.0 [\#190](https://github.com/auth0/auth0-aspnetcore-authentication/pull/190) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.6.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.6.0) (2025-12-04)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.5.1...1.6.0)
 
