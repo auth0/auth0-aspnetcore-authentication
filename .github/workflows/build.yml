@@ -16,7 +16,7 @@ jobs:
         dotnet-version: ['net6.0', 'net7.0', 'net8.0', 'net10.0']
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
