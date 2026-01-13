@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.PushedAuthorizationRequest;
 using Auth0.AspNetCore.Authentication.CustomDomains;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -15,13 +17,13 @@ namespace Auth0.AspNetCore.Authentication
         {
             return new OpenIdConnectEvents
             {
-                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options, oidcOptions, customDomainsOptions)),
-                OnRedirectToIdentityProviderForSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut, CreateOnRedirectToIdentityProviderForSignOut(auth0Options, customDomainsOptions)),
-                OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated, CreateOnTokenValidated(auth0Options, customDomainsOptions)),
+                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options, oidcOptions)),
+                OnRedirectToIdentityProviderForSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut, CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
+                OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated, CreateOnTokenValidated(auth0Options)),
 
                 OnAccessDenied = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAccessDenied),
                 OnAuthenticationFailed = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthenticationFailed),
-                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived, CreateOnAuthorizationCodeReceived(auth0Options, customDomainsOptions)),
+                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived, CreateOnAuthorizationCodeReceived(auth0Options)),
                 OnMessageReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnMessageReceived),
                 OnRemoteFailure = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteFailure),
                 OnRemoteSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteSignOut),
@@ -48,12 +50,13 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions, Auth0CustomDomainsOptions? customDomainsOptions)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions)
         {
             return async (context) =>
             {
                 // Store the resolved domain in the authentication state (Properties.Items) so it can be validated
                 // when the token returns. The StartupFilter already resolved it and cached it in HttpContext.Items.
+                var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
                 if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true })
                 {
                     var resolvedDomain = context.HttpContext.GetResolvedDomain();
@@ -84,7 +87,7 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0WebAppOptions auth0Options, Auth0CustomDomainsOptions? customDomainsOptions)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
@@ -134,7 +137,7 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0WebAppOptions auth0Options, Auth0CustomDomainsOptions? customDomainsOptions)
+        private static Func<TokenValidatedContext, Task> CreateOnTokenValidated(Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
@@ -149,6 +152,7 @@ namespace Auth0.AspNetCore.Authentication
 
                 // When the issuer is resolved per request, validate it against the issuer stored in the protected state.
                 // This is important because we would have skipped issuer validation in the case of Multiple Custom Domains.
+                var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
                 if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true } && context.Properties?.Items != null &&
                     context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var expectedIssuer) &&
                     !string.IsNullOrWhiteSpace(expectedIssuer))
@@ -170,7 +174,7 @@ namespace Auth0.AspNetCore.Authentication
         }
 
 
-        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(Auth0WebAppOptions auth0Options, Auth0CustomDomainsOptions? customDomainsOptions)
+        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(Auth0WebAppOptions auth0Options)
         {
             return async (context) =>
             {
@@ -183,6 +187,7 @@ namespace Auth0.AspNetCore.Authentication
                     if (string.IsNullOrWhiteSpace(issuer))
                     {
                         var resolvedDomain = context.HttpContext.GetResolvedDomain();
+                        var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
                         if (string.IsNullOrWhiteSpace(resolvedDomain) && customDomainsOptions?.DomainResolver != null)
                         {
                             resolvedDomain = await customDomainsOptions.DomainResolver(context.HttpContext).ConfigureAwait(false);

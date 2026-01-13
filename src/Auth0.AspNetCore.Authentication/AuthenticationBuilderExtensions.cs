@@ -196,7 +196,7 @@ namespace Auth0.AspNetCore.Authentication
 
                         if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
                         {
-                            var result = await RefreshTokens(options, refreshToken, oidcOptions.Backchannel);
+                            var result = await RefreshTokens(context.HttpContext, options, refreshToken, oidcOptions.Backchannel);
 
                             if (result != null)
                             {
@@ -239,10 +239,14 @@ namespace Auth0.AspNetCore.Authentication
             }
         }
 
-        private static async Task<AccessTokenResponse?> RefreshTokens(Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
+        private static async Task<AccessTokenResponse?> RefreshTokens(HttpContext httpContext, Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
         {
             var tokenClient = new TokenClient(httpClient);
-            return await tokenClient.Refresh(options, refreshToken);
+            
+            // Get the resolved domain from HttpContext if available (for multiple custom domains)
+            var resolvedDomain = httpContext.GetResolvedDomain();
+            
+            return await tokenClient.Refresh(options, refreshToken, resolvedDomain);
         }
 
         private static async Task VerifyBackchannelLogoutSupport(HttpContext context, OpenIdConnectOptions oidcOptions)
