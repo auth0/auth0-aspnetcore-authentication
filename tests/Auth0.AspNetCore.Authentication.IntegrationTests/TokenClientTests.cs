@@ -30,7 +30,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
            
             var client = new TokenClient(new HttpClient(mockHandler.Object));
-            var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com" }, "123");
+            var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" }, "123");
 
             result.Should().BeNull();
         }
