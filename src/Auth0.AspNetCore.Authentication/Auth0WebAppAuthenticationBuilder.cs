@@ -103,17 +103,6 @@ namespace Auth0.AspNetCore.Authentication
             // Register the post-configure options to set up custom ConfigurationManager
             _services.TryAddEnumerable(
                 ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0CustomDomainsOpenIdConnectPostConfigureOptions>());
-            
-            // If cookies per issuer is enabled, register the custom cookie manager
-            if (customDomainsOptions.EnableCookiesPerIssuer)
-            {
-                _services.AddOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>(_options.CookieAuthenticationScheme)
-                    .Configure(cookieOptions =>
-                    {
-                        // Replace the default cookie manager with our custom domain-scoped one
-                        cookieOptions.CookieManager = new Auth0CustomDomainsCookieManager(cookieOptions.CookieManager);
-                    });
-            }
         }
 
         private void EnableWithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
