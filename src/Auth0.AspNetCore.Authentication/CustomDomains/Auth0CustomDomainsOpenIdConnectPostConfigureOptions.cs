@@ -59,14 +59,6 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
             {
                 return;
             }
-
-            // Validate that DomainResolver is properly configured
-            if (auth0CustomDomainsOptions.DomainResolver is null)
-            {
-                throw new InvalidOperationException(
-                    $"DomainResolver is not configured for custom domains. " +
-                    $"Ensure the DomainResolver property is set in {nameof(Auth0CustomDomainsOptions)}.");
-            }
             
             // Ensure we have a StateDataFormat for extracting the issuer on callback requests.
             if (options.StateDataFormat is null)
