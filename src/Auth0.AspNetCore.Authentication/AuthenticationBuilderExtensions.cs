@@ -155,8 +155,8 @@ namespace Auth0.AspNetCore.Authentication
                 if (logoutTokenHandler != null)
                 {
                     await VerifyBackchannelLogoutSupport(context.HttpContext, oidcOptions);
-                    // var issuer = $"https://{options.Domain}/";
-                    // // Prefer issuer from the authenticated principal
+
+                    // Prefer issuer from the authenticated principal
                     var resolvedIssuer = context.HttpContext.User?.FindFirst("iss")?.Value;
 
                     // Fall back to the domain resolved by StartupFilter (cached in HttpContext.Items)

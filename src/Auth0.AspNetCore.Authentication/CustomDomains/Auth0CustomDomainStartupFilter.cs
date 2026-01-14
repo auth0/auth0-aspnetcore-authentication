@@ -25,6 +25,17 @@ internal sealed class Auth0CustomDomainStartupFilter : IStartupFilter
     /// </summary>
     /// <param name="next">The next middleware configuration action in the pipeline.</param>
     /// <returns>An action that configures the application builder.</returns>
+    /// <remarks>
+    /// This method registers middleware that:
+    /// <list type="bullet">
+    /// <item>Runs before authentication to pre-resolve the domain</item>
+    /// <item>Invokes the configured DomainResolver if present</item>
+    /// <item>Caches the resolved domain in HttpContext.Items for the request lifetime</item>
+    /// <item>Throws if DomainResolver returns null/empty to fail fast</item>
+    /// </list>
+    /// The resolved domain is stored with key <see cref="Auth0Constants.ResolvedDomainKey"/> 
+    /// and used by OpenIdConnect configuration managers and token endpoints.
+    /// </remarks>
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
     {
         return app =>

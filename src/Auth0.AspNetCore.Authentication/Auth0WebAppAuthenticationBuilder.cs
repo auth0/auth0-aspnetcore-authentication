@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
 using Auth0.AspNetCore.Authentication.CustomDomains;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -97,8 +98,9 @@ namespace Auth0.AspNetCore.Authentication
             _services.AddHttpContextAccessor();
             
             // Register the startup filter to resolve domain early in the request pipeline
-            _services.AddSingleton<Microsoft.AspNetCore.Hosting.IStartupFilter>(
-                sp => new Auth0CustomDomainStartupFilter(_authenticationScheme));
+            _services.TryAddEnumerable(
+                ServiceDescriptor.Singleton<IStartupFilter>(
+                    _ => new Auth0CustomDomainStartupFilter(_authenticationScheme)));
             
             // Register the post-configure options to set up custom ConfigurationManager
             _services.TryAddEnumerable(
