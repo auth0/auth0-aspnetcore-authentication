@@ -13,17 +13,23 @@ namespace Auth0.AspNetCore.Authentication
 {
     internal class OpenIdConnectEventsFactory
     {
-        internal static OpenIdConnectEvents Create(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions, Auth0CustomDomainsOptions? customDomainsOptions = null)
+        internal static OpenIdConnectEvents Create(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions)
         {
             return new OpenIdConnectEvents
             {
-                OnRedirectToIdentityProvider = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider, CreateOnRedirectToIdentityProvider(auth0Options, oidcOptions)),
-                OnRedirectToIdentityProviderForSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut, CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
-                OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated, CreateOnTokenValidated(auth0Options)),
+                OnRedirectToIdentityProvider =
+                    ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProvider,
+                        CreateOnRedirectToIdentityProvider(auth0Options, oidcOptions)),
+                OnRedirectToIdentityProviderForSignOut = ProxyEvent(
+                    auth0Options.OpenIdConnectEvents?.OnRedirectToIdentityProviderForSignOut,
+                    CreateOnRedirectToIdentityProviderForSignOut(auth0Options)),
+                OnTokenValidated = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnTokenValidated,
+                    CreateOnTokenValidated(auth0Options)),
 
                 OnAccessDenied = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAccessDenied),
                 OnAuthenticationFailed = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthenticationFailed),
-                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived, CreateOnAuthorizationCodeReceived(auth0Options)),
+                OnAuthorizationCodeReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnAuthorizationCodeReceived,
+                    CreateOnAuthorizationCodeReceived(auth0Options)),
                 OnMessageReceived = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnMessageReceived),
                 OnRemoteFailure = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteFailure),
                 OnRemoteSignOut = ProxyEvent(auth0Options.OpenIdConnectEvents?.OnRemoteSignOut),
@@ -50,13 +56,17 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options, OpenIdConnectOptions oidcOptions)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProvider(Auth0WebAppOptions auth0Options,
+            OpenIdConnectOptions oidcOptions)
         {
             return async (context) =>
             {
                 // Store the resolved domain in the authentication state (Properties.Items) so it can be validated
                 // when the token returns. The StartupFilter already resolved it and cached it in HttpContext.Items.
-                var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
+                var customDomainsOptions = context.HttpContext.RequestServices
+                    .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
+                    ?.Get(context.Scheme.Name);
+
                 if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true })
                 {
                     var resolvedDomain = context.HttpContext.GetResolvedDomain();
@@ -75,7 +85,8 @@ namespace Auth0.AspNetCore.Authentication
                     context.ProtocolMessage.SetParameter(extraParam.Key, extraParam.Value);
                 }
 
-                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) && !context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization))
+                if (!string.IsNullOrWhiteSpace(auth0Options.Organization) &&
+                    !context.Properties.Items.ContainsKey(Auth0AuthenticationParameters.Organization))
                 {
                     context.Properties.Items[Auth0AuthenticationParameters.Organization] = auth0Options.Organization;
                 }
@@ -87,7 +98,8 @@ namespace Auth0.AspNetCore.Authentication
             };
         }
 
-        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(Auth0WebAppOptions auth0Options)
+        private static Func<RedirectContext, Task> CreateOnRedirectToIdentityProviderForSignOut(
+            Auth0WebAppOptions auth0Options)
         {
             return (context) =>
             {
@@ -101,7 +113,7 @@ namespace Auth0.AspNetCore.Authentication
                 }
 
                 var authority = Utils.ToAuthority(issuer ?? $"https://{auth0Options.Domain}");
-                var logoutUri = $"{authority}/v2/logout?client_id={auth0Options.ClientId}";
+                var logoutUri = $"{authority.TrimEnd('/')}/v2/logout?client_id={auth0Options.ClientId}";
 
                 var postLogoutUri = context.Properties.RedirectUri;
                 var parameters = GetExtraParameters(context.Properties.Items);
@@ -152,8 +164,12 @@ namespace Auth0.AspNetCore.Authentication
 
                 // When the issuer is resolved per request, validate it against the issuer stored in the protected state.
                 // This is important because we would have skipped issuer validation in the case of Multiple Custom Domains.
-                var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
-                if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true } && context.Properties?.Items != null &&
+                var customDomainsOptions = context.HttpContext.RequestServices
+                    .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
+                    ?.Get(context.Scheme.Name);
+
+                if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true } &&
+                    context.Properties?.Items != null &&
                     context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var expectedIssuer) &&
                     !string.IsNullOrWhiteSpace(expectedIssuer))
                 {
@@ -165,7 +181,8 @@ namespace Auth0.AspNetCore.Authentication
 
                     if (!ok)
                     {
-                        context.Fail($"Token issuer '{tokenIssuer}' does not match expected issuer '{expectedAuthority}'.");
+                        context.Fail(
+                            $"Token issuer '{tokenIssuer}' does not match expected issuer '{expectedAuthority}'.");
                     }
                 }
 
@@ -174,39 +191,50 @@ namespace Auth0.AspNetCore.Authentication
         }
 
 
-        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(Auth0WebAppOptions auth0Options)
+        private static Func<AuthorizationCodeReceivedContext, Task> CreateOnAuthorizationCodeReceived(
+            Auth0WebAppOptions auth0Options)
         {
             return async (context) =>
             {
                 if (auth0Options.ClientAssertionSecurityKey != null)
                 {
-                    var issuer = context.Properties?.Items != null && context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var storedIssuer)
+                    var issuer = context.Properties?.Items != null &&
+                                 context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey,
+                                     out var storedIssuer)
                         ? storedIssuer
                         : null;
-                    
+
                     if (string.IsNullOrWhiteSpace(issuer))
                     {
                         var resolvedDomain = context.HttpContext.GetResolvedDomain();
-                        var customDomainsOptions = context.HttpContext.RequestServices.GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()?.CurrentValue;
+                        var customDomainsOptions = context.HttpContext.RequestServices
+                            .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
+                            ?.Get(context.Scheme.Name);
                         if (string.IsNullOrWhiteSpace(resolvedDomain) && customDomainsOptions?.DomainResolver != null)
                         {
-                            resolvedDomain = await customDomainsOptions.DomainResolver(context.HttpContext).ConfigureAwait(false);
+                            resolvedDomain = await customDomainsOptions.DomainResolver(context.HttpContext)
+                                .ConfigureAwait(false);
                         }
+
                         resolvedDomain ??= auth0Options.Domain;
                         issuer = $"https://{resolvedDomain}/";
                     }
 
                     var audience = Utils.ToAuthority(issuer) + "/";
-                    context.TokenEndpointRequest?.SetParameter("client_assertion", new JwtTokenFactory(auth0Options.ClientAssertionSecurityKey, auth0Options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
-                       .GenerateToken(auth0Options.ClientId, audience, auth0Options.ClientId
-                    ));
+                    context.TokenEndpointRequest?.SetParameter("client_assertion",
+                        new JwtTokenFactory(auth0Options.ClientAssertionSecurityKey,
+                                auth0Options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
+                            .GenerateToken(auth0Options.ClientId, audience, auth0Options.ClientId
+                            ));
 
-                    context.TokenEndpointRequest?.SetParameter("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+                    context.TokenEndpointRequest?.SetParameter("client_assertion_type",
+                        "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
                 }
             };
         }
 
-        private static IDictionary<string, string?> GetAuthorizeParameters(Auth0WebAppOptions auth0Options, IDictionary<string, string?> authSessionItems)
+        private static IDictionary<string, string?> GetAuthorizeParameters(Auth0WebAppOptions auth0Options,
+            IDictionary<string, string?> authSessionItems)
         {
             var parameters = new Dictionary<string, string?>();
 
@@ -251,13 +279,13 @@ namespace Auth0.AspNetCore.Authentication
         {
             var parameters = new Dictionary<string, string?>();
 
-            foreach (var (key, value) in authSessionItems.Where(item => item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
+            foreach (var (key, value) in authSessionItems.Where(item =>
+                         item.Key.StartsWith($"{Auth0AuthenticationParameters.Prefix}:")))
             {
                 parameters[key.Replace($"{Auth0AuthenticationParameters.Prefix}:", "")] = value;
             }
 
             return parameters;
         }
-
     }
 }

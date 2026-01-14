@@ -55,15 +55,15 @@ namespace Auth0.AspNetCore.Authentication
         /// <returns>A normalized authority URL string.</returns>
         internal static string ToAuthority(string issuerOrAuthority)
         {
-            var normalized = issuerOrAuthority.Trim();
-
-            if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            var normalized = issuerOrAuthority.Trim().TrimEnd('/');
+    
+            if (!normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
-                return normalized;
+                normalized = $"https://{normalized}";
             }
-
-            return $"https://{normalized.TrimEnd('/')}/";
+    
+            return normalized + "/";
         }
     }
 }
