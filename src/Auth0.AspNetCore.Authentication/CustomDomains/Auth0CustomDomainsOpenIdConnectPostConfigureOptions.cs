@@ -88,6 +88,10 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
             // The issuer varies per request, so we can't validate against a single static issuer string.
             // Issuer validation will instead be performed via the OnTokenValidated event.
             options.TokenValidationParameters.ValidateIssuer = false;
+            
+            // Since Domain Resolver is set, this value will be set dynamically, so we clear it here.
+            options.Authority = null;
+            
         }
     }
 }
