@@ -33,6 +33,13 @@ namespace Auth0.AspNetCore.Authentication
             // Use provided domain for dynamic resolution, fallback to options.Domain
             var tokenEndpointDomain = domain ?? options.Domain;
 
+            if (string.IsNullOrWhiteSpace(tokenEndpointDomain))
+            {
+                throw new InvalidOperationException(
+                    "Cannot determine domain for token endpoint. " +
+                    "Ensure Domain is set or domain resolution is properly configured.");
+            }
+
             ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));

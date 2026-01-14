@@ -94,19 +94,19 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <param name="context">The current HTTP context.</param>
     /// <returns>The resolved authority URL.</returns>
     /// <exception cref="InvalidOperationException">Thrown when domain resolution fails.</exception>
-    private async Task<string> ResolveAuthorityAsync(HttpContext context)
+    internal async Task<string> ResolveAuthorityAsync(HttpContext context)
     {
         // In case of a callback request, extracts the issuer from the state parameter.
         if (TryGetState(context, out var state) && TryGetIssuerFromState(state, out var stateIssuer))
         {
-            return ToAuthority(stateIssuer);
+            return Utils.ToAuthority(stateIssuer);
         }
 
         // Check if the domain was already resolved earlier in the request pipeline
         if (context.Items[Auth0Constants.ResolvedDomainKey] is string cachedDomain &&
             !string.IsNullOrWhiteSpace(cachedDomain))
         {
-            return ToAuthority(cachedDomain);
+            return Utils.ToAuthority(cachedDomain);
         }
 
         // Invoke the domain resolver to determine the domain for this request
@@ -121,7 +121,7 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
 
         // Cache the resolved domain for subsequent use in this request
         context.Items[Auth0Constants.ResolvedDomainKey] = resolved;
-        return ToAuthority(resolved);
+        return Utils.ToAuthority(resolved);
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <remarks>
     /// Checks both query string (GET requests) and form data (POST requests).
     /// </remarks>
-    private static bool TryGetState(HttpContext context, out string? state)
+    internal static bool TryGetState(HttpContext context, out string? state)
     {
         // Check query string first (most common for OAuth/OIDC callbacks)
         if (context.Request.Query.TryGetValue("state", out var queryState) && 
@@ -166,7 +166,7 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// This method safely handles malformed or tampered state parameters by catching
     /// deserialization exceptions. This is expected behavior for invalid/expired state.
     /// </remarks>
-    private bool TryGetIssuerFromState(string? state, out string issuer)
+    internal bool TryGetIssuerFromState(string? state, out string issuer)
     {
         issuer = string.Empty;
 
@@ -202,30 +202,6 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Converts a domain string to a fully-qualified authority URL.
-    /// </summary>
-    /// <param name="domain">The domain, with or without protocol.</param>
-    /// <returns>A fully-qualified HTTPS URL.</returns>
-    /// <exception cref="ArgumentException">Thrown when the domain is null or empty.</exception>
-    internal static string ToAuthority(string? domain)
-    {
-        if (string.IsNullOrWhiteSpace(domain))
-        {
-            throw new ArgumentException("Domain cannot be null or empty.", nameof(domain));
-        }
-
-        var normalized = domain.Trim().TrimEnd('/');
-
-        if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            return normalized;
-        }
-
-        return $"https://{normalized}";
     }
 
     /// <summary>

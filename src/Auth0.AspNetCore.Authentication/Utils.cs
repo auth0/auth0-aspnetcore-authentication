@@ -45,5 +45,25 @@ namespace Auth0.AspNetCore.Authentication
                 }
             };
         }
+        
+        /// <summary>
+        /// Normalizes the given issuer or authority string to a valid HTTPS authority URL.
+        /// Trims whitespace and trailing slashes. If the input already starts with "http://" or "https://",
+        /// it is returned as-is (after trimming). Otherwise, "https://" is prepended.
+        /// </summary>
+        /// <param name="issuerOrAuthority">The issuer or authority string to normalize.</param>
+        /// <returns>A normalized authority URL string.</returns>
+        internal static string ToAuthority(string issuerOrAuthority)
+        {
+            var normalized = issuerOrAuthority.Trim();
+
+            if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return normalized;
+            }
+
+            return $"https://{normalized.TrimEnd('/')}/";
+        }
     }
 }

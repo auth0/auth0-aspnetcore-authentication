@@ -38,7 +38,7 @@ internal sealed class Auth0CustomDomainStartupFilter : IStartupFilter
                 // If a DomainResolver is defined, resolve the issuer and cache it in the HttpContext.
                 if (customDomainsOptions.DomainResolver is not null)
                 {
-                    var issuer = await customDomainsOptions.DomainResolver(ctx);
+                    var issuer = await customDomainsOptions.DomainResolver(ctx).ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(issuer))
                         throw new InvalidOperationException("DomainResolver returned empty issuer.");
                     

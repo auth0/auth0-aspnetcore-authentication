@@ -93,14 +93,14 @@ namespace Auth0.AspNetCore.Authentication
             {
                 // Prefer issuer from the authenticated principal
                 var issuer = context.HttpContext.User?.FindFirst("iss")?.Value;
-                
+
                 // Fall back to the domain resolved by StartupFilter (cached in HttpContext.Items)
                 if (string.IsNullOrWhiteSpace(issuer))
                 {
                     issuer = context.HttpContext.GetResolvedDomain();
                 }
 
-                var authority = ToAuthority(issuer ?? $"https://{auth0Options.Domain}");
+                var authority = Utils.ToAuthority(issuer ?? $"https://{auth0Options.Domain}");
                 var logoutUri = $"{authority}/v2/logout?client_id={auth0Options.ClientId}";
 
                 var postLogoutUri = context.Properties.RedirectUri;
@@ -158,7 +158,7 @@ namespace Auth0.AspNetCore.Authentication
                     !string.IsNullOrWhiteSpace(expectedIssuer))
                 {
                     var tokenIssuer = context.SecurityToken.Issuer;
-                    var expectedAuthority = ToAuthority(expectedIssuer);
+                    var expectedAuthority = Utils.ToAuthority(expectedIssuer);
 
                     var ok = tokenIssuer.Equals(expectedAuthority, StringComparison.OrdinalIgnoreCase) ||
                              tokenIssuer.Equals(expectedAuthority + "/", StringComparison.OrdinalIgnoreCase);
@@ -196,7 +196,7 @@ namespace Auth0.AspNetCore.Authentication
                         issuer = $"https://{resolvedDomain}/";
                     }
 
-                    var audience = ToAuthority(issuer) + "/";
+                    var audience = Utils.ToAuthority(issuer) + "/";
                     context.TokenEndpointRequest?.SetParameter("client_assertion", new JwtTokenFactory(auth0Options.ClientAssertionSecurityKey, auth0Options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
                        .GenerateToken(auth0Options.ClientId, audience, auth0Options.ClientId
                     ));
@@ -204,19 +204,6 @@ namespace Auth0.AspNetCore.Authentication
                     context.TokenEndpointRequest?.SetParameter("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
                 }
             };
-        }
-
-        private static string ToAuthority(string issuerOrAuthority)
-        {
-            var normalized = issuerOrAuthority.Trim().TrimEnd('/');
-
-            if (normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                return normalized;
-            }
-
-            return $"https://{normalized}";
         }
 
         private static IDictionary<string, string?> GetAuthorizeParameters(Auth0WebAppOptions auth0Options, IDictionary<string, string?> authSessionItems)
