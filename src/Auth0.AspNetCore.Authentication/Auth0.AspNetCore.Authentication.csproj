@@ -13,7 +13,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.15.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="10.0.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
