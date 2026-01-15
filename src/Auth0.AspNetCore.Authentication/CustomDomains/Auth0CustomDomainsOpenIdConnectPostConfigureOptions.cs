@@ -60,6 +60,14 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
                 return;
             }
             
+            // Ensure DomainResolver is configured
+            if (auth0CustomDomainsOptions.DomainResolver is null)
+            {
+                throw new InvalidOperationException(
+                    $"DomainResolver must be configured when custom domains are enabled. " +
+                    $"Set the {nameof(Auth0CustomDomainsOptions.DomainResolver)} property in the {nameof(Auth0CustomDomainsOptions)} configuration.");
+            }
+            
             // Ensure we have a StateDataFormat for extracting the issuer on callback requests.
             if (options.StateDataFormat is null)
             {
@@ -69,7 +77,14 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
                     $"Ensure the OpenIdConnect authentication scheme is properly configured.");
             }
             
-            var httpClient = options.Backchannel ?? _httpClientFactory?.CreateClient() ?? new HttpClient();
+            if (options.Backchannel is null && _httpClientFactory is null)
+            {
+                throw new InvalidOperationException(
+                    $"Either OpenIdConnectOptions.Backchannel or IHttpClientFactory must be configured. " +
+                    $"Configure a Backchannel HttpClient on OpenIdConnectOptions or register IHttpClientFactory in the service collection.");
+            }
+            
+            var httpClient = options.Backchannel ?? _httpClientFactory!.CreateClient();
 
             options.ConfigurationManager = new Auth0CustomDomainsOpenIdConnectConfigurationManager(
                 _httpContextAccessor,

@@ -297,7 +297,7 @@ public class Auth0CustomDomainsOpenIdConnectPostConfigureOptionsTests
     }
 
     [Fact]
-    public void PostConfigure_WithoutBackchannelOrFactory_CreatesNewHttpClient()
+    public void PostConfigure_WithoutBackchannelOrFactory_ThrowsInvalidOperationException()
     {
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
@@ -318,8 +318,9 @@ public class Auth0CustomDomainsOpenIdConnectPostConfigureOptionsTests
             httpContextAccessor.Object,
             auth0CustomDomainsOptionsMonitor.Object);
 
-        postConfigureOptions.PostConfigure("TestScheme", options);
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            postConfigureOptions.PostConfigure("TestScheme", options));
 
-        Assert.NotNull(options.ConfigurationManager);
+        Assert.Contains("Either OpenIdConnectOptions.Backchannel or IHttpClientFactory must be configured", exception.Message);
     }
 }

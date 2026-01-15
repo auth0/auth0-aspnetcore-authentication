@@ -97,6 +97,9 @@ namespace Auth0.AspNetCore.Authentication
             // Register HttpContextAccessor - required for domain resolution
             _services.AddHttpContextAccessor();
             
+            // Register HttpClient - required for fetching OIDC configuration per domain
+            _services.AddHttpClient();
+            
             // Register the startup filter to resolve domain early in the request pipeline
             _services.TryAddEnumerable(
                 ServiceDescriptor.Singleton<IStartupFilter>(
