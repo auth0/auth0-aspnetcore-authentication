@@ -82,7 +82,7 @@ public class Auth0CustomDomainStartupFilterTests
     }
 
     [Fact]
-    public Task Configure_WithDomainResolverReturningNull_ThrowsInvalidOperationException()
+    public async Task Configure_WithDomainResolverReturningNull_ThrowsInvalidOperationException()
     {
         var auth0SchemeName = "Auth0";
         var startupFilter = new Auth0CustomDomainStartupFilter(auth0SchemeName);
@@ -100,16 +100,18 @@ public class Auth0CustomDomainStartupFilterTests
 
         var configureAction = startupFilter.Configure(_ => { });
         var appBuilder = new Mock<IApplicationBuilder>();
+        Func<RequestDelegate, RequestDelegate> capturedMiddleware = null;
         appBuilder.Setup(a => a.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
-            .Callback<Func<RequestDelegate, RequestDelegate>>(async void (middleware) =>
-                await Assert.ThrowsAsync<InvalidOperationException>(() => middleware(next)(httpContext)));
+            .Callback<Func<RequestDelegate, RequestDelegate>>(middleware => capturedMiddleware = middleware);
 
         configureAction(appBuilder.Object);
-        return Task.CompletedTask;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await capturedMiddleware(next)(httpContext));
     }
 
     [Fact]
-    public Task Configure_WithDomainResolverReturningEmptyString_ThrowsInvalidOperationException()
+    public async Task Configure_WithDomainResolverReturningEmptyString_ThrowsInvalidOperationException()
     {
         var auth0SchemeName = "Auth0";
         var startupFilter = new Auth0CustomDomainStartupFilter(auth0SchemeName);
@@ -127,17 +129,18 @@ public class Auth0CustomDomainStartupFilterTests
 
         var configureAction = startupFilter.Configure(_ => { });
         var appBuilder = new Mock<IApplicationBuilder>();
-
+        Func<RequestDelegate, RequestDelegate> capturedMiddleware = null;
+        appBuilder.Setup(a => a.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
+            .Callback<Func<RequestDelegate, RequestDelegate>>(middleware => capturedMiddleware = middleware);
 
         configureAction(appBuilder.Object);
-        appBuilder.Setup(a => a.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
-            .Callback<Func<RequestDelegate, RequestDelegate>>(async void (middleware) =>
-                await Assert.ThrowsAsync<InvalidOperationException>(() => middleware(next)(httpContext)));
-        return Task.CompletedTask;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await capturedMiddleware(next)(httpContext));
     }
 
     [Fact]
-    public Task Configure_WithDomainResolverReturningWhitespace_ThrowsInvalidOperationException()
+    public async Task Configure_WithDomainResolverReturningWhitespace_ThrowsInvalidOperationException()
     {
         var auth0SchemeName = "Auth0";
         var startupFilter = new Auth0CustomDomainStartupFilter(auth0SchemeName);
@@ -155,12 +158,14 @@ public class Auth0CustomDomainStartupFilterTests
 
         var configureAction = startupFilter.Configure(_ => { });
         var appBuilder = new Mock<IApplicationBuilder>();
+        Func<RequestDelegate, RequestDelegate> capturedMiddleware = null;
         appBuilder.Setup(a => a.Use(It.IsAny<Func<RequestDelegate, RequestDelegate>>()))
-            .Callback<Func<RequestDelegate, RequestDelegate>>(async void (middleware) =>
-                await Assert.ThrowsAsync<InvalidOperationException>(() => middleware(next)(httpContext)));
+            .Callback<Func<RequestDelegate, RequestDelegate>>(middleware => capturedMiddleware = middleware);
 
         configureAction(appBuilder.Object);
-        return Task.CompletedTask;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await capturedMiddleware(next)(httpContext));
     }
 
     [Fact]

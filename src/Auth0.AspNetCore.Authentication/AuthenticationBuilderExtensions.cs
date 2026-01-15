@@ -165,7 +165,7 @@ namespace Auth0.AspNetCore.Authentication
                         resolvedIssuer = context.HttpContext.GetResolvedDomain();
                     }
 
-                    var issuer = Utils.ToAuthority(resolvedIssuer ?? $"https://{options.Domain}/") ;
+                    var issuer = Utils.ToAuthority(resolvedIssuer ?? $"https://{options.Domain}/");
                     var sid = context.Principal?.FindFirst("sid")?.Value;
 
                     var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
