@@ -23,6 +23,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         public static readonly string Process = "Process";
         public static readonly string Logout = "Account/Logout";
         public static readonly string Callback = "Callback";
+        public static readonly string Tokens = "Account/Tokens";
         public static readonly string ExtraProviderScheme = "ExtraProviderScheme";
 
         /// <summary>
