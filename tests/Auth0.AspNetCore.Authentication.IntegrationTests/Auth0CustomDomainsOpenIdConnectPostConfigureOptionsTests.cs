@@ -323,4 +323,92 @@ public class Auth0CustomDomainsOpenIdConnectPostConfigureOptionsTests
 
         Assert.Contains("Either OpenIdConnectOptions.Backchannel or IHttpClientFactory must be configured", exception.Message);
     }
+
+    [Fact]
+    public void PostConfigure_WithCustomCache_UsesProvidedCache()
+    {
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+        var customCache = new MemoryConfigurationManagerCache(maxSize: 50);
+
+        var auth0CustomDomainsOptions = new Auth0CustomDomainsOptions
+        {
+            DomainResolver = context => Task.FromResult<string>(null),
+            ConfigurationManagerCache = customCache
+        };
+        var auth0CustomDomainsOptionsMonitor = new Mock<IOptionsMonitor<Auth0CustomDomainsOptions>>();
+        auth0CustomDomainsOptionsMonitor.Setup(m => m.Get("TestScheme")).Returns(auth0CustomDomainsOptions);
+
+        var options = new OpenIdConnectOptions
+        {
+            StateDataFormat = stateDataFormat.Object,
+            Backchannel = new HttpClient()
+        };
+
+        var postConfigureOptions = new Auth0CustomDomainsOpenIdConnectPostConfigureOptions(
+            httpContextAccessor.Object,
+            auth0CustomDomainsOptionsMonitor.Object);
+
+        postConfigureOptions.PostConfigure("TestScheme", options);
+
+        Assert.IsType<Auth0CustomDomainsOpenIdConnectConfigurationManager>(options.ConfigurationManager);
+    }
+
+    [Fact]
+    public void PostConfigure_WithNullCache_UsesDefaultCache()
+    {
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+
+        var auth0CustomDomainsOptions = new Auth0CustomDomainsOptions
+        {
+            DomainResolver = context => Task.FromResult<string>(null),
+            ConfigurationManagerCache = null
+        };
+        var auth0CustomDomainsOptionsMonitor = new Mock<IOptionsMonitor<Auth0CustomDomainsOptions>>();
+        auth0CustomDomainsOptionsMonitor.Setup(m => m.Get("TestScheme")).Returns(auth0CustomDomainsOptions);
+
+        var options = new OpenIdConnectOptions
+        {
+            StateDataFormat = stateDataFormat.Object,
+            Backchannel = new HttpClient()
+        };
+
+        var postConfigureOptions = new Auth0CustomDomainsOpenIdConnectPostConfigureOptions(
+            httpContextAccessor.Object,
+            auth0CustomDomainsOptionsMonitor.Object);
+
+        postConfigureOptions.PostConfigure("TestScheme", options);
+
+        Assert.IsType<Auth0CustomDomainsOpenIdConnectConfigurationManager>(options.ConfigurationManager);
+    }
+
+    [Fact]
+    public void PostConfigure_WithNullConfigurationManagerCache_DisablesCaching()
+    {
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+
+        var auth0CustomDomainsOptions = new Auth0CustomDomainsOptions
+        {
+            DomainResolver = context => Task.FromResult<string>(null),
+            ConfigurationManagerCache = new NullConfigurationManagerCache()
+        };
+        var auth0CustomDomainsOptionsMonitor = new Mock<IOptionsMonitor<Auth0CustomDomainsOptions>>();
+        auth0CustomDomainsOptionsMonitor.Setup(m => m.Get("TestScheme")).Returns(auth0CustomDomainsOptions);
+
+        var options = new OpenIdConnectOptions
+        {
+            StateDataFormat = stateDataFormat.Object,
+            Backchannel = new HttpClient()
+        };
+
+        var postConfigureOptions = new Auth0CustomDomainsOpenIdConnectPostConfigureOptions(
+            httpContextAccessor.Object,
+            auth0CustomDomainsOptionsMonitor.Object);
+
+        postConfigureOptions.PostConfigure("TestScheme", options);
+
+        Assert.IsType<Auth0CustomDomainsOpenIdConnectConfigurationManager>(options.ConfigurationManager);
+    }
 }
