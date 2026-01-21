@@ -102,7 +102,7 @@ namespace Auth0.AspNetCore.Authentication
             
             // Register the startup filter to resolve domain early in the request pipeline
             _services.TryAddEnumerable(
-                ServiceDescriptor.Singleton<IStartupFilter>(
+                ServiceDescriptor.Singleton<IStartupFilter, Auth0CustomDomainStartupFilter>(
                     _ => new Auth0CustomDomainStartupFilter(_authenticationScheme)));
             
             // Register the post-configure options to set up custom ConfigurationManager
