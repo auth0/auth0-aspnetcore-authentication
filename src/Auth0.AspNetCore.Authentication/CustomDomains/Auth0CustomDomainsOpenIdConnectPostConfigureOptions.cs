@@ -25,7 +25,8 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
         /// </summary>
         /// <param name="httpContextAccessor">The HTTP context accessor for retrieving the current request context.</param>
         /// <param name="auth0CustomDomainsOptionsMonitor">The options monitor for Auth0 custom domains configuration.</param>
-        /// <param name="httpClientFactory">Optional HTTP client factory for creating HTTP clients. If not provided, the OpenIdConnect backchannel will be used.</param>
+        /// <param name="httpClientFactory">Optional HTTP client factory for creating HTTP clients.
+        /// If not provided, the OpenIdConnect backchannel will be used.</param>
         /// <exception cref="ArgumentNullException">Thrown when required parameters are null.</exception>
         public Auth0CustomDomainsOpenIdConnectPostConfigureOptions(
             IHttpContextAccessor httpContextAccessor,
@@ -90,7 +91,8 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains
                 _httpContextAccessor,
                 auth0CustomDomainsOptions.DomainResolver,
                 options.StateDataFormat,
-                httpClient);
+                httpClient,
+                auth0CustomDomainsOptions.ConfigurationManagerCache);
 
             // The issuer varies per request, so we can't validate against a single static issuer string.
             // Issuer validation will instead be performed via the OnTokenValidated event.

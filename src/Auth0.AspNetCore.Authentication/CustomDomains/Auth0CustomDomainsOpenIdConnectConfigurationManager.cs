@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,20 +15,20 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains;
 /// separate OpenID Connect configurations per Auth0 custom domain.
 /// </summary>
 /// <remarks>
-/// This manager resolves configurations dynamically based on the domain associated with each request,
+/// Resolves configurations dynamically based on the domain associated with each request,
 /// enabling support for multiple Auth0 custom domains within a single application instance.
-/// Each domain's configuration is cached independently to optimise performance.
-/// This class is designed to be registered as a singleton and maintain its cache throughout the application lifetime.
+/// Each domain's configuration is cached independently using the provided <see cref="IConfigurationManagerCache"/>.
+/// Registered as a singleton and maintain its cache throughout the application lifetime.
 /// </remarks>
-internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : IConfigurationManager<OpenIdConnectConfiguration>
+internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : IConfigurationManager<OpenIdConnectConfiguration>, IDisposable
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly Func<HttpContext, Task<string>> _domainResolver;
     private readonly ISecureDataFormat<AuthenticationProperties> _stateDataFormat;
     private readonly HttpClient _httpClient;
-
-    private readonly ConcurrentDictionary<string, IConfigurationManager<OpenIdConnectConfiguration>>
-        _configurationManagersByMetadataAddress = new();
+    private readonly IConfigurationManagerCache _cache;
+    private readonly bool _ownsCache;
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Auth0CustomDomainsOpenIdConnectConfigurationManager"/> class.
@@ -38,17 +37,24 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <param name="domainResolver">The function to resolve the Auth0 domain from the HTTP context.</param>
     /// <param name="stateDataFormat">The secure data format for protecting/unprotecting authentication state.</param>
     /// <param name="httpClient">The HTTP client for retrieving OpenID Connect configurations.</param>
-    /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
+    /// <param name="cache">
+    /// The cache for configuration managers. If null, a default <see cref="MemoryConfigurationManagerCache"/> is used.
+    /// </param>
+    /// <exception cref="ArgumentNullException">Thrown when any required parameter is null.</exception>
     public Auth0CustomDomainsOpenIdConnectConfigurationManager(
         IHttpContextAccessor httpContextAccessor,
         Func<HttpContext, Task<string>> domainResolver,
         ISecureDataFormat<AuthenticationProperties> stateDataFormat,
-        HttpClient httpClient)
+        HttpClient httpClient,
+        IConfigurationManagerCache? cache = null)
     {
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         _domainResolver = domainResolver ?? throw new ArgumentNullException(nameof(domainResolver));
         _stateDataFormat = stateDataFormat ?? throw new ArgumentNullException(nameof(stateDataFormat));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        
+        _cache = cache ?? new MemoryConfigurationManagerCache();
+        _ownsCache = cache == null;
     }
 
     /// <summary>
@@ -57,9 +63,11 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <param name="cancel">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>The OpenID Connect configuration for the resolved domain.</returns>
     /// <exception cref="InvalidOperationException">Thrown when HttpContext is unavailable, or domain resolution fails.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when the manager has been disposed.</exception>
     public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(CancellationToken cancel)
     {
-
+        ThrowIfDisposed();
+        
         var httpContext = _httpContextAccessor.HttpContext;
 
         if (httpContext == null)
@@ -71,7 +79,7 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
         var authority = await ResolveAuthorityAsync(httpContext).ConfigureAwait(false);
         var metadataAddress = $"{authority.TrimEnd('/')}/.well-known/openid-configuration";
 
-        var manager = _configurationManagersByMetadataAddress.GetOrAdd(metadataAddress, CreateConfigurationManager);
+        var manager = _cache.GetOrCreate(metadataAddress, CreateConfigurationManager);
 
         return await manager.GetConfigurationAsync(cancel).ConfigureAwait(false);
     }
@@ -79,13 +87,17 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <summary>
     /// Requests that all cached configurations be refreshed on their next access.
     /// </summary>
+    /// <remarks>
+    /// Clears the cache, forcing new configuration managers to be created on subsequent requests.
+    /// </remarks>
     public void RequestRefresh()
     {
-
-        foreach (var manager in _configurationManagersByMetadataAddress.Values)
+        if (_disposed)
         {
-            manager.RequestRefresh();
+            return;
         }
+        
+        _cache.Clear();
     }
 
     /// <summary>
@@ -209,10 +221,6 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// </summary>
     /// <param name="address">The OpenID Connect metadata endpoint URL.</param>
     /// <returns>A configured instance of <see cref="ConfigurationManager{OpenIdConnectConfiguration}"/>.</returns>
-    /// <remarks>
-    /// The created configuration manager is cached in the internal dictionary and reused for subsequent
-    /// requests to the same domain, providing automatic configuration refresh and caching capabilities.
-    /// </remarks>
     internal IConfigurationManager<OpenIdConnectConfiguration> CreateConfigurationManager(string address)
     {
         var retriever = new HttpDocumentRetriever(_httpClient)
@@ -224,5 +232,37 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
             address,
             new OpenIdConnectConfigurationRetriever(),
             retriever);
+    }
+    
+    /// <summary>
+    /// Throws an <see cref="ObjectDisposedException"/> if this instance has been disposed.
+    /// </summary>
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(GetType().FullName);
+        }
+    }
+    
+    /// <summary>
+    /// Releases all resources used by this instance.
+    /// </summary>
+    /// <remarks>
+    /// Disposes the cache only if it was created internally (not provided by the user).
+    /// </remarks>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        
+        _disposed = true;
+        
+        if (_ownsCache)
+        {
+            _cache.Dispose();
+        }
     }
 }

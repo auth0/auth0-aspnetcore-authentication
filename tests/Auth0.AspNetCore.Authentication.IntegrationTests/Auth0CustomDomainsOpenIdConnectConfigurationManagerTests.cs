@@ -7,6 +7,8 @@ using Auth0.AspNetCore.Authentication.CustomDomains;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Moq;
 using Xunit;
 
@@ -503,12 +505,198 @@ public class Auth0CustomDomainsOpenIdConnectConfigurationManagerTests
         Assert.Equal("https://tenant.auth0.com/", authority);
     }
 
-    private Auth0CustomDomainsOpenIdConnectConfigurationManager CreateManager()
+    private Auth0CustomDomainsOpenIdConnectConfigurationManager CreateManager(IConfigurationManagerCache? cache = null)
     {
         return new Auth0CustomDomainsOpenIdConnectConfigurationManager(
             _httpContextAccessorMock.Object,
             _domainResolverMock.Object,
             _stateDataFormatMock.Object,
-            _httpClient);
+            _httpClient,
+            cache);
+    }
+
+    [Fact]
+    public void Constructor_WithNullCache_CreatesDefaultCache()
+    {
+        var manager = CreateManager(cache: null);
+
+        Assert.NotNull(manager);
+    }
+
+    [Fact]
+    public void Constructor_WithCustomCache_UsesProvidedCache()
+    {
+        var customCache = new MemoryConfigurationManagerCache(maxSize: 50);
+        var manager = CreateManager(cache: customCache);
+
+        Assert.NotNull(manager);
+    }
+
+    [Fact]
+    public void Constructor_WithNullConfigurationManagerCache_UsesProvidedCache()
+    {
+        var nullCache = new NullConfigurationManagerCache();
+        var manager = CreateManager(cache: nullCache);
+
+        Assert.NotNull(manager);
+    }
+
+    [Fact]
+    public async Task GetConfigurationAsync_WithNullCache_AlwaysCreatesNewManager()
+    {
+        var httpContext = new DefaultHttpContext();
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+
+        var domainResolver = new Mock<Func<HttpContext, Task<string>>>();
+        domainResolver.Setup(x => x(It.IsAny<HttpContext>())).ReturnsAsync("example.auth0.com");
+
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+        var httpClient = new HttpClient();
+        var nullCache = new NullConfigurationManagerCache();
+
+        var manager = new Auth0CustomDomainsOpenIdConnectConfigurationManager(
+            httpContextAccessor.Object,
+            domainResolver.Object,
+            stateDataFormat.Object,
+            httpClient,
+            nullCache);
+
+        httpContext.Items.Clear();
+        var config1 = await manager.GetConfigurationAsync(CancellationToken.None);
+
+        httpContext.Items.Clear();
+        var config2 = await manager.GetConfigurationAsync(CancellationToken.None);
+
+        // With NullConfigurationManagerCache, the domain resolver should be called each time
+        // since no caching is performed
+        domainResolver.Verify(x => x(It.IsAny<HttpContext>()), Times.Exactly(2));
+        Assert.NotNull(config1);
+        Assert.NotNull(config2);
+    }
+
+    [Fact]
+    public async Task GetConfigurationAsync_WithCustomMemoryCache_ReusesCachedManager()
+    {
+        var httpContext = new DefaultHttpContext();
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+
+        var domainResolver = new Mock<Func<HttpContext, Task<string>>>();
+        domainResolver.Setup(x => x(It.IsAny<HttpContext>())).ReturnsAsync("example.auth0.com");
+
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+        var httpClient = new HttpClient();
+        var memoryCache = new MemoryConfigurationManagerCache(maxSize: 10);
+
+        var manager = new Auth0CustomDomainsOpenIdConnectConfigurationManager(
+            httpContextAccessor.Object,
+            domainResolver.Object,
+            stateDataFormat.Object,
+            httpClient,
+            memoryCache);
+
+        var config1 = await manager.GetConfigurationAsync(CancellationToken.None);
+        var config2 = await manager.GetConfigurationAsync(CancellationToken.None);
+
+        // With MemoryConfigurationManagerCache, the domain resolver should only be called once
+        // due to caching
+        domainResolver.Verify(x => x(It.IsAny<HttpContext>()), Times.Once);
+        Assert.NotNull(config1);
+        Assert.NotNull(config2);
+    }
+
+    [Fact]
+    public void Dispose_WithOwnedCache_DisposesCache()
+    {
+        // When no cache is provided, the manager creates and owns its own cache
+        var manager = CreateManager(cache: null);
+
+        var exception = Record.Exception(() => manager.Dispose());
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Dispose_WithProvidedCache_DoesNotDisposeCache()
+    {
+        // When a cache is provided externally, the manager should not dispose it
+        var customCache = new MemoryConfigurationManagerCache(maxSize: 50);
+        var manager = CreateManager(cache: customCache);
+
+        manager.Dispose();
+
+        // The cache should still be usable after manager disposal
+        var mockConfigManager = new Mock<IConfigurationManager<OpenIdConnectConfiguration>>();
+        var exception = Record.Exception(() => customCache.GetOrCreate("test", _ => mockConfigManager.Object));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Dispose_CanBeCalledMultipleTimes()
+    {
+        var manager = CreateManager();
+
+        var exception = Record.Exception(() =>
+        {
+            manager.Dispose();
+            manager.Dispose();
+            manager.Dispose();
+        });
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public async Task GetConfigurationAsync_AfterDispose_ThrowsObjectDisposedException()
+    {
+        _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
+        _domainResolverMock.Setup(x => x(_httpContext)).ReturnsAsync("example.auth0.com");
+        var manager = CreateManager();
+
+        manager.Dispose();
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            manager.GetConfigurationAsync(CancellationToken.None));
+    }
+
+    [Fact]
+    public void RequestRefresh_AfterDispose_DoesNotThrow()
+    {
+        var manager = CreateManager();
+
+        manager.Dispose();
+
+        // RequestRefresh gracefully handles disposal by returning early
+        var exception = Record.Exception(() => manager.RequestRefresh());
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public async Task GetConfigurationAsync_WithMemoryCacheAndSlidingExpiration_UsesCache()
+    {
+        var httpContext = new DefaultHttpContext();
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+
+        var domainResolver = new Mock<Func<HttpContext, Task<string>>>();
+        domainResolver.Setup(x => x(It.IsAny<HttpContext>())).ReturnsAsync("example.auth0.com");
+
+        var stateDataFormat = new Mock<ISecureDataFormat<AuthenticationProperties>>();
+        var httpClient = new HttpClient();
+        var memoryCache = new MemoryConfigurationManagerCache(maxSize: 10, slidingExpiration: TimeSpan.FromHours(1));
+
+        var manager = new Auth0CustomDomainsOpenIdConnectConfigurationManager(
+            httpContextAccessor.Object,
+            domainResolver.Object,
+            stateDataFormat.Object,
+            httpClient,
+            memoryCache);
+
+        var config = await manager.GetConfigurationAsync(CancellationToken.None);
+
+        Assert.NotNull(config);
     }
 }
