@@ -6,7 +6,7 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 ![Downloads](https://img.shields.io/nuget/dt/auth0.aspnetcore.authentication)
 [![License](https://img.shields.io/:license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/auth0/auth0-aspnetcore-authentication)
-![AzureDevOps](https://img.shields.io/azure-devops/build/Auth0SDK/Auth0.AspNetCore.Authentication/8)
+[![Build and Test](https://github.com/auth0/auth0-aspnetcore-authentication/actions/workflows/build.yml/badge.svg)](https://github.com/auth0/auth0-aspnetcore-authentication/actions/workflows/build.yml)
 
 :books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
 
@@ -15,12 +15,12 @@ A library based on `Microsoft.AspNetCore.Authentication.OpenIdConnect` to make i
 - [Quickstart](https://auth0.com/docs/quickstart/webapp/aspnet-core) - our interactive guide for quickly adding login, logout and user information to an ASP.NET MVC application using Auth0.
 - [Sample App](https://github.com/auth0-samples/auth0-aspnetcore-mvc-samples/tree/master/Quickstart/Sample) - a full-fledged ASP.NET MVC application integrated with Auth0.
 - [Examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md) - code samples for common ASP.NET MVC authentication scenario's.
-- [Docs site](https://www.auth0.com/docs) - explore our docs site and learn more about 
+- [Docs site](https://www.auth0.com/docs) - explore our docs site and learn more about Auth0. 
 
 ## Getting started
 ### Requirements
 
-This library supports .NET 6.0 and above.
+This library supports .NET 6.0, 7.0, 8.0, and 10.0.
 
 ### Installation
 
@@ -114,6 +114,38 @@ For more code samples on how to integrate the **auth0-aspnetcore-authentication*
 
 > This SDK also works with Blazor Server, for more info see [the Blazor Server section in our examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md#blazor-server).
 
+## Multiple Custom Domains
+
+The SDK supports scenarios where a single application needs to authenticate users against **multiple Auth0 tenants** or **custom domains**. This is useful for multi-tenant SaaS applications where each customer has their own Auth0 tenant.
+
+### Configuration
+
+```csharp
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+})
+.WithCustomDomains(options =>
+{
+    options.DomainResolver = httpContext =>
+    {
+        var host = httpContext.Request.Host.Host;
+
+        // Route to different Auth0 tenants based on subdomain
+        if (host.StartsWith("tenant-a."))
+            return Task.FromResult("tenant-a.us.auth0.com");
+
+        if (host.StartsWith("tenant-b."))
+            return Task.FromResult("tenant-b.us.auth0.com");
+
+        return Task.FromResult("default.us.auth0.com");
+    };
+});
+```
+
+For detailed configuration options, caching strategies, and more examples, see the [Multiple Custom Domains Examples](EXAMPLES.md#multiple-custom-domains).
+
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
 
@@ -152,4 +184,4 @@ Please do not report security vulnerabilities on the public GitHub issue tracker
 </p>
 <p align="center">Auth0 is an easy to implement, adaptable authentication and authorization platform. To learn more checkout <a href="https://auth0.com/why-auth0">Why Auth0?</a></p>
 <p align="center">
-This project is licensed under the MIT license. See the <a href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE"> LICENSE</a> file for more info.</p>
+This project is licensed under the MIT license. See the <a href="https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/LICENSE">LICENSE</a> file for more info.</p>

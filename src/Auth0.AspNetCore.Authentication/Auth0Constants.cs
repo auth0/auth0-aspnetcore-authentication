@@ -14,5 +14,7 @@
         /// The callback path to which Auth0 should redirect back, used when configuring OpenIdConnect
         /// </summary>
         internal static string DefaultCallbackPath = "/callback";
+
+        public static readonly string ResolvedDomainKey = "auth0:resolved-domain";
     }
 }
