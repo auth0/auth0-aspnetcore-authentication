@@ -18,7 +18,7 @@ namespace Auth0.AspNetCore.Authentication.CustomDomains;
 /// Resolves configurations dynamically based on the domain associated with each request,
 /// enabling support for multiple Auth0 custom domains within a single application instance.
 /// Each domain's configuration is cached independently using the provided <see cref="IConfigurationManagerCache"/>.
-/// Registered as a singleton and maintain its cache throughout the application lifetime.
+/// Is registered as a singleton and maintain its cache throughout the application lifetime.
 /// </remarks>
 internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : IConfigurationManager<OpenIdConnectConfiguration>, IDisposable
 {
@@ -108,10 +108,41 @@ internal sealed class Auth0CustomDomainsOpenIdConnectConfigurationManager : ICon
     /// <exception cref="InvalidOperationException">Thrown when domain resolution fails.</exception>
     internal async Task<string> ResolveAuthorityAsync(HttpContext context)
     {
+        var hasState = TryGetState(context, out var state);
+
         // In case of a callback request, extracts the issuer from the state parameter.
-        if (TryGetState(context, out var state) && TryGetIssuerFromState(state, out var stateIssuer))
+        if (hasState && TryGetIssuerFromState(state, out var stateIssuer))
         {
-            return Utils.ToAuthority(stateIssuer);
+            var stateAuthority = Utils.ToAuthority(stateIssuer);
+
+            // Cross-validate: if the StartupFilter already resolved a domain for this request,
+            // ensure it matches the domain stored in the encrypted state. A mismatch indicates
+            // the request arrived on a different domain than the one that initiated the flow.
+            if (context.Items[Auth0Constants.ResolvedDomainKey] is string middlewareDomain &&
+                !string.IsNullOrWhiteSpace(middlewareDomain))
+            {
+                var middlewareAuthority = Utils.ToAuthority(middlewareDomain);
+                if (!stateAuthority.Equals(middlewareAuthority, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"Domain mismatch: the callback request arrived on domain '{middlewareDomain}' " +
+                        $"but the authentication transaction was initiated with domain '{stateIssuer}'. " +
+                        "This may indicate a cross-domain replay or misconfigured routing.");
+                }
+            }
+
+            return stateAuthority;
+        }
+
+        // If the request carries a state parameter (i.e. it looks like a callback) but the domain
+        // could not be extracted from state, fail explicitly rather than falling back to the
+        // DomainResolver, which could return a different domain than the one that started the flow.
+        if (hasState)
+        {
+            throw new InvalidOperationException(
+                "The request contains a 'state' parameter but the resolved domain could not be " +
+                "extracted from it. This may indicate a tampered, expired, or malformed state. " +
+                "The authentication transaction cannot be safely completed.");
         }
 
         // Check if the domain was already resolved earlier in the request pipeline

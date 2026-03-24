@@ -15,6 +15,9 @@
         /// </summary>
         internal static string DefaultCallbackPath = "/callback";
 
-        public static readonly string ResolvedDomainKey = "auth0:resolved-domain";
+        /// <summary>
+        /// Key used to store the resolved domain in the authentication properties.
+        /// </summary>
+        internal static readonly string ResolvedDomainKey = "auth0:resolved-domain";
     }
 }

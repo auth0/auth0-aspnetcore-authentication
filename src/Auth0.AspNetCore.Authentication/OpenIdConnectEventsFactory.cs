@@ -168,21 +168,33 @@ namespace Auth0.AspNetCore.Authentication
                     .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
                     ?.Get(context.Scheme.Name);
 
-                if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true } &&
-                    context.Properties?.Items != null &&
-                    context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var expectedIssuer) &&
-                    !string.IsNullOrWhiteSpace(expectedIssuer))
+                if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true })
                 {
-                    var tokenIssuer = context.SecurityToken.Issuer;
-                    var expectedAuthority = Utils.ToAuthority(expectedIssuer);
-
-                    var ok = tokenIssuer.Equals(expectedAuthority, StringComparison.OrdinalIgnoreCase) ||
-                             tokenIssuer.Equals(expectedAuthority + "/", StringComparison.OrdinalIgnoreCase);
-
-                    if (!ok)
+                    if (context.Properties?.Items == null ||
+                        !context.Properties.Items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var expectedIssuer) ||
+                        string.IsNullOrWhiteSpace(expectedIssuer))
                     {
+                        // In multi-domain mode, static issuer validation is disabled (ValidateIssuer = false).
+                        // The domain MUST be present in state to validate the token issuer.
+                        // If it's missing, we cannot verify the token came from the expected authority.
                         context.Fail(
-                            $"Token issuer '{tokenIssuer}' does not match expected issuer '{expectedAuthority}'.");
+                            "Token validation failed: the resolved domain was not found in the authentication state. " +
+                            "In multi-domain mode, the domain must be stored in state during the authorization request " +
+                            "to validate the token issuer on callback.");
+                    }
+                    else
+                    {
+                        var tokenIssuer = context.SecurityToken.Issuer;
+                        var expectedAuthority = Utils.ToAuthority(expectedIssuer);
+
+                        var ok = tokenIssuer.Equals(expectedAuthority, StringComparison.OrdinalIgnoreCase) ||
+                                 tokenIssuer.Equals(expectedAuthority + "/", StringComparison.OrdinalIgnoreCase);
+
+                        if (!ok)
+                        {
+                            context.Fail(
+                                $"Token issuer '{tokenIssuer}' does not match expected issuer '{expectedAuthority}'.");
+                        }
                     }
                 }
 

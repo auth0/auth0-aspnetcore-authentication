@@ -699,4 +699,158 @@ public class Auth0CustomDomainsOpenIdConnectConfigurationManagerTests
 
         Assert.NotNull(config);
     }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_WithStateButNoIssuerInState_ThrowsInvalidOperationException()
+    {
+        // State parameter is present but doesn't contain the resolved domain key
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        var props = new AuthenticationProperties(); // No ResolvedDomainKey
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns(props);
+
+        var manager = CreateManager();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.ResolveAuthorityAsync(_httpContext));
+
+        Assert.Contains("state", exception.Message);
+        Assert.Contains("resolved domain could not be extracted", exception.Message);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_WithStateButCorruptedState_ThrowsInvalidOperationException()
+    {
+        // State parameter is present but decryption throws (tampered state)
+        var state = "corrupted-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        _stateDataFormatMock.Setup(x => x.Unprotect(state))
+            .Throws<System.Security.Cryptography.CryptographicException>();
+
+        var manager = CreateManager();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.ResolveAuthorityAsync(_httpContext));
+
+        Assert.Contains("state", exception.Message);
+        Assert.Contains("resolved domain could not be extracted", exception.Message);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_WithStateButNullProperties_ThrowsInvalidOperationException()
+    {
+        // State parameter is present but Unprotect returns null
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns((AuthenticationProperties)null!);
+
+        var manager = CreateManager();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.ResolveAuthorityAsync(_httpContext));
+
+        Assert.Contains("state", exception.Message);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_DoesNotFallBackToDomainResolver_WhenStatePresent()
+    {
+        // Verify that when state is present but issuer extraction fails,
+        // the domain resolver is NOT called (preventing domain swap attacks)
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns((AuthenticationProperties)null!);
+        _domainResolverMock.Setup(x => x(_httpContext)).ReturnsAsync("attacker-domain.auth0.com");
+
+        var manager = CreateManager();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.ResolveAuthorityAsync(_httpContext));
+
+        _domainResolverMock.Verify(x => x(It.IsAny<HttpContext>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_CrossValidation_MatchingDomains_Succeeds()
+    {
+        var issuer = "tenant.auth0.com";
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        // StartupFilter already resolved the same domain
+        _httpContext.Items[Auth0Constants.ResolvedDomainKey] = issuer;
+
+        var props = new AuthenticationProperties();
+        props.Items[Auth0Constants.ResolvedDomainKey] = issuer;
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns(props);
+
+        var manager = CreateManager();
+
+        var authority = await manager.ResolveAuthorityAsync(_httpContext);
+
+        Assert.Equal($"https://{issuer}/", authority);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_CrossValidation_MismatchedDomains_ThrowsInvalidOperationException()
+    {
+        var stateIssuer = "tenant-a.auth0.com";
+        var middlewareIssuer = "tenant-b.auth0.com";
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        // StartupFilter resolved a different domain than what's in state
+        _httpContext.Items[Auth0Constants.ResolvedDomainKey] = middlewareIssuer;
+
+        var props = new AuthenticationProperties();
+        props.Items[Auth0Constants.ResolvedDomainKey] = stateIssuer;
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns(props);
+
+        var manager = CreateManager();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.ResolveAuthorityAsync(_httpContext));
+
+        Assert.Contains("Domain mismatch", exception.Message);
+        Assert.Contains("tenant-a.auth0.com", exception.Message);
+        Assert.Contains("tenant-b.auth0.com", exception.Message);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_CrossValidation_NoMiddlewareDomain_StillSucceeds()
+    {
+        // When the StartupFilter hasn't cached a domain yet (e.g., no middleware ran),
+        // the cross-validation is skipped and the state domain is trusted.
+        var issuer = "tenant.auth0.com";
+        var state = "protected-state";
+        _httpContext.Request.QueryString = new QueryString($"?state={state}");
+
+        var props = new AuthenticationProperties();
+        props.Items[Auth0Constants.ResolvedDomainKey] = issuer;
+        _stateDataFormatMock.Setup(x => x.Unprotect(state)).Returns(props);
+
+        var manager = CreateManager();
+
+        var authority = await manager.ResolveAuthorityAsync(_httpContext);
+
+        Assert.Equal($"https://{issuer}/", authority);
+    }
+
+    [Fact]
+    public async Task ResolveAuthorityAsync_WithoutState_StillUsesResolver()
+    {
+        // Non-callback requests (no state parameter) should still work via DomainResolver
+        var expectedDomain = "tenant.auth0.com";
+        _domainResolverMock.Setup(x => x(_httpContext)).ReturnsAsync(expectedDomain);
+        var manager = CreateManager();
+
+        var authority = await manager.ResolveAuthorityAsync(_httpContext);
+
+        Assert.Equal($"https://{expectedDomain}/", authority);
+        _domainResolverMock.Verify(x => x(_httpContext), Times.Once);
+    }
 }
