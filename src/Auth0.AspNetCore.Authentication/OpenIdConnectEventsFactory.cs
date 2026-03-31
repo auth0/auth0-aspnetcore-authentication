@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -70,11 +71,20 @@ namespace Auth0.AspNetCore.Authentication
                 if (customDomainsOptions is { IsMultipleCustomDomainsEnabled: true })
                 {
                     var resolvedDomain = context.HttpContext.GetResolvedDomain();
-                    if (!string.IsNullOrWhiteSpace(resolvedDomain))
+                    if (string.IsNullOrWhiteSpace(resolvedDomain))
                     {
-                        // Adds to the encrypted state parameter that will be available even in callbacks
-                        context.Properties.Items[Auth0Constants.ResolvedDomainKey] = resolvedDomain;
+                        // Cannot proceed without a resolved domain — issuer validation would fail later anyway.
+                        // Fail early with a clear message rather than allowing a round-trip to Auth0.
+                        context.HandleResponse();
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync(
+                            "Authentication configuration error: could not resolve the domain for this request. " +
+                            "Ensure the DomainResolver is configured and the Auth0 middleware is registered in the pipeline.");
+                        return;
                     }
+
+                    // Adds to the encrypted state parameter that will be available even in callbacks
+                    context.Properties.Items[Auth0Constants.ResolvedDomainKey] = resolvedDomain;
                 }
 
                 // Set auth0Client querystring parameter for /authorize
