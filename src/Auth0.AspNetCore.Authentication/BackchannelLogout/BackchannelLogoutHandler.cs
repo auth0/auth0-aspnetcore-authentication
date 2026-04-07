@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Auth0.AspNetCore.Authentication.CustomDomains;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +19,7 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
         private readonly ILogoutTokenHandler _tokenHandler;
         private readonly string _authenticationScheme;
 
-        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler) 
+        public BackchannelLogoutHandler(ILogoutTokenHandler tokenHandler)
             : this(tokenHandler, Auth0Constants.AuthenticationScheme)
         {
         }
@@ -48,7 +49,17 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
                             .GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>()
                             .Get(_authenticationScheme);
 
-                        var principal = await ValidateLogoutToken(logoutToken, oidcOptions, context);
+                        var customDomainsOptions = context.RequestServices
+                            .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
+                            ?.Get(_authenticationScheme);
+                        var isMcdEnabled = customDomainsOptions?.IsMultipleCustomDomainsEnabled == true;
+
+                        if (isMcdEnabled)
+                        {
+                            ValidateIssuerMatchesResolvedDomain(logoutToken, context);
+                        }
+
+                        var principal = await ValidateLogoutToken(logoutToken, oidcOptions, context, isMcdEnabled);
 
                         if (principal != null)
                         {
@@ -84,7 +95,46 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
             }
         }
 
-        private async Task<ClaimsPrincipal> ValidateLogoutToken(String token, OpenIdConnectOptions oidcOptions, HttpContext context)
+        /// <summary>
+        /// When MCD is enabled, extracts the issuer from the unverified token and validates it matches
+        /// the domain resolved for the current request. This check happens BEFORE full JWT
+        /// validation so we avoid fetching JWKS for tokens from the wrong tenant.
+        /// </summary>
+        private static void ValidateIssuerMatchesResolvedDomain(string token, HttpContext context)
+        {
+            var unverifiedIssuer = ExtractUnverifiedIssuer(token);
+
+            var resolvedDomain = context.GetResolvedDomain();
+
+            if (string.IsNullOrWhiteSpace(resolvedDomain))
+            {
+                throw new LogoutTokenValidationException(
+                    "Unable to resolve domain for this request. Ensure DomainResolver is configured.");
+            }
+
+            var normalizedIssuer = Utils.ToAuthority(unverifiedIssuer);
+            var normalizedResolved = Utils.ToAuthority(resolvedDomain);
+
+            if (!string.Equals(normalizedIssuer, normalizedResolved))
+            {
+                throw new LogoutTokenValidationException("Logout token issuer does not match the resolved domain.");
+            }
+        }
+
+        /// <summary>
+        /// Reads the JWT without signature validation to extract the issuer claim.
+        /// Throws <see cref="LogoutTokenValidationException"/> if the token is malformed.
+        /// Note: This does not validate the signature or any other JWT claims.
+        /// </summary>
+        private static string ExtractUnverifiedIssuer(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            if (!handler.CanReadToken(token))
+                throw new LogoutTokenValidationException("Logout token is malformed or not a valid JWT.");
+            return handler.ReadJwtToken(token).Issuer;
+        }
+
+        private async Task<ClaimsPrincipal> ValidateLogoutToken(string token, OpenIdConnectOptions oidcOptions, HttpContext context, bool isMcdEnabled)
         {
             OpenIdConnectConfiguration? configuration = null;
 
@@ -93,13 +143,19 @@ namespace Auth0.AspNetCore.Authentication.BackchannelLogout
                 configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(context.RequestAborted);
             }
 
+            var validIssuer = isMcdEnabled
+                ? Utils.ToAuthority(context.GetResolvedDomain()
+                    ?? throw new LogoutTokenValidationException(
+                        "Unable to resolve domain for this request. Ensure DomainResolver is configured."))
+                : oidcOptions.TokenValidationParameters.ValidIssuer;
+
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
-                ValidIssuer = oidcOptions.TokenValidationParameters.ValidIssuer,
+                ValidIssuer = validIssuer,
                 ValidAudience = oidcOptions.TokenValidationParameters.ValidAudience,
             };
 
