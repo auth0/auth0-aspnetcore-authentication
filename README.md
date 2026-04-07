@@ -114,9 +114,11 @@ For more code samples on how to integrate the **auth0-aspnetcore-authentication*
 
 > This SDK also works with Blazor Server, for more info see [the Blazor Server section in our examples](https://github.com/auth0/auth0-aspnetcore-authentication/blob/main/EXAMPLES.md#blazor-server).
 
-## Multiple Custom Domains
+## Multiple Custom Domain (MCD) Support
 
-The SDK supports scenarios where a single application needs to authenticate users against **multiple Auth0 tenants** or **custom domains**. This is useful for multi-tenant SaaS applications where each customer has their own Auth0 tenant.
+Multiple Custom Domains (MCD) lets you resolve the Auth0 domain per request while keeping a single SDK instance. This is useful when one application serves multiple custom domains (for example, `brand-1.my-app.com` and `brand-2.my-app.com`), each mapped to a different `Auth0` custom domain.
+
+Resolver mode is intended for the custom domains of a single `Auth0` tenant. It is not a supported way to connect multiple `Auth0` tenants to one application.
 
 ### Configuration
 
@@ -128,23 +130,16 @@ services.AddAuth0WebAppAuthentication(options =>
 })
 .WithCustomDomains(options =>
 {
+    // Example: resolve from a custom header
     options.DomainResolver = httpContext =>
     {
-        var host = httpContext.Request.Host.Host;
-
-        // Route to different Auth0 tenants based on subdomain
-        if (host.StartsWith("tenant-a."))
-            return Task.FromResult("tenant-a.us.auth0.com");
-
-        if (host.StartsWith("tenant-b."))
-            return Task.FromResult("tenant-b.us.auth0.com");
-
-        return Task.FromResult("default.us.auth0.com");
+        var tenant = httpContext.Request.Headers["X-Tenant-Domain"].FirstOrDefault();
+        return Task.FromResult(tenant ?? "default-tenant.auth0.com");
     };
 });
 ```
 
-For detailed configuration options, caching strategies, and more examples, see the [Multiple Custom Domains Examples](EXAMPLES.md#multiple-custom-domains).
+For detailed configuration options, caching strategies, security requirements, and more examples, see the [Multiple Custom Domain (MCD) Examples](EXAMPLES.md#multiple-custom-domain-mcd-support).
 
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
