@@ -1,5 +1,22 @@
 # Change Log
 
+## [1.7.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.7.0) (2026-04-09)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.6.1...1.7.0)
+
+**Added**
+- Adds support for multiple custom domains [\#206](https://github.com/auth0/auth0-aspnetcore-authentication/pull/206) ([kailash-b](https://github.com/kailash-b))
+
+**Security**
+- chore: Dependency updates [\#220](https://github.com/auth0/auth0-aspnetcore-authentication/pull/220) ([kailash-b](https://github.com/kailash-b))
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.2 to 10.0.3 [\#209](https://github.com/auth0/auth0-aspnetcore-authentication/pull/209) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.Testing from 10.0.2 to 10.0.3 [\#208](https://github.com/auth0/auth0-aspnetcore-authentication/pull/208) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps)(deps): Bump actions/checkout from 5 to 6 [\#192](https://github.com/auth0/auth0-aspnetcore-authentication/pull/192) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump FluentAssertions from 7.2.0 to 7.2.1 [\#207](https://github.com/auth0/auth0-aspnetcore-authentication/pull/207) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.15.0 to 8.16.0 [\#211](https://github.com/auth0/auth0-aspnetcore-authentication/pull/211) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.ViewFeatures from 2.3.0 to 2.3.9 [\#203](https://github.com/auth0/auth0-aspnetcore-authentication/pull/203) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.Testing from 10.0.1 to 10.0.2 [\#204](https://github.com/auth0/auth0-aspnetcore-authentication/pull/204) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.1 to 10.0.2 [\#205](https://github.com/auth0/auth0-aspnetcore-authentication/pull/205) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.6.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.6.1) (2025-12-22)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.6.0...1.6.1)
 
