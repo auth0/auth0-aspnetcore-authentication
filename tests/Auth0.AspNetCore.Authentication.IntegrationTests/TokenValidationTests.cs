@@ -970,6 +970,58 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             return tokenHandler.WriteToken(token);
         }
 
+        [Fact]
+        public async Task Should_Throw_When_Custom_Domain_Issuer_Mismatch()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var customDomain = "custom.auth0.com";
+            
+            // Mock handler expects the default domain but we'll use a different issuer in the token
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => GenerateToken(1, $"https://{customDomain}/", clientId, nonce, "1"), (me) => me.HasAuth0ClientHeader())
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+                // Server is configured with default domain
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    Func<Task> act = async () =>
+                    {
+                        await client.SendAsync(message, setCookie.Value);
+                    };
+
+                    var innerException = act
+                        .Should()
+                        .ThrowAsync<Exception>()
+                        .Result
+                        .And.InnerException;
+
+                    innerException
+                        .Should()
+                        .BeOfType<SecurityTokenInvalidIssuerException>();
+                }
+            }
+        }
+
 
 
     }

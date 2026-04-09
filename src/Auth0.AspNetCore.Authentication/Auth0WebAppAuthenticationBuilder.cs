@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Auth0.AspNetCore.Authentication.CustomDomains;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -62,6 +65,49 @@ namespace Auth0.AspNetCore.Authentication
                     _authenticationScheme));
             _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
             return this;
+        }
+
+        /// <summary>
+        /// Configures support for multiple Auth0 custom domains with dynamic domain resolution.
+        /// </summary>
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0CustomDomainsOptions"/></param>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
+        public Auth0WebAppAuthenticationBuilder WithCustomDomains(Action<Auth0CustomDomainsOptions> configureOptions)
+        {
+            EnableCustomDomains(configureOptions);
+            return this;
+        }
+        
+        private void EnableCustomDomains(Action<Auth0CustomDomainsOptions> configureOptions)
+        {
+            var customDomainsOptions = new Auth0CustomDomainsOptions();
+            configureOptions(customDomainsOptions);
+            
+            // Validate that DomainResolver is configured
+            if (customDomainsOptions.DomainResolver == null)
+            {
+                throw new InvalidOperationException(
+                    $"DomainResolver must be configured when using {nameof(WithCustomDomains)}. " +
+                    $"Set the {nameof(Auth0CustomDomainsOptions.DomainResolver)} property to provide a function that resolves the Auth0 domain for each request.");
+            }
+
+            // Register the options for this authentication scheme
+            _services.Configure(_authenticationScheme, configureOptions);
+            
+            // Register HttpContextAccessor - required for domain resolution
+            _services.AddHttpContextAccessor();
+            
+            // Register HttpClient - required for fetching OIDC configuration per domain
+            _services.AddHttpClient();
+            
+            // Register the startup filter to resolve domain early in the request pipeline
+            _services.TryAddEnumerable(
+                ServiceDescriptor.Singleton<IStartupFilter, Auth0CustomDomainStartupFilter>(
+                    _ => new Auth0CustomDomainStartupFilter(_authenticationScheme)));
+            
+            // Register the post-configure options to set up custom ConfigurationManager
+            _services.TryAddEnumerable(
+                ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0CustomDomainsOpenIdConnectPostConfigureOptions>());
         }
 
         private void EnableWithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)

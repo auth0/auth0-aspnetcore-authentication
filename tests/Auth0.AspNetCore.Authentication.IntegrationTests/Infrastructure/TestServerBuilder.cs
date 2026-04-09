@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Auth0.AspNetCore.Authentication.CustomDomains;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <param name="authenticationScheme">Optional custom authentication scheme to use.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false, string authenticationScheme = null)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false, string authenticationScheme = null, Action<Auth0CustomDomainsOptions> configureCustomDomains = null)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -140,10 +141,15 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                             {
                                 builder.WithAccessToken(configureWithAccessTokensOptions);
                             }
-                            
+
                             if (enableBackchannelLogout)
                             {
                                 builder.WithBackchannelLogout();
+                            }
+
+                            if (configureCustomDomains != null)
+                            {
+                                builder.WithCustomDomains(configureCustomDomains);
                             }
 
                             services.AddControllersWithViews();

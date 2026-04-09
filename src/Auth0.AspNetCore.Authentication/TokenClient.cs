@@ -22,7 +22,7 @@ namespace Auth0.AspNetCore.Authentication
             _httpClient = httpClient;
         }
 
-        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken)
+        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
@@ -30,11 +30,21 @@ namespace Auth0.AspNetCore.Authentication
                 { "refresh_token", refreshToken }
             };
 
-            ApplyClientAuthentication(options, body);
+            // Use provided domain for dynamic resolution, fallback to options.Domain
+            var tokenEndpointDomain = domain ?? options.Domain;
+
+            if (string.IsNullOrWhiteSpace(tokenEndpointDomain))
+            {
+                throw new InvalidOperationException(
+                    "Cannot determine domain for token endpoint. " +
+                    "Ensure Domain is set or domain resolution is properly configured.");
+            }
+
+            ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
-            using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{options.Domain}/oauth/token") { Content = requestContent })
+            using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{tokenEndpointDomain}/oauth/token") { Content = requestContent })
             {
                 using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false))
                 {
@@ -50,12 +60,12 @@ namespace Auth0.AspNetCore.Authentication
             }
         }
 
-        private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body)
+        private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)
         {
             if (options.ClientAssertionSecurityKey != null)
             {
                 body.Add("client_assertion", new JwtTokenFactory(options.ClientAssertionSecurityKey, options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
-                   .GenerateToken(options.ClientId, $"https://{options.Domain}/", options.ClientId
+                   .GenerateToken(options.ClientId, $"https://{domain}/", options.ClientId
                 ));
 
                 body.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");

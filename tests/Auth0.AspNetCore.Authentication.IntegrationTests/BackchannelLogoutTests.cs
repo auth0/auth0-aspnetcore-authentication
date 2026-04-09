@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -31,16 +32,14 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var res = await client.SendAsync($"{TestServerBuilder.Host}/backchannel-logout");
 
         res.StatusCode.Should().Be((HttpStatusCode)405);
     }
-    
+
     [Fact]
     public async Task Should_return_400_when_not_form_urlencoded()
     {
@@ -56,21 +55,19 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var message = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         var response = await client.SendAsync(message);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
 
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Be("Only application/x-www-form-urlencoded is allowed.");
     }
-    
+
     [Fact]
     public async Task Should_return_400_when_no_logout_token()
     {
@@ -86,23 +83,21 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var formData = new Dictionary<string, string> { { "Foo", "Bar" } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Be("Missing logout_token.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Signature_On_Backchannel_Logout()
     {
@@ -118,31 +113,29 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .SignWithRs256("Auth0.AspNetCore.Authentication.IntegrationTests.jwks2.json")
             .Build();
-                
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Signature validation failed.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Issuer_On_Backchannel_Logout()
     {
@@ -158,29 +151,27 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://bad_issuer/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .Build();
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Issuer validation failed.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Audience_On_Backchannel_Logout()
     {
@@ -196,30 +187,28 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience("bad_audience")
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .Build();
-                
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Audience validation failed.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Sid_On_Backchannel_Logout()
     {
@@ -235,29 +224,27 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .Build();
-                    
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
-                
+
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Session Id (sid) claim must be a string present in the logout token.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Nonce_On_Backchannel_Logout()
     {
@@ -275,10 +262,8 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
@@ -286,19 +271,19 @@ public class BackchannelLogoutTests
             .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
             .Build();
-            
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Nonce (nonce) claim must not be present in the logout token.");
     }
-    
+
     [Fact]
     public async Task Should_Validate_Events_When_Missing_On_Backchannel_Logout()
     {
@@ -314,25 +299,23 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
             .Build();
-                
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
         error.Message.Should().Contain("Events (events) claim must be present in the logout token.");
     }
@@ -352,30 +335,30 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"foo\": {} }" )
+            .WithClaim("events", "{ \"foo\": {} }")
             .Build();
-                
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         var content = await response.Content.ReadAsStringAsync();
         var error = ApiError.Parse(content);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)400);
-        error.Message.Should().Contain("Events (events) claim must contain a 'http://schemas.openid.net/event/backchannel-logout' property in the logout token.");
+        error.Message.Should()
+            .Contain(
+                "Events (events) claim must contain a 'http://schemas.openid.net/event/backchannel-logout' property in the logout token.");
     }
-    
+
     [Fact]
     public async Task Should_Pass_Validation_On_Backchannel_Logout()
     {
@@ -391,23 +374,21 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .Build();
-                
+
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
-                
+
         response.StatusCode.Should().Be((HttpStatusCode)200);
     }
 
@@ -430,10 +411,8 @@ public class BackchannelLogoutTests
                 .Build())
             .Build();
 
-        using var server = TestServerBuilder.CreateServer(opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, true, false, null, true);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, true, false, null, true);
         using var client = server.CreateClient();
         var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
         var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
@@ -449,24 +428,26 @@ public class BackchannelLogoutTests
         // - Send it to the `/oauth/token` endpoint
         var state = queryParameters["state"];
 
-        var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+        var message = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
 
         // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
         var callbackResponse = (await client.SendAsync(message, setCookie.Value));
         var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
 
-        var protectedMessage = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedMessage =
+            new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
         var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
-                
+
         // Accessing a protected endpoint before logging out should be OK.
         protectedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         protectedResponse.Headers.Location.Should().BeNull();
-        
+
         var logoutToken = new JwtTokenBuilder(1)
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .Build();
 
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
@@ -474,84 +455,86 @@ public class BackchannelLogoutTests
         req.Content = new FormUrlEncodedContent(formData);
         using var response = await client.SendAsync(req);
 
-        var protectedMessage2 = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedMessage2 =
+            new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
         var protectedResponse2 = await client.SendAsync(protectedMessage2, callbackCookies);
-                
+
         // Accessing a protected endpoint after logging out should redirect.
         protectedResponse2.StatusCode.Should().Be(HttpStatusCode.Found);
         protectedResponse2.Headers.Location.Should().NotBeNull();
         protectedResponse2.Headers.Location!.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
     }
-    
+
     [Fact]
     public async Task Should_Not_Logout_When_Sid_Doesnt_Match()
     {
         var nonce = "";
-            var configuration = TestConfiguration.GetConfiguration();
-            var domain = configuration["Auth0:Domain"];
-            var clientId = configuration["Auth0:ClientId"];
-            var mockHandler = new OidcMockBuilder()
-                .MockOpenIdConfig()
-                .MockJwks()
-                .MockToken(() => new JwtTokenBuilder(1)
-                    .WithIssuer($"https://{domain}/")
-                    .WithAudience(clientId)
-                    // ReSharper disable once AccessToModifiedClosure
-                    .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
-                    .WithClaim(JwtRegisteredClaimNames.Sid, "sid2")
-                    .Build())
-                .Build();
-
-            using var server = TestServerBuilder.CreateServer(opt =>
-            {
-                opt.Backchannel = new HttpClient(mockHandler.Object);
-            }, null, false, true, false, null, true);
-            using var client = server.CreateClient();
-            var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
-            var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
-
-            var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
-
-            // Keep track of the nonce as we need to:
-            // - Send it to the `/oauth/token` endpoint
-            // - Include it in the generated ID Token
-            nonce = queryParameters["nonce"];
-
-            // Keep track of the state as we need to:
-            // - Send it to the `/oauth/token` endpoint
-            var state = queryParameters["state"];
-
-            var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
-
-            // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
-            var callbackResponse = (await client.SendAsync(message, setCookie.Value));
-            var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
-
-            var protectedMessage = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
-            var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
-
-            // Accessing a protected endpoint before logging out should be OK.
-            protectedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            protectedResponse.Headers.Location.Should().BeNull();
-
-            var logoutToken = new JwtTokenBuilder(1)
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = configuration["Auth0:Domain"];
+        var clientId = configuration["Auth0:ClientId"];
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
                 .WithIssuer($"https://{domain}/")
                 .WithAudience(clientId)
-                .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-                .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
-                .Build();
+                // ReSharper disable once AccessToModifiedClosure
+                .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
+                .WithClaim(JwtRegisteredClaimNames.Sid, "sid2")
+                .Build())
+            .Build();
 
-            var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
-            using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
-            req.Content = new FormUrlEncodedContent(formData);
-            using var response = await client.SendAsync(req);
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, true, false, null, true);
+        using var client = server.CreateClient();
+        var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+        var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
 
-            var protectedMessage2 = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
-            var protectedResponse2 = await client.SendAsync(protectedMessage2, callbackCookies);
-                    
-            // Accessing a protected endpoint after logging out should be still be OK when the SID didn't match.
-            protectedResponse2.StatusCode.Should().Be(HttpStatusCode.OK);
-            protectedResponse2.Headers.Location.Should().BeNull();
+        var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+        // Keep track of the nonce as we need to:
+        // - Send it to the `/oauth/token` endpoint
+        // - Include it in the generated ID Token
+        nonce = queryParameters["nonce"];
+
+        // Keep track of the state as we need to:
+        // - Send it to the `/oauth/token` endpoint
+        var state = queryParameters["state"];
+
+        var message = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+        // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+        var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+        var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
+
+        var protectedMessage =
+            new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
+
+        // Accessing a protected endpoint before logging out should be OK.
+        protectedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        protectedResponse.Headers.Location.Should().BeNull();
+
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        var protectedMessage2 =
+            new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedResponse2 = await client.SendAsync(protectedMessage2, callbackCookies);
+
+        // Accessing a protected endpoint after logging out should be still be OK when the SID didn't match.
+        protectedResponse2.StatusCode.Should().Be(HttpStatusCode.OK);
+        protectedResponse2.Headers.Location.Should().BeNull();
     }
 
     [Fact]
@@ -572,10 +555,8 @@ public class BackchannelLogoutTests
             .Build();
 
         // Create a server with a custom authentication scheme
-        using var server = TestServerBuilder.CreateServerWithCustomScheme(customScheme, opt =>
-        {
-            opt.Backchannel = new HttpClient(mockHandler.Object);
-        }, null, false, false, false, null, true);
+        using var server = TestServerBuilder.CreateServerWithCustomScheme(customScheme,
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
         using var client = server.CreateClient();
 
         // Create a valid logout token
@@ -583,7 +564,7 @@ public class BackchannelLogoutTests
             .WithIssuer($"https://{domain}/")
             .WithAudience(clientId)
             .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
-            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }" )
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
             .Build();
 
         var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
@@ -592,5 +573,373 @@ public class BackchannelLogoutTests
         using var response = await client.SendAsync(req);
 
         response.StatusCode.Should().Be((HttpStatusCode)200);
+    }
+
+    [Fact]
+    public async Task Should_Reject_Tokens_From_Different_Issuers_Multiple_Custom_Domains()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain1 = "tenant1.auth0.com";
+        var domain2 = "tenant2.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain1}/")
+                .WithAudience(clientId)
+                .Build())
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); }, null, false, false, false, null, true);
+        using var client = server.CreateClient();
+
+        // Test logout token from domain1
+        var logoutToken1 = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain1}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid1")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData1 = new Dictionary<string, string> { { "logout_token", logoutToken1 } };
+        using var req1 = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req1.Content = new FormUrlEncodedContent(formData1);
+        using var response1 = await client.SendAsync(req1);
+
+        // Should fail because issuer doesn't match the configured domain
+        response1.StatusCode.Should().Be((HttpStatusCode)400);
+        var content1 = await response1.Content.ReadAsStringAsync();
+        var error1 = ApiError.Parse(content1);
+        error1.Message.Should().Contain("Issuer validation failed");
+
+        // Test logout token from domain2
+        var logoutToken2 = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain2}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid2")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData2 = new Dictionary<string, string> { { "logout_token", logoutToken2 } };
+        using var req2 = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req2.Content = new FormUrlEncodedContent(formData2);
+        using var response2 = await client.SendAsync(req2);
+
+        // Should also fail because issuer doesn't match the configured domain
+        response2.StatusCode.Should().Be((HttpStatusCode)400);
+        var content2 = await response2.Content.ReadAsStringAsync();
+        var error2 = ApiError.Parse(content2);
+        error2.Message.Should().Contain("Issuer validation failed");
+    }
+
+    [Fact]
+    public async Task Should_Support_Backchannel_Logout_With_Multiple_Custom_Domains()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain1 = "tenant1.auth0.com";
+        var domain2 = "tenant2.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain1}/")
+                .WithAudience(clientId)
+                .Build())
+            .Build();
+
+        // MCD-enabled server: DomainResolver always returns domain1 for this test
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = domain1;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, false, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult(domain1);
+            });
+        using var client = server.CreateClient();
+
+        // Logout token from domain1 — matches the resolved domain, should succeed
+        var logoutToken1 = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain1}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid1")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData1 = new Dictionary<string, string> { { "logout_token", logoutToken1 } };
+        using var req1 = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req1.Content = new FormUrlEncodedContent(formData1);
+        using var response1 = await client.SendAsync(req1);
+
+        response1.StatusCode.Should().Be((HttpStatusCode)200);
+
+        // Logout token from domain2 — does NOT match the resolved domain, should be rejected early
+        var logoutToken2 = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain2}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid2")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData2 = new Dictionary<string, string> { { "logout_token", logoutToken2 } };
+        using var req2 = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req2.Content = new FormUrlEncodedContent(formData2);
+        using var response2 = await client.SendAsync(req2);
+
+        response2.StatusCode.Should().Be((HttpStatusCode)400);
+        var content2 = await response2.Content.ReadAsStringAsync();
+        var error2 = ApiError.Parse(content2);
+        error2.Message.Should().Contain("Logout token issuer does not match the resolved domain");
+    }
+
+    [Fact]
+    public async Task Should_Not_Affect_Single_Domain_When_MCD_Not_Enabled()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = configuration["Auth0:Domain"];
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .Build())
+            .Build();
+
+        // No configureCustomDomains — standard single-domain setup
+        using var server = TestServerBuilder.CreateServer(
+            opt => { opt.Backchannel = new HttpClient(mockHandler.Object); },
+            null, false, false, false, null, true);
+        using var client = server.CreateClient();
+
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)200);
+    }
+
+    [Fact]
+    public async Task Should_Return_400_When_Logout_Token_Issuer_Does_Not_Match_Resolved_Domain()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var resolvedDomain = "tenant1.auth0.com";
+        var otherDomain = "tenant2.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .Build();
+
+        // DomainResolver returns resolvedDomain, but token will be from otherDomain
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = resolvedDomain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, false, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult(resolvedDomain);
+            });
+        using var client = server.CreateClient();
+
+        // Token from otherDomain — issuer mismatch should be caught before JWT validation
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{otherDomain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)400);
+        var content = await response.Content.ReadAsStringAsync();
+        var error = ApiError.Parse(content);
+        error.Message.Should().Contain("Logout token issuer does not match the resolved domain");
+    }
+
+    [Fact]
+    public async Task Should_Logout_And_Clear_Cookie_With_Multiple_Custom_Domains()
+    {
+        var nonce = "";
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+                .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
+                .Build())
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = domain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, true, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult(domain);
+            });
+        using var client = server.CreateClient();
+
+        var loginResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+        var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+        var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+        nonce = queryParameters["nonce"];
+        var state = queryParameters["state"];
+
+        var callbackMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+        var callbackResponse = await client.SendAsync(callbackMessage, setCookie.Value);
+        var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
+
+        var protectedMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
+
+        // Accessing a protected endpoint before logging out should be OK.
+        protectedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        protectedResponse.Headers.Location.Should().BeNull();
+
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)200);
+
+        var protectedMessage2 = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedResponse2 = await client.SendAsync(protectedMessage2, callbackCookies);
+
+        // Accessing a protected endpoint after backchannel logout should redirect to login.
+        protectedResponse2.StatusCode.Should().Be(HttpStatusCode.Found);
+        protectedResponse2.Headers.Location.Should().NotBeNull();
+        protectedResponse2.Headers.Location!.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
+    }
+
+    [Fact]
+    public async Task Should_Return_400_When_Logout_Token_Is_Malformed_And_MCD_Enabled()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var resolvedDomain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = resolvedDomain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, false, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult(resolvedDomain);
+            });
+        using var client = server.CreateClient();
+
+        var formData = new Dictionary<string, string> { { "logout_token", "not.a.valid.jwt" } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)400);
+        var content = await response.Content.ReadAsStringAsync();
+        var error = ApiError.Parse(content);
+        error.Message.Should().Contain("Logout token is malformed or not a valid JWT");
+    }
+
+    [Fact]
+    public async Task Should_Return_500_When_Resolved_Domain_Not_Available_And_MCD_Enabled()
+    {
+        var configuration = TestConfiguration.GetConfiguration();
+        var resolvedDomain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = resolvedDomain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, false, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult<string>(null);
+            });
+        using var client = server.CreateClient();
+
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{resolvedDomain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+
+        // DomainResolver returning null causes the startup filter to throw InvalidOperationException
+        // before the backchannel logout handler is reached. The test host surfaces this as an exception.
+        var act = async () => await client.SendAsync(req);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("DomainResolver returned empty issuer.");
     }
 }

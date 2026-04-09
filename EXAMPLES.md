@@ -6,6 +6,7 @@
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
+- [Multiple Custom Domain (MCD) Support](#multiple-custom-domain-mcd-support)
 - [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
 
@@ -312,6 +313,162 @@ public IActionResult Admin()
 {
     return View();
 }
+```
+
+## Multiple Custom Domain (MCD) Support
+
+Multiple Custom Domains (MCD) lets you resolve the Auth0 domain per request while keeping a single SDK instance. This is useful when one application serves multiple custom domains (for example, `brand-1.my-app.com` and `brand-2.my-app.com`), each mapped to a different `Auth0` custom domain.
+
+`MCD` is enabled by providing a `DomainResolver` function instead of a static domain string, enabling you to dynamically define the `Auth0` custom domain at run-time.
+
+Resolver mode is intended for the custom domains of a single `Auth0` tenant. It is not a supported way to connect multiple `Auth0` tenants to one application.
+
+### Dynamic Domain Resolver
+
+Provide a resolver function to select the domain at runtime. The resolver should return the `Auth0 Custom Domain` (for example, `brand-1.custom-domain.com`). Returning `null` or an empty value throws `InvalidOperationException`.
+
+### Configure with a DomainResolver
+
+Call `WithCustomDomains()` and provide a `DomainResolver` to resolve the domain dynamically based on the incoming request. The domain can be derived from a subdomain, request header, query parameter, or any other request attribute:
+
+```csharp
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+})
+.WithCustomDomains(options =>
+{
+    // Example: resolve from a custom header
+    options.DomainResolver = httpContext =>
+    {
+        var tenant = httpContext.Request.Headers["X-Tenant-Domain"].FirstOrDefault();
+        return Task.FromResult(tenant ?? "default-tenant.auth0.com");
+    };
+});
+```
+
+### Resolve domain from subdomain
+
+```csharp
+services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Configuration["Auth0:Domain"];
+    options.ClientId = Configuration["Auth0:ClientId"];
+})
+.WithCustomDomains(options =>
+{
+    // e.g., "acme.myapp.com" -> "acme.auth0.com"
+    options.DomainResolver = httpContext =>
+    {
+        var host = httpContext.Request.Host.Host;
+        var subdomain = host.Split('.')[0];
+        return Task.FromResult($"{subdomain}.auth0.com");
+    };
+});
+```
+
+### Redirect URI requirements
+
+When using MCD, the `redirectUri` must be an **absolute URL**. In MCD deployments, you will typically resolve the redirect URI per request so each domain uses the correct callback URL:
+
+```csharp
+var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+    // Resolve redirect URI based on the incoming request's host
+    .WithRedirectUri($"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/callback")
+    .Build();
+
+await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+```
+
+You must validate the host and scheme safely for your deployment to prevent open redirect attacks.
+
+### Legacy sessions and migration
+
+When moving from a static domain setup to a `DomainResolver`, existing sessions can continue to work if the resolver returns the same Auth0 custom domain that was used for those legacy sessions.
+
+If the resolver returns a different domain, the SDK treats the session as missing and requires the user to sign in again. This is intentional to keep sessions isolated per domain.
+
+### Security requirements
+
+When configuring the `DomainResolver`, you are responsible for ensuring that all resolved domains are trusted. Mis-configuring the domain resolver is a critical security risk that can lead to authentication bypass on the relying party (RP) or expose the application to Server-Side Request Forgery (SSRF).
+
+**Single tenant limitation:**
+The `DomainResolver` is intended solely for multiple custom domains belonging to the same Auth0 tenant. It is not a supported mechanism for connecting multiple Auth0 tenants to a single application.
+
+**Secure proxy requirement:**
+When using MCD, your application must be deployed behind a secure edge or reverse proxy (e.g., Cloudflare, Nginx, or AWS ALB). The proxy must be configured to sanitize and overwrite `Host` and `X-Forwarded-Host` headers before they reach your application.
+
+Without a trusted proxy layer to validate these headers, an attacker can manipulate the domain resolution process. This can result in malicious redirects, where users are sent to unauthorized or fraudulent endpoints during the login and logout flows.
+
+### Configuration Manager Cache
+
+You can control how OpenID Connect configuration managers are cached per domain with `ConfigurationManagerCache`.
+
+By default, the SDK uses an in-memory cache with:
+- `maxSize: 100` entries
+- No expiration (entries remain until evicted by size pressure)
+
+The cache is keyed by the OIDC metadata endpoint URL (e.g., `https://brand-1.custom-domain.com/.well-known/openid-configuration`). Each distinct domain resolved by `DomainResolver` occupies one cache entry.
+
+Most applications can keep the defaults, but you may want to adjust them in the following cases:
+- Increase `maxSize` if one process may verify tokens for more than 100 distinct domains during its lifetime.
+- Decrease `maxSize` if memory usage matters more than avoiding repeated OIDC discovery setup.
+- Set `slidingExpiration` if you want entries that haven't been accessed within a given duration to be evicted automatically.
+- Use `NullConfigurationManagerCache` to disable caching entirely (not recommended for production).
+
+Rule of thumb: set `maxSize` to cover the number of distinct domains a single process is expected to serve, with some headroom.
+
+#### MemoryConfigurationManagerCache (Default)
+
+```csharp
+.WithCustomDomains(options =>
+{
+    options.DomainResolver = httpContext => { /* ... */ };
+
+    options.ConfigurationManagerCache = new MemoryConfigurationManagerCache(
+        maxSize: 100,                             // Maximum number of domains to cache
+        slidingExpiration: TimeSpan.FromHours(1)  // Optional: evict entries not accessed within 1 hour
+    );
+});
+```
+
+#### NullConfigurationManagerCache
+
+Disables caching entirely — a new configuration manager is created on every request (not recommended for production):
+
+```csharp
+.WithCustomDomains(options =>
+{
+    options.DomainResolver = httpContext => { /* ... */ };
+    options.ConfigurationManagerCache = new NullConfigurationManagerCache();
+});
+```
+
+#### Custom Cache Implementation
+
+Implement `IConfigurationManagerCache` for custom caching strategies (e.g., a distributed cache):
+
+```csharp
+public class MyCustomConfigurationManagerCache : IConfigurationManagerCache
+{
+    public IConfigurationManager<OpenIdConnectConfiguration> GetOrCreate(
+        string metadataAddress,
+        Func<string, IConfigurationManager<OpenIdConnectConfiguration>> factory)
+    {
+        // Return a cached instance or call factory(metadataAddress) to create one
+    }
+
+    public void Clear() { /* Evict all entries */ }
+    public void Dispose() { /* Clean up resources */ }
+}
+
+// Usage
+.WithCustomDomains(options =>
+{
+    options.DomainResolver = httpContext => { /* ... */ };
+    options.ConfigurationManagerCache = new MyCustomConfigurationManagerCache();
+});
 ```
 
 ## Backchannel Logout
