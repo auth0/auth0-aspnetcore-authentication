@@ -101,6 +101,18 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Controllers
         {
             return View();
         }
+        
+        public IActionResult Tokens()
+        {
+            var authItems = HttpContext.Features.Get<IAuthenticateResultFeature>()?.AuthenticateResult?.Properties?.Items;
+            if (authItems == null) return BadRequest("Error with authentication result object.");
+            if (authItems.ContainsKey(".Token.access_token")
+                && authItems.ContainsKey(".Token.refresh_token")
+                && authItems.ContainsKey(".Token.id_token"))
+                return Ok($"TokensExist=True");
+            else
+                return Ok($"TokensExist=False");
+        }
 
         private Dictionary<string, string> ObjectToDictionary(object values)
         {
