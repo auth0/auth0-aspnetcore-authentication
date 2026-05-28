@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Linq;
+using System.Net.Http;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
 {
@@ -88,6 +90,16 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
         }
 
         /// <summary>
+        /// Read the URL-decoded value of `client_assertion` from the HttpRequestMessage form body.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>The decoded `client_assertion` value, or null if not present.</returns>
+        public static string GetClientAssertion(this HttpRequestMessage me)
+        {
+            return me.GetBody("client_assertion");
+        }
+
+        /// <summary>
         /// Indicate whether or not the HttpRequestMessage contains the specified property and value, if provided.
         /// </summary>
         /// <param name="me">The HttpRequestMessage to inspect.</param>
@@ -102,6 +114,22 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
             }
 
             return content.Contains($"{key}=");
+        }
+
+        /// <summary>
+        /// Read the URL-decoded value of the specified form body property, if present.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <param name="key">The form body property name.</param>
+        /// <returns>The decoded value, or null if the property is not present.</returns>
+        private static string GetBody(this HttpRequestMessage me, string key)
+        {
+            var content = me.Content.ReadAsStringAsync().Result;
+            return content.Split('&')
+                .Select(p => p.Split(new[] { '=' }, 2))
+                .Where(kv => kv.Length == 2 && kv[0] == key)
+                .Select(kv => Uri.UnescapeDataString(kv[1]))
+                .FirstOrDefault();
         }
     }
 }
