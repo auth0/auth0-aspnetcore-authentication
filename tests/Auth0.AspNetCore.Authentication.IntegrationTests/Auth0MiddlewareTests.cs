@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -865,10 +866,16 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var configuration = TestConfiguration.GetConfiguration();
             var domain = configuration["Auth0:Domain"];
             var clientId = configuration["Auth0:ClientId"];
+            string capturedClientAssertion = null;
             var mockHandler = new OidcMockBuilder()
                 .MockOpenIdConfig()
                 .MockJwks()
-                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) => me.HasClientAssertion())
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce), (me) =>
+                {
+                    if (!me.HasClientAssertion()) return false;
+                    capturedClientAssertion = me.GetClientAssertion();
+                    return true;
+                })
                 .Build();
 
             var provider = new RSACryptoServiceProvider();
@@ -902,6 +909,12 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     var callbackResponse = (await client.SendAsync(message, setCookie.Value));
 
                     callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+                    capturedClientAssertion.Should().NotBeNullOrEmpty();
+                    var decoded = new JwtSecurityTokenHandler().ReadJwtToken(capturedClientAssertion);
+                    decoded.Audiences.Should().ContainSingle().Which.Should().Be($"https://{domain}/");
+                    decoded.Issuer.Should().Be(clientId);
+                    decoded.Subject.Should().Be(clientId);
                 }
             }
         }
