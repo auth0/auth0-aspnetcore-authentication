@@ -1,5 +1,21 @@
 # Change Log
 
+## [1.7.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.7.1) (2026-06-08)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.7.0...1.7.1)
+
+This is a maintenance release that updates runtime and test dependencies to their latest patch versions.
+
+**Security**
+- chore: Upgrade dependencies — bundles [\#231](https://github.com/auth0/auth0-aspnetcore-authentication/pull/231), [\#232](https://github.com/auth0/auth0-aspnetcore-authentication/pull/232), [\#233](https://github.com/auth0/auth0-aspnetcore-authentication/pull/233), [\#234](https://github.com/auth0/auth0-aspnetcore-authentication/pull/234), [\#235](https://github.com/auth0/auth0-aspnetcore-authentication/pull/235) (`System.Text.Encodings.Web` 10.0.8, `Microsoft.AspNetCore.Mvc.Testing` 10.0.8, `Microsoft.AspNetCore.Mvc.ViewFeatures` 2.3.10, `Microsoft.NET.Test.Sdk` 18.6.0, `coverlet.collector` 10.0.1) [\#237](https://github.com/auth0/auth0-aspnetcore-authentication/pull/237) ([kailash-b](https://github.com/kailash-b))
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.17.0 to 8.18.0 [\#230](https://github.com/auth0/auth0-aspnetcore-authentication/pull/230) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.NET.Test.Sdk from 18.4.0 to 18.5.1 [\#229](https://github.com/auth0/auth0-aspnetcore-authentication/pull/229) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.6 to 10.0.7 [\#228](https://github.com/auth0/auth0-aspnetcore-authentication/pull/228) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.Testing from 10.0.6 to 10.0.7 [\#227](https://github.com/auth0/auth0-aspnetcore-authentication/pull/227) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.5 to 10.0.6 [\#225](https://github.com/auth0/auth0-aspnetcore-authentication/pull/225) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.Testing from 10.0.5 to 10.0.6 [\#224](https://github.com/auth0/auth0-aspnetcore-authentication/pull/224) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.NET.Test.Sdk from 18.3.0 to 18.4.0 [\#222](https://github.com/auth0/auth0-aspnetcore-authentication/pull/222) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.IdentityModel.Protocols.OpenIdConnect from 8.16.0 to 8.17.0 [\#221](https://github.com/auth0/auth0-aspnetcore-authentication/pull/221) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.7.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.7.0) (2026-04-09)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.6.1...1.7.0)
 
