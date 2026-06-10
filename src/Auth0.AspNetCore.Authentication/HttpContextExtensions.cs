@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Auth0.AspNetCore.Authentication;
 
-internal static class Extensions
+internal static class HttpContextExtensions
 {
     /// <summary>
     /// Retrieves the resolved domain from the <see cref="HttpContext.Items"/> collection.
