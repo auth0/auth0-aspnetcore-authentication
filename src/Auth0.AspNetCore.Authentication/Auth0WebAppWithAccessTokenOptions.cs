@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -16,6 +17,13 @@ namespace Auth0.AspNetCore.Authentication
         /// Scopes to be used to request token(s). (e.g. "Scope1 Scope2 Scope3")
         /// </summary>
         public string? Scope { get; set; }
+
+        /// <summary>
+        /// Optional per-audience default scopes, used when requesting access tokens for
+        /// additional audiences (MRRT). When an audience is present in this map, its value
+        /// is used as the default scope for that audience; otherwise <see cref="Scope"/> is used.
+        /// </summary>
+        public IReadOnlyDictionary<string, string>? ScopeByAudience { get; set; }
 
         /// <summary>
         /// Define whether or not Refresh Tokens should be used internally when the access token is expired.

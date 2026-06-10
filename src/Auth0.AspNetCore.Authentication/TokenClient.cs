@@ -22,13 +22,23 @@ namespace Auth0.AspNetCore.Authentication
             _httpClient = httpClient;
         }
 
-        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null)
+        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null, string? audience = null, string? scope = null)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
                 { "client_id", options.ClientId },
                 { "refresh_token", refreshToken }
             };
+
+            if (!string.IsNullOrWhiteSpace(audience))
+            {
+                body.Add("audience", audience);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scope))
+            {
+                body.Add("scope", scope);
+            }
 
             // Use provided domain for dynamic resolution, fallback to options.Domain
             var tokenEndpointDomain = domain ?? options.Domain;

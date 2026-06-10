@@ -128,6 +128,79 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task Refresh_WithAudienceAndScope_IncludesThemInBody()
+        {
+            var capturedBody = string.Empty;
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    if (req.Content != null)
+                        capturedBody = req.Content.ReadAsStringAsync().Result;
+                })
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"new_token\",\"token_type\":\"Bearer\",\"expires_in\":86400,\"scope\":\"read:orders\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123",
+                null,
+                "api://orders",
+                "read:orders"
+            );
+
+            result.Should().NotBeNull();
+            result?.Scope.Should().Be("read:orders");
+            capturedBody.Should().Contain("audience=api%3A%2F%2Forders");
+            capturedBody.Should().Contain("scope=read%3Aorders");
+        }
+
+        [Fact]
+        public async Task Refresh_WithoutAudienceAndScope_OmitsThemFromBody()
+        {
+            var capturedBody = string.Empty;
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    if (req.Content != null)
+                        capturedBody = req.Content.ReadAsStringAsync().Result;
+                })
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"new_token\",\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            capturedBody.Should().NotContain("audience=");
+            capturedBody.Should().NotContain("scope=");
+        }
+
+        [Fact]
         public async Task Refresh_WithNullDomain_ThrowsInvalidOperationException()
         {
             var mockHandler = new Mock<HttpMessageHandler>();
