@@ -47,23 +47,27 @@ namespace Auth0.AspNetCore.Authentication
             var properties = authenticateResult.Properties;
             var matchesPrimaryToken = MatchesPrimaryToken(audience, mergedScope, optionsWithAccessToken);
 
-            // 1. Try to satisfy the request from what is already stored in the session.
-            if (matchesPrimaryToken)
+            // 1. Try to satisfy the request from what is already stored in the session,
+            //    unless the caller explicitly asked to bypass the cache.
+            if (!request.ForceRefresh)
             {
-                if (properties.Items.TryGetValue(".Token.access_token", out var primaryToken) &&
-                    !string.IsNullOrEmpty(primaryToken) &&
-                    !IsPrimaryExpired(properties))
+                if (matchesPrimaryToken)
                 {
-                    return primaryToken;
+                    if (properties.Items.TryGetValue(".Token.access_token", out var primaryToken) &&
+                        !string.IsNullOrEmpty(primaryToken) &&
+                        !IsPrimaryExpired(properties))
+                    {
+                        return primaryToken;
+                    }
                 }
-            }
-            else
-            {
-                var sets = ReadAccessTokenSets(properties);
-                var match = TokenSetHelpers.FindAccessTokenSet(sets, audience!, mergedScope, ScopeMatchMode.RequestedScope);
-                if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.AddSeconds(ExpiryLeewaySeconds).ToUnixTimeSeconds())
+                else
                 {
-                    return match.AccessToken;
+                    var sets = ReadAccessTokenSets(properties);
+                    var match = TokenSetHelpers.FindAccessTokenSet(sets, audience!, mergedScope, ScopeMatchMode.RequestedScope);
+                    if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.AddSeconds(ExpiryLeewaySeconds).ToUnixTimeSeconds())
+                    {
+                        return match.AccessToken;
+                    }
                 }
             }
 

@@ -17,5 +17,12 @@ namespace Auth0.AspNetCore.Authentication
         /// default scopes for the resolved audience.
         /// </summary>
         public string? Scope { get; set; }
+
+        /// <summary>
+        /// When <c>true</c>, always exchanges the refresh token for a new access token,
+        /// ignoring any cached token. The freshly retrieved token still replaces the
+        /// cached entry. Defaults to <c>false</c>.
+        /// </summary>
+        public bool ForceRefresh { get; set; }
     }
 }
