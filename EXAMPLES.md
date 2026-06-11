@@ -4,6 +4,7 @@
 - [Scopes](#scopes)
 - [Calling an API](#calling-an-api)
   - [Configuring the refresh leeway](#configuring-the-refresh-leeway)
+- [Server-side session storage](#server-side-session-storage)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -190,6 +191,90 @@ services
 The above snippet checks whether the SDK is configured to use refresh tokens, if there is an existing ID token (meaning the user is authenticated) as well as the absence of a refresh token. If each of these criteria are met, it logs the user out from the application and initializes a new login flow.
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
+
+## Server-side session storage
+
+By default, the SDK is **stateless**: the entire authentication session - the user's identity claims together with the ID, access, and refresh tokens - is serialized into the encrypted authentication cookie. This requires no additional infrastructure and lets any instance behind a load balancer serve any request.
+
+Because everything lives in the cookie, the session is subject to the browser's cookie size limits (around 4 KB per cookie). ASP.NET Core automatically splits a larger payload across multiple cookies, but tokens are large and browsers/proxies also cap the total size of request headers. Sessions that accumulate several tokens can therefore grow large enough to be rejected by the browser, a reverse proxy, or the web server.
+
+To avoid this, you can move the session **server-side**. The cookie then holds only a small session key, while the full session payload is kept in a store you control. Use `WithSessionStore` to provide an [`ITicketStore`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.cookies.iticketstore) implementation:
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+    })
+    .WithSessionStore<RedisTicketStore>();
+```
+
+Server-side session storage is a built-in ASP.NET Core capability (`CookieAuthenticationOptions.SessionStore`), so this was always possible - but only by post-configuring the cookie options for the exact scheme the SDK uses internally. Getting that scheme name wrong left the store silently unused. `WithSessionStore` simply makes it easier: it attaches the store to the SDK's own cookie scheme for you, so it keeps working even when you set a custom `CookieAuthenticationScheme` - there is no scheme name to wire up by hand.
+
+Keep the **default cookie-based session** when you want to stay stateless and avoid running extra infrastructure - for most applications it is the simplest and best choice. Server-side storage is an opt-in for the cases above, and it requires a store that is shared across all your instances (for example a distributed cache) when you run more than one.
+
+### Providing the ITicketStore
+
+You can pass either a type (resolved from the dependency injection container, so it may depend on other registered services such as `IDistributedCache` and `IDataProtectionProvider`) or an already-constructed instance:
+
+```csharp
+// Resolved from the container - supports constructor injection.
+.WithSessionStore<RedisTicketStore>();
+
+// Or supply an instance directly - you are then responsible for its dependencies.
+.WithSessionStore(new RedisTicketStore(cache, dataProtectionProvider));
+```
+
+Prefer the type overload when your store depends on registered services (as the `RedisTicketStore` below does); the instance overload is best for stores you can construct by hand.
+
+A minimal `IDistributedCache`-backed implementation looks like this. Honoring `ticket.Properties.ExpiresUtc` lets the cache expire abandoned sessions automatically. The serialized ticket contains the user's claims and any tokens (access/refresh) carried in `AuthenticationProperties`, so it is encrypted with an [`IDataProtector`](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/overview) before being written to the cache:
+
+```csharp
+public class RedisTicketStore : ITicketStore
+{
+    private readonly IDistributedCache _cache;
+    private readonly IDataProtector _protector;
+
+    public RedisTicketStore(IDistributedCache cache, IDataProtectionProvider provider)
+    {
+        _cache = cache;
+        _protector = provider.CreateProtector("Auth0.AspNetCore.Authentication.RedisTicketStore");
+    }
+
+    public async Task<string> StoreAsync(AuthenticationTicket ticket)
+    {
+        var key = $"auth-session-{Guid.NewGuid():N}";
+        await RenewAsync(key, ticket);
+        return key;
+    }
+
+    public async Task RenewAsync(string key, AuthenticationTicket ticket)
+    {
+        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = ticket.Properties.ExpiresUtc };
+        var payload = _protector.Protect(TicketSerializer.Default.Serialize(ticket));
+        await _cache.SetAsync(key, payload, options);
+    }
+
+    public async Task<AuthenticationTicket?> RetrieveAsync(string key)
+    {
+        var bytes = await _cache.GetAsync(key);
+        return bytes == null ? null : TicketSerializer.Default.Deserialize(_protector.Unprotect(bytes));
+    }
+
+    public Task RemoveAsync(string key) => _cache.RemoveAsync(key);
+}
+```
+
+> :warning: **Running multiple instances:** the store must be shared across them (e.g. a distributed cache such as Redis or SQL Server). An in-memory store only works for a single instance and will cause users to appear logged out when their requests are served by a different instance. Likewise, the [Data Protection keys must be persisted and shared](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview) across all instances - otherwise tickets become unreadable after a key rotation, app restart, or when served by a different node.
+>
+> :warning: **Protecting the ticket:** it holds sensitive data (claims, access and refresh tokens). Encrypting the payload with `IDataProtector` as shown above means an attacker who gains read access to the cache cannot recover those tokens. Treat the cache backend itself as sensitive too: restrict access and enable encryption in transit (e.g. Redis AUTH + TLS) and at rest.
 
 ## Organizations
 

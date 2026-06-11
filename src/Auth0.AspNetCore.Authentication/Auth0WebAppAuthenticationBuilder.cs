@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -77,7 +78,57 @@ namespace Auth0.AspNetCore.Authentication
             EnableCustomDomains(configureOptions);
             return this;
         }
-        
+
+        /// <summary>
+        /// Stores the authentication session server-side using the supplied
+        /// <see href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.cookies.iticketstore">ITicketStore</see>,
+        /// keeping only a session key in the cookie. <typeparamref name="TStore"/> is resolved
+        /// from the service provider, so it may depend on other registered services
+        /// (e.g. <see href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache">IDistributedCache</see>).
+        /// </summary>
+        /// <typeparam name="TStore">The <c>ITicketStore</c> implementation to use.</typeparam>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
+        public Auth0WebAppAuthenticationBuilder WithSessionStore<TStore>() where TStore : class, ITicketStore
+        {
+            // Register and resolve the concrete type rather than ITicketStore: this avoids a
+            // pre-registered ITicketStore silently shadowing TStore, and lets schemes using
+            // different store types each get their own registration.
+            _services.TryAddSingleton<TStore>();
+            EnableSessionStore(sp => sp.GetRequiredService<TStore>());
+            return this;
+        }
+
+        /// <summary>
+        /// Stores the authentication session server-side using the supplied
+        /// <see href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.cookies.iticketstore">ITicketStore</see>
+        /// instance, keeping only a session key in the cookie.
+        /// </summary>
+        /// <param name="ticketStore">The <c>ITicketStore</c> instance to use.</param>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
+        public Auth0WebAppAuthenticationBuilder WithSessionStore(ITicketStore ticketStore)
+        {
+            if (ticketStore == null)
+            {
+                throw new ArgumentNullException(nameof(ticketStore));
+            }
+
+            EnableSessionStore(_ => ticketStore);
+            return this;
+        }
+
+        private void EnableSessionStore(Func<IServiceProvider, ITicketStore> resolveStore)
+        {
+            // Attach the store to the cookie handler on the SDK's own cookie scheme. Resolving
+            // the scheme here is what frees callers from having to name it correctly themselves
+            // (a mismatch would otherwise leave the store silently unused).
+            var cookieScheme = _options.CookieAuthenticationScheme;
+
+            _services
+                .AddOptions<CookieAuthenticationOptions>(cookieScheme)
+                .Configure<IServiceProvider>((cookieOptions, sp) =>
+                    cookieOptions.SessionStore = resolveStore(sp));
+        }
+
         private void EnableCustomDomains(Action<Auth0CustomDomainsOptions> configureOptions)
         {
             var customDomainsOptions = new Auth0CustomDomainsOptions();
