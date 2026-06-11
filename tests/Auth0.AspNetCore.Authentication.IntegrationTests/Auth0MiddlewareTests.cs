@@ -1434,6 +1434,111 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async void Should_Refresh_Access_Token_When_Within_Configured_Leeway()
+        {
+            // The token is valid for 70s, which is beyond the default 60s leeway and would
+            // normally NOT trigger a refresh (see Should_Not_Refresh_Access_Token_When_Not_Expired).
+            // Configuring a 120s leeway makes the SDK treat it as expiring imminently and refresh it.
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.UtcNow.AddSeconds(70)), (me) => me.HasGrantType("authorization_code"))
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.UtcNow.AddSeconds(70)), (me) => me.HasGrantType("refresh_token"), 70, true, HttpStatusCode.OK, "456_ROTATED")
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+                opts.AccessTokenExpirationLeeway = TimeSpan.FromSeconds(120);
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+                    var content = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    mockHandler.Verify();
+
+                    content.GetValue("RefreshToken").Value<string>().Should().Be("456_ROTATED");
+                }
+            }
+        }
+
+        [Fact]
+        public async void Should_Not_Refresh_Access_Token_When_Outside_Configured_Leeway()
+        {
+            // The token is valid for 40s, which is within the default 60s leeway and would
+            // normally trigger a refresh. Configuring a smaller 5s leeway leaves it untouched.
+            // No refresh_token grant is mocked, so any refresh attempt would surface as a failure.
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.UtcNow.AddSeconds(40)), (me) => me.HasGrantType("authorization_code"), 40)
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+                opts.AccessTokenExpirationLeeway = TimeSpan.FromSeconds(5);
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+                    var content = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    mockHandler.Verify();
+
+                    content.GetValue("RefreshToken").Value<string>().Should().Be("456");
+                }
+            }
+        }
+
+        [Fact]
         public async void Should_Call_On_Access_Token_Missing()
         {
             var configuration = TestConfiguration.GetConfiguration();

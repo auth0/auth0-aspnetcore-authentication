@@ -199,8 +199,8 @@ namespace Auth0.AspNetCore.Authentication
                     {
                         var now = DateTimeOffset.Now;
                         var expiresAt = DateTimeOffset.Parse(context.Properties.Items[".Token.expires_at"]!);
-                        var leeway = 60;
-                        var difference = DateTimeOffset.Compare(expiresAt, now.AddSeconds(leeway));
+                        var leeway = optionsWithAccessToken.AccessTokenExpirationLeeway;
+                        var difference = DateTimeOffset.Compare(expiresAt, now.Add(leeway));
                         var isExpired = difference <= 0;
 
                         if (isExpired && !string.IsNullOrWhiteSpace(refreshToken))
