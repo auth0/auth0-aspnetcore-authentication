@@ -31,12 +31,15 @@ builder.Services
                 await context.ChallengeAsync(PlaygroundConstants.AuthenticationScheme, authenticationProperties);
             }
         };
-    }).WithBackchannelLogout();
+    }).WithBackchannelLogout()
+    // Store the authentication session server-side instead of in the cookie. Only a session
+    // key is kept in the cookie, which keeps the cookie small regardless of how much the
+    // session holds. Comment this out to use the default, stateless, cookie-based session.
+    .WithSessionStore<CustomInMemoryTicketStore>();
 
 
 // The above configuration works but is not suitable for production as it uses an InMemory cache to store the logout token
 // Instead, for production use any of the following, additional, configuration.
-// Note: For the statefull scenario's, ensure to uncomment `ConfigureStatefullSessions` as well.
 
 
 // ** STATELESS **
@@ -48,8 +51,9 @@ builder.Services
 
 // ** STATEFUL **
 
-// Ensure to uncomment this when using any of the below configurations
-// ConfigureStatefullSessions(services);
+// Stateful sessions are enabled by the `.WithSessionStore<CustomInMemoryTicketStore>()` call on
+// the authentication builder above. The options below show custom LogoutTokenHandler variants
+// that pair with a stateful session.
 
 
 // 2. Configure the SDK to use Stateful session and a custom LogoutTokenHandler to store the tokens.
@@ -141,29 +145,4 @@ void ConfigureServicesAuth0StatfullInstantSessionClear(IServiceCollection servic
 {
     // Configure a custom LogoutTokenHandler, allowing you to clear the stateful session
     services.AddTransient<ILogoutTokenHandler, CustomClearSessionLogoutTokenHandler>();
-}
-
-void ConfigureStatefullSessions(IServiceCollection services)
-{
-    // Configure a custom ITicketStore to store the Identity Information on the server
-    services.AddTransient<ITicketStore, CustomInMemoryTicketStore>();
-    // Configure the Cookie Middleware to use the CustomInMemoryTicketStore
-    services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, ConfigureCookieAuthenticationOptions>();
-}
-
-public class ConfigureCookieAuthenticationOptions
-    : IPostConfigureOptions<CookieAuthenticationOptions>
-{
-    private readonly ITicketStore _ticketStore;
-
-    public ConfigureCookieAuthenticationOptions(ITicketStore ticketStore)
-    {
-        _ticketStore = ticketStore;
-    }
-
-    public void PostConfigure(string name,
-        CookieAuthenticationOptions options)
-    {
-        options.SessionStore = _ticketStore;
-    }
 }
