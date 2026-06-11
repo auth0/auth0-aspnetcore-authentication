@@ -69,7 +69,7 @@ namespace Auth0.AspNetCore.Authentication
             builder.Services.Configure(authenticationScheme, configureOptions);
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, Auth0OpenIdConnectPostConfigureOptions>());
 
-            builder.Services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+            builder.Services.AddOptions<CookieAuthenticationOptions>(auth0Options.CookieAuthenticationScheme)
                 .Configure(options =>
                 {
                     options.Events.OnValidatePrincipal = Utils.ProxyEvent(CreateOnValidatePrincipal(authenticationScheme), options.Events.OnValidatePrincipal);
