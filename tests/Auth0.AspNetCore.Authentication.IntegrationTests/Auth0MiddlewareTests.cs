@@ -1142,6 +1142,62 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async void Should_Refresh_Access_Token_When_Expired_Using_Custom_Cookie_Scheme()
+        {
+            var nonce = "";
+            var cookieScheme = "Test_Cookie_Scheme";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.UtcNow.AddSeconds(20)), (me) => me.HasGrantType("authorization_code"), 20)
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.UtcNow.AddSeconds(20)), (me) => me.HasGrantType("refresh_token") && me.HasClientSecret(), 20)
+                .Build();
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+                opts.CookieAuthenticationScheme = cookieScheme;
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+            }, false, true))
+            {
+
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+
+                    // Keep track of the nonce/state as we need to:
+                    // - Send it to the `/oauth/token` endpoint
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    // Pass along the Set-Cookies to ensure `Nonce` and `Correlation` cookies are set.
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    callbackResponse.Headers.Location.OriginalString.Should().Be("/");
+
+                    // Authenticate against the custom cookie scheme so OnValidatePrincipal fires on the
+                    // handler the SDK actually registered. If the refresh hook were wired to the default
+                    // "Cookies" scheme, the refresh_token grant would never be called and Verify() fails.
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}?scheme={cookieScheme}", callbackResponse.Headers.GetValues("Set-Cookie"));
+
+                    mockHandler.Verify();
+                }
+            }
+        }
+
+        [Fact]
         public async void Should_Refresh_Access_Token_When_Expired_Using_Client_Assertion()
         {
             var nonce = "";

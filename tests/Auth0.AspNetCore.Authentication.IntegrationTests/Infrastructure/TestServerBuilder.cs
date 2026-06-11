@@ -57,10 +57,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
 
                                if (req.Path == new PathString("/process"))
                                 {
-                                    var ticket = await context.AuthenticateAsync("Cookies");
+                                    var cookieScheme = req.Query.TryGetValue("scheme", out var schemeValue)
+                                        ? schemeValue.ToString()
+                                        : CookieAuthenticationDefaults.AuthenticationScheme;
+                                    var ticket = await context.AuthenticateAsync(cookieScheme);
                                     await res.WriteAsync(JsonSerializer.Serialize(new
                                     {
-                                        RefreshToken = await context.GetTokenAsync("refresh_token")
+                                        RefreshToken = await context.GetTokenAsync(cookieScheme, "refresh_token")
                                     }));
                                 }
                                 else
