@@ -3,6 +3,7 @@
 - [Login and Logout](#login-and-logout)
 - [Scopes](#scopes)
 - [Calling an API](#calling-an-api)
+  - [Configuring the refresh leeway](#configuring-the-refresh-leeway)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -139,6 +140,29 @@ public void ConfigureServices(IServiceCollection services)
         });
 }
 ```
+
+#### Configuring the refresh leeway
+
+When refresh tokens are enabled, the SDK refreshes the access token slightly *before* it actually expires, so a request in flight isn't left holding a token that lapses mid-call. This window defaults to **60 seconds**. You can tune it with `AccessTokenExpirationLeeway`:
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        // Refresh the access token up to 2 minutes before it expires.
+        options.AccessTokenExpirationLeeway = TimeSpan.FromSeconds(120);
+    });
+```
+
+A larger leeway refreshes more eagerly (fewer near-expiry tokens, more refresh calls); a smaller leeway refreshes later. The leeway only takes effect when `UseRefreshTokens` is enabled.
 
 #### Detecting the absense of a refresh token
 
