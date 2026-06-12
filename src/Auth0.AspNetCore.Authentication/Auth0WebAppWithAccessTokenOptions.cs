@@ -33,8 +33,8 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>
         /// The amount of time before an access token expires during which it is treated as
         /// already expired, so that a refresh is triggered proactively rather than the token
-        /// lapsing mid-request. Only applies when <see cref="UseRefreshTokens"/> is enabled.
-        /// Defaults to 60 seconds.
+        /// lapsing mid-request. Applies to both the primary (login-time) token and additional
+        /// audience/scope tokens retrieved on demand (MRRT). Defaults to 60 seconds.
         /// </summary>
         public TimeSpan AccessTokenExpirationLeeway { get; set; } = TimeSpan.FromSeconds(60);
 

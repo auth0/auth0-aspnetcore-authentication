@@ -118,6 +118,21 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public void UpsertAccessTokenSet_UnchangedAccessToken_LeavesEntryIntact()
+        {
+            // Same request, same access token returned: the entry must be left in place
+            // (same instance) rather than replaced.
+            var existing = new AccessTokenSet { Audience = "api", AccessToken = "tok", Scope = "a", RequestedScope = "a" };
+            var sets = new List<AccessTokenSet> { existing };
+            var response = new AccessTokenResponse { AccessToken = "tok", ExpiresIn = 3600, Scope = "a" };
+
+            var result = TokenSetHelpers.UpsertAccessTokenSet(sets, "api", "a", response);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeSameAs(existing);
+        }
+
+        [Fact]
         public void UpsertAccessTokenSet_MergesRequestedScopeWhenGrantedScopeMatches()
         {
             // cached entry: granted "a", requested "a b". New request "a c" -> granted "a".

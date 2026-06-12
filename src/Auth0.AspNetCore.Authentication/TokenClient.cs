@@ -76,24 +76,23 @@ namespace Auth0.AspNetCore.Authentication
                         // Swallow the parse error so it never surfaces as an exposed Exception on the
                         // failure event; report a status-code-only failure with a static, payload-free
                         // message instead.
-                        return new TokenRefreshResult
-                        {
-                            StatusCode = (int)response.StatusCode,
-                            Error = "invalid_token_response",
-                            ErrorDescription = "The token endpoint returned a response that could not be parsed."
-                        };
+                        return TokenRefreshResult.Failure(
+                            (int)response.StatusCode,
+                            "invalid_token_response",
+                            "The token endpoint returned a response that could not be parsed.");
                     }
 
                     return accessTokenResponse != null
                         ? TokenRefreshResult.Success(accessTokenResponse)
-                        : new TokenRefreshResult { StatusCode = (int)response.StatusCode };
+                        : TokenRefreshResult.Failure((int)response.StatusCode);
                 }
             }
         }
 
         private static async Task<TokenRefreshResult> BuildFailure(HttpResponseMessage response)
         {
-            var result = new TokenRefreshResult { StatusCode = (int)response.StatusCode };
+            string? error = null;
+            string? errorDescription = null;
 
             try
             {
@@ -104,16 +103,14 @@ namespace Auth0.AspNetCore.Authentication
                     var root = document.RootElement;
                     if (root.ValueKind == JsonValueKind.Object)
                     {
-                        // An "mfa_required" error also carries "mfa_token" and "mfa_requirements";
-                        // surfacing those (and completing the MFA flow) is deferred to a subsequent PR.
                         if (root.TryGetProperty("error", out var errorElement))
                         {
-                            result.Error = errorElement.GetString();
+                            error = errorElement.GetString();
                         }
 
                         if (root.TryGetProperty("error_description", out var descriptionElement))
                         {
-                            result.ErrorDescription = descriptionElement.GetString();
+                            errorDescription = descriptionElement.GetString();
                         }
                     }
                 }
@@ -123,7 +120,7 @@ namespace Auth0.AspNetCore.Authentication
                 // A non-JSON or unreadable error body still yields a result carrying the status code.
             }
 
-            return result;
+            return TokenRefreshResult.Failure((int)response.StatusCode, error, errorDescription);
         }
 
         private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)

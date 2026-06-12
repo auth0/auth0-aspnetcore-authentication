@@ -169,6 +169,11 @@ namespace Auth0.AspNetCore.Authentication
 
             ValidateOptions(_options);
 
+            // GetAccessTokenAsync (MRRT) resolves an IHttpClientFactory to exchange the refresh
+            // token when no Backchannel is configured. Register it here so the factory is always
+            // available.
+            _services.AddHttpClient();
+
             _services.Configure(_authenticationScheme, configureOptions);
             _services.AddOptions<OpenIdConnectOptions>(_authenticationScheme)
                 .Configure(options =>

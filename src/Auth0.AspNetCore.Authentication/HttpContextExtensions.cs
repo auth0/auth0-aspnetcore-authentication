@@ -81,7 +81,7 @@ namespace Auth0.AspNetCore.Authentication
                 return null;
             }
 
-            var httpClient = options.Backchannel ?? new HttpClient();
+            var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
             var tokenClient = new TokenClient(httpClient);
             var resolvedDomain = context.GetResolvedDomain();
 
@@ -95,13 +95,15 @@ namespace Auth0.AspNetCore.Authentication
                 // Any refresh failure — transport error, malformed response, or misconfiguration —
                 // is folded into the same failure path as a token-endpoint rejection, so callers
                 // have a single failure protocol and nothing escapes this method.
-                await FireRefreshFailed(context, optionsWithAccessToken, audience, mergedScope, statusCode: null, error: null, errorDescription: null, exception: ex).ConfigureAwait(false);
+                await FireRefreshFailed(optionsWithAccessToken,
+                    AccessTokenRefreshFailedContext.FromException(context, audience, mergedScope, ex)).ConfigureAwait(false);
                 return null;
             }
 
             if (!result.IsSuccess)
             {
-                await FireRefreshFailed(context, optionsWithAccessToken, audience, mergedScope, result.StatusCode, result.Error, result.ErrorDescription, exception: null).ConfigureAwait(false);
+                await FireRefreshFailed(optionsWithAccessToken,
+                    AccessTokenRefreshFailedContext.FromHttpRejection(context, audience, mergedScope, result.StatusCode, result.Error, result.ErrorDescription)).ConfigureAwait(false);
                 return null;
             }
 
@@ -130,19 +132,22 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Determines whether the requested audience/scope matches the application's primary
-        /// (login-time) token — the one stored in the <c>.Token.access_token</c> slot — rather
-        /// than an additional MRRT audience/scope kept in the access-token sets.
+        /// Fires the <see cref="Auth0WebAppWithAccessTokenEvents.OnAccessTokenRefreshFailed"/> event
+        /// with the details of a failed refresh, when a subscriber is configured.
         /// </summary>
-        private static async Task FireRefreshFailed(HttpContext context, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, string? audience, string? scope, int? statusCode, string? error, string? errorDescription, Exception? exception)
+        private static async Task FireRefreshFailed(Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, AccessTokenRefreshFailedContext failedContext)
         {
             if (optionsWithAccessToken.Events?.OnAccessTokenRefreshFailed != null)
             {
-                var failedContext = new AccessTokenRefreshFailedContext(context, audience, scope, statusCode, error, errorDescription, exception);
                 await optionsWithAccessToken.Events.OnAccessTokenRefreshFailed(failedContext).ConfigureAwait(false);
             }
         }
 
+        /// <summary>
+        /// Determines whether the requested audience/scope matches the application's primary
+        /// (login-time) token — the one stored in the <c>.Token.access_token</c> slot — rather
+        /// than an additional MRRT audience/scope kept in the access-token sets.
+        /// </summary>
         private static bool MatchesPrimaryToken(string? audience, string? mergedScope, Auth0WebAppWithAccessTokenOptions options)
         {
             var matchesPrimaryAudience = audience == null || audience == options.Audience;

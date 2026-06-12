@@ -12,7 +12,7 @@ namespace Auth0.AspNetCore.Authentication
     /// </summary>
     public class AccessTokenRefreshFailedContext
     {
-        internal AccessTokenRefreshFailedContext(HttpContext httpContext, string? audience, string? scope, int? statusCode, string? error, string? errorDescription, Exception? exception)
+        private AccessTokenRefreshFailedContext(HttpContext httpContext, string? audience, string? scope, int? statusCode, string? error, string? errorDescription, Exception? exception)
         {
             HttpContext = httpContext;
             Audience = audience;
@@ -22,6 +22,21 @@ namespace Auth0.AspNetCore.Authentication
             ErrorDescription = errorDescription;
             Exception = exception;
         }
+
+        /// <summary>
+        /// Creates a context for a failure where the token endpoint returned a non-success
+        /// HTTP response. <see cref="Exception"/> is left <c>null</c>.
+        /// </summary>
+        internal static AccessTokenRefreshFailedContext FromHttpRejection(HttpContext httpContext, string? audience, string? scope, int? statusCode, string? error, string? errorDescription) =>
+            new AccessTokenRefreshFailedContext(httpContext, audience, scope, statusCode, error, errorDescription, exception: null);
+
+        /// <summary>
+        /// Creates a context for a failure where the refresh threw before producing an HTTP
+        /// response (for example a transport failure, timeout, or misconfiguration).
+        /// <see cref="StatusCode"/>, <see cref="Error"/>, and <see cref="ErrorDescription"/> are left <c>null</c>.
+        /// </summary>
+        internal static AccessTokenRefreshFailedContext FromException(HttpContext httpContext, string? audience, string? scope, Exception exception) =>
+            new AccessTokenRefreshFailedContext(httpContext, audience, scope, statusCode: null, error: null, errorDescription: null, exception: exception);
 
         /// <summary>
         /// The current <see cref="HttpContext"/>, allowing you to sign the user out, challenge
