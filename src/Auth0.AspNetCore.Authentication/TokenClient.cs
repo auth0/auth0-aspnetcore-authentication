@@ -22,7 +22,7 @@ namespace Auth0.AspNetCore.Authentication
             _httpClient = httpClient;
         }
 
-        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null, string? audience = null, string? scope = null)
+        public async Task<TokenRefreshResult> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null, string? audience = null, string? scope = null)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
@@ -60,14 +60,70 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     if (!response.IsSuccessStatusCode)
                     {
-                        return null;
+                        return await BuildFailure(response).ConfigureAwait(false);
                     }
 
                     var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                    return await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
+                    AccessTokenResponse? accessTokenResponse;
+                    try
+                    {
+                        accessTokenResponse = await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
+                    }
+                    catch (JsonException)
+                    {
+                        // The body is over token-bearing bytes (id_token is a JWT of user claims).
+                        // Swallow the parse error so it never surfaces as an exposed Exception on the
+                        // failure event; report a status-code-only failure with a static, payload-free
+                        // message instead.
+                        return new TokenRefreshResult
+                        {
+                            StatusCode = (int)response.StatusCode,
+                            Error = "invalid_token_response",
+                            ErrorDescription = "The token endpoint returned a response that could not be parsed."
+                        };
+                    }
+
+                    return accessTokenResponse != null
+                        ? TokenRefreshResult.Success(accessTokenResponse)
+                        : new TokenRefreshResult { StatusCode = (int)response.StatusCode };
                 }
             }
+        }
+
+        private static async Task<TokenRefreshResult> BuildFailure(HttpResponseMessage response)
+        {
+            var result = new TokenRefreshResult { StatusCode = (int)response.StatusCode };
+
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(body))
+                {
+                    using var document = JsonDocument.Parse(body);
+                    var root = document.RootElement;
+                    if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        // An "mfa_required" error also carries "mfa_token" and "mfa_requirements";
+                        // surfacing those (and completing the MFA flow) is deferred to a subsequent PR.
+                        if (root.TryGetProperty("error", out var errorElement))
+                        {
+                            result.Error = errorElement.GetString();
+                        }
+
+                        if (root.TryGetProperty("error_description", out var descriptionElement))
+                        {
+                            result.ErrorDescription = descriptionElement.GetString();
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // A non-JSON or unreadable error body still yields a result carrying the status code.
+            }
+
+            return result;
         }
 
         private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)

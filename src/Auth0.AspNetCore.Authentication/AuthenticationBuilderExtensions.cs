@@ -251,11 +251,12 @@ namespace Auth0.AspNetCore.Authentication
         private static async Task<AccessTokenResponse?> RefreshTokens(HttpContext httpContext, Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
         {
             var tokenClient = new TokenClient(httpClient);
-            
+
             // Get the resolved domain from HttpContext if available (for multiple custom domains)
             var resolvedDomain = httpContext.GetResolvedDomain();
-            
-            return await tokenClient.Refresh(options, refreshToken, resolvedDomain);
+
+            var result = await tokenClient.Refresh(options, refreshToken, resolvedDomain);
+            return result.Response;
         }
 
         private static async Task VerifyBackchannelLogoutSupport(HttpContext context, OpenIdConnectOptions oidcOptions)

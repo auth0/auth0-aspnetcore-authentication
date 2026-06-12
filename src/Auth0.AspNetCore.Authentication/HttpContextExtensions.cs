@@ -86,11 +86,27 @@ namespace Auth0.AspNetCore.Authentication
             var tokenClient = new TokenClient(httpClient);
             var resolvedDomain = context.GetResolvedDomain();
 
-            var response = await tokenClient.Refresh(options, refreshToken, resolvedDomain, audience, mergedScope).ConfigureAwait(false);
-            if (response == null)
+            TokenRefreshResult result;
+            try
             {
+                result = await tokenClient.Refresh(options, refreshToken, resolvedDomain, audience, mergedScope).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Any refresh failure — transport error, malformed response, or misconfiguration —
+                // is folded into the same failure path as a token-endpoint rejection, so callers
+                // have a single failure protocol and nothing escapes this method.
+                await FireRefreshFailed(context, optionsWithAccessToken, audience, mergedScope, statusCode: null, error: null, errorDescription: null, exception: ex).ConfigureAwait(false);
                 return null;
             }
+
+            if (!result.IsSuccess)
+            {
+                await FireRefreshFailed(context, optionsWithAccessToken, audience, mergedScope, result.StatusCode, result.Error, result.ErrorDescription, exception: null).ConfigureAwait(false);
+                return null;
+            }
+
+            var response = result.Response!;
 
             // 3. Merge the new token into the session (primary slot or additional array) and persist.
             ApplyTokenResponse(properties, response, audience, mergedScope, matchesPrimaryToken);
@@ -119,6 +135,15 @@ namespace Auth0.AspNetCore.Authentication
         /// (login-time) token — the one stored in the <c>.Token.access_token</c> slot — rather
         /// than an additional MRRT audience/scope kept in the access-token sets.
         /// </summary>
+        private static async Task FireRefreshFailed(HttpContext context, Auth0WebAppWithAccessTokenOptions optionsWithAccessToken, string? audience, string? scope, int? statusCode, string? error, string? errorDescription, Exception? exception)
+        {
+            if (optionsWithAccessToken.Events?.OnAccessTokenRefreshFailed != null)
+            {
+                var failedContext = new AccessTokenRefreshFailedContext(context, audience, scope, statusCode, error, errorDescription, exception);
+                await optionsWithAccessToken.Events.OnAccessTokenRefreshFailed(failedContext).ConfigureAwait(false);
+            }
+        }
+
         private static bool MatchesPrimaryToken(string? audience, string? mergedScope, Auth0WebAppWithAccessTokenOptions options)
         {
             var matchesPrimaryAudience = audience == null || audience == options.Audience;
@@ -136,7 +161,13 @@ namespace Auth0.AspNetCore.Authentication
                 return true;
             }
 
-            var expiresAt = DateTimeOffset.Parse(expiresAtRaw);
+            // Treat an unparseable timestamp as expired so the token is re-fetched rather
+            // than throwing out of a cache check on a malformed session value.
+            if (!DateTimeOffset.TryParse(expiresAtRaw, out var expiresAt))
+            {
+                return true;
+            }
+
             return DateTimeOffset.Compare(expiresAt, DateTimeOffset.Now.AddSeconds(ExpiryLeewaySeconds)) <= 0;
         }
 
@@ -170,7 +201,16 @@ namespace Auth0.AspNetCore.Authentication
         {
             if (properties.Items.TryGetValue(AccessTokensItemKey, out var json) && !string.IsNullOrEmpty(json))
             {
-                return JsonSerializer.Deserialize<List<AccessTokenSet>>(json) ?? new List<AccessTokenSet>();
+                // Corrupted or version-skewed session data is treated as a cache miss: the
+                // token gets re-fetched, which is preferable to throwing out of a public method.
+                try
+                {
+                    return JsonSerializer.Deserialize<List<AccessTokenSet>>(json) ?? new List<AccessTokenSet>();
+                }
+                catch (JsonException)
+                {
+                    return new List<AccessTokenSet>();
+                }
             }
 
             return new List<AccessTokenSet>();

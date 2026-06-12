@@ -102,6 +102,140 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
+        [Fact]
+        public async Task GetAccessTokenAsync_WithCorruptedAccessTokenSets_TreatsAsCacheMissAndRefreshes()
+        {
+            var handler = CreateTokenHandler("fresh");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "primary";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+            // Corrupted/version-skewed additional-token store.
+            properties.Items[".Token.access_tokens"] = "{ this is not valid json";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = "https://other-api" });
+
+            // Corruption is swallowed: the request falls through to a refresh rather than throwing.
+            result.Should().Be("fresh");
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WithMalformedPrimaryExpiry_TreatsAsExpiredAndRefreshes()
+        {
+            var handler = CreateTokenHandler("fresh");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = "not-a-date";
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience });
+
+            result.Should().Be("fresh");
+            handler.Protected().Verify("SendAsync", Times.Once(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenRefreshRejected_FiresRefreshFailedEventAndReturnsNull()
+        {
+            var handler = CreateFailingHandler(HttpStatusCode.BadRequest,
+                "{\"error\":\"invalid_grant\",\"error_description\":\"refresh token revoked\"}");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? captured = null;
+            var context = BuildContext(handler.Object, properties, out _, opts =>
+            {
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = ctx =>
+                    {
+                        captured = ctx;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            result.Should().BeNull();
+            captured.Should().NotBeNull();
+            captured!.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
+            captured.Error.Should().Be("invalid_grant");
+            captured.ErrorDescription.Should().Be("refresh token revoked");
+            captured.Exception.Should().BeNull();
+            captured.Audience.Should().Be(PrimaryAudience);
+            captured.HttpContext.Should().BeSameAs(context);
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenTransportFails_FiresRefreshFailedEventAndReturnsNull()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new HttpRequestException("network down"));
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? captured = null;
+            var context = BuildContext(handler.Object, properties, out _, opts =>
+            {
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = ctx =>
+                    {
+                        captured = ctx;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            // A transport failure must not propagate out of the public method.
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            result.Should().BeNull();
+            captured.Should().NotBeNull();
+            // Transport failures surface as the thrown exception, with no HTTP status/error detail.
+            captured!.Exception.Should().BeOfType<HttpRequestException>();
+            captured.StatusCode.Should().BeNull();
+            captured.Error.Should().BeNull();
+        }
+
+        private static Mock<HttpMessageHandler> CreateFailingHandler(HttpStatusCode statusCode, string body)
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = statusCode,
+                    Content = new StringContent(body)
+                });
+            return handler;
+        }
+
         private static Mock<HttpMessageHandler> CreateTokenHandler(string accessToken)
         {
             var handler = new Mock<HttpMessageHandler>();
