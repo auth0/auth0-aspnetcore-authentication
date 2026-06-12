@@ -17,7 +17,6 @@ namespace Auth0.AspNetCore.Authentication
     public static class HttpContextExtensions
     {
         internal const string AccessTokensItemKey = ".Token.access_tokens";
-        private const int ExpiryLeewaySeconds = 60;
 
         /// <summary>
         /// Retrieves an access token for the audience/scope described by <paramref name="request"/>.
@@ -55,7 +54,7 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     if (properties.Items.TryGetValue(".Token.access_token", out var primaryToken) &&
                         !string.IsNullOrEmpty(primaryToken) &&
-                        !IsPrimaryExpired(properties))
+                        !IsPrimaryExpired(properties, optionsWithAccessToken.AccessTokenExpirationLeeway))
                     {
                         return primaryToken;
                     }
@@ -64,7 +63,7 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     var sets = ReadAccessTokenSets(properties);
                     var match = TokenSetHelpers.FindAccessTokenSet(sets, audience!, mergedScope, ScopeMatchMode.RequestedScope);
-                    if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.AddSeconds(ExpiryLeewaySeconds).ToUnixTimeSeconds())
+                    if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.Add(optionsWithAccessToken.AccessTokenExpirationLeeway).ToUnixTimeSeconds())
                     {
                         return match.AccessToken;
                     }
@@ -154,7 +153,7 @@ namespace Auth0.AspNetCore.Authentication
             return matchesPrimaryAudience && matchesPrimaryScope;
         }
 
-        private static bool IsPrimaryExpired(AuthenticationProperties properties)
+        private static bool IsPrimaryExpired(AuthenticationProperties properties, TimeSpan leeway)
         {
             if (!properties.Items.TryGetValue(".Token.expires_at", out var expiresAtRaw) || string.IsNullOrEmpty(expiresAtRaw))
             {
@@ -168,7 +167,7 @@ namespace Auth0.AspNetCore.Authentication
                 return true;
             }
 
-            return DateTimeOffset.Compare(expiresAt, DateTimeOffset.Now.AddSeconds(ExpiryLeewaySeconds)) <= 0;
+            return DateTimeOffset.Compare(expiresAt, DateTimeOffset.Now.Add(leeway)) <= 0;
         }
 
         private static void ApplyTokenResponse(AuthenticationProperties properties, AccessTokenResponse response, string? audience, string? mergedScope, bool matchesPrimaryToken)
