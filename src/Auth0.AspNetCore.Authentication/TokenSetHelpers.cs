@@ -156,11 +156,14 @@ namespace Auth0.AspNetCore.Authentication
         /// <item>Else match strictly by granted scope and merge the requested scopes (union).</item>
         /// <item>Else append a new entry.</item>
         /// </list>
+        /// Expired entries are pruned first so stale tokens for combinations that are no longer
+        /// requested don't accumulate in the (cookie-serialized) set indefinitely.
         /// Returns the updated list (a new list instance).
         /// </summary>
         public static List<AccessTokenSet> UpsertAccessTokenSet(IEnumerable<AccessTokenSet>? sets, string audience, string? requestedScope, AccessTokenResponse response)
         {
-            var result = sets?.ToList() ?? new List<AccessTokenSet>();
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var result = sets?.Where(set => set.ExpiresAt > now).ToList() ?? new List<AccessTokenSet>();
 
             // Case 1: we've served this request before. Refresh the token in place,
             // skipping the write when the access token is unchanged.

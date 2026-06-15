@@ -258,6 +258,98 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task Refresh_WithEmptyJsonObjectBody_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            // A 200 with no access_token deserializes to a non-null object whose AccessToken is null;
+            // that must be reported as a failure rather than a success carrying an empty token.
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+        }
+
+        [Fact]
+        public async Task Refresh_WithBodyMissingAccessToken_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+        }
+
+        [Fact]
+        public async Task Refresh_WithEmptyAccessToken_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"\",\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+        }
+
+        [Fact]
         public async Task Refresh_WithNullDomain_ThrowsInvalidOperationException()
         {
             var mockHandler = new Mock<HttpMessageHandler>();

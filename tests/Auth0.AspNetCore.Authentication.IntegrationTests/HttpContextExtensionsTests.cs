@@ -180,6 +180,45 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task GetAccessTokenAsync_WhenRefreshReturnsTokenlessBody_FiresRefreshFailedEventAndDoesNotPersist()
+        {
+            // 200 OK with no access_token: must be treated as a failure, not a success that
+            // clobbers the cached primary token with null.
+            var handler = CreateRawTokenHandler("{}");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? captured = null;
+            var context = BuildContext(handler.Object, properties, out var authService, opts =>
+            {
+                opts.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = ctx =>
+                    {
+                        captured = ctx;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            result.Should().BeNull();
+            captured.Should().NotBeNull();
+            captured!.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            captured.Error.Should().Be("invalid_token_response");
+            captured.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+            // The session must be left untouched — no SignInAsync, so the stale token is preserved.
+            authService.Verify(s => s.SignInAsync(
+                It.IsAny<HttpContext>(), It.IsAny<string>(),
+                It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Never());
+            properties.Items[".Token.access_token"].Should().Be("cached");
+        }
+
+        [Fact]
         public async Task GetAccessTokenAsync_WhenTransportFails_FiresRefreshFailedEventAndReturnsNull()
         {
             var handler = new Mock<HttpMessageHandler>();

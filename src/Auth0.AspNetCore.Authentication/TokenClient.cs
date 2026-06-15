@@ -82,9 +82,16 @@ namespace Auth0.AspNetCore.Authentication
                             "The token endpoint returned a response that could not be parsed.");
                     }
 
-                    return accessTokenResponse != null
-                        ? TokenRefreshResult.Success(accessTokenResponse)
-                        : TokenRefreshResult.Failure((int)response.StatusCode);
+                    // A 200 with no usable access_token (e.g. an empty object or a body missing
+                    // the field) deserializes to a non-null response whose AccessToken is null.
+                    // Treat that as a failure so IsSuccess only ever means "we have a usable token"
+                    // and a useless token is never persisted downstream.
+                    return !string.IsNullOrEmpty(accessTokenResponse?.AccessToken)
+                        ? TokenRefreshResult.Success(accessTokenResponse!)
+                        : TokenRefreshResult.Failure(
+                            (int)response.StatusCode,
+                            "invalid_token_response",
+                            "The token endpoint returned a response without an access token.");
                 }
             }
         }

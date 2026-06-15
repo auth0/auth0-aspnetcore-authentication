@@ -107,7 +107,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         {
             var existing = new List<AccessTokenSet>
             {
-                new AccessTokenSet { Audience = "api", AccessToken = "old", Scope = "a", RequestedScope = "a" }
+                new AccessTokenSet { Audience = "api", AccessToken = "old", Scope = "a", RequestedScope = "a", ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds() }
             };
             var response = new AccessTokenResponse { AccessToken = "new", ExpiresIn = 3600, Scope = "a" };
 
@@ -122,7 +122,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         {
             // Same request, same access token returned: the entry must be left in place
             // (same instance) rather than replaced.
-            var existing = new AccessTokenSet { Audience = "api", AccessToken = "tok", Scope = "a", RequestedScope = "a" };
+            var existing = new AccessTokenSet { Audience = "api", AccessToken = "tok", Scope = "a", RequestedScope = "a", ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds() };
             var sets = new List<AccessTokenSet> { existing };
             var response = new AccessTokenResponse { AccessToken = "tok", ExpiresIn = 3600, Scope = "a" };
 
@@ -133,13 +133,72 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public void UpsertAccessTokenSet_PrunesExpiredEntriesForOtherCombinations()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var existing = new List<AccessTokenSet>
+            {
+                // Expired entry for a combination that is no longer being requested.
+                new AccessTokenSet { Audience = "api", AccessToken = "stale", Scope = "read", RequestedScope = "read", ExpiresAt = now - 60 },
+                // Still-valid entry for a different combination.
+                new AccessTokenSet { Audience = "api", AccessToken = "live", Scope = "write", RequestedScope = "write", ExpiresAt = now + 3600 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "fresh", ExpiresIn = 3600, Scope = "manage" };
+
+            var result = TokenSetHelpers.UpsertAccessTokenSet(existing, "api", "manage", response);
+
+            // The dead "read" entry is dropped; the live "write" entry and the new "manage" entry remain.
+            result.Should().HaveCount(2);
+            result.Should().NotContain(set => set.AccessToken == "stale");
+            result.Should().Contain(set => set.AccessToken == "live");
+            result.Should().Contain(set => set.AccessToken == "fresh");
+        }
+
+        [Fact]
+        public void UpsertAccessTokenSet_KeepsUnexpiredEntries()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var existing = new List<AccessTokenSet>
+            {
+                new AccessTokenSet { Audience = "api", AccessToken = "other", Scope = "read", RequestedScope = "read", ExpiresAt = now + 3600 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "fresh", ExpiresIn = 3600, Scope = "write" };
+
+            var result = TokenSetHelpers.UpsertAccessTokenSet(existing, "api", "write", response);
+
+            result.Should().HaveCount(2);
+            result.Should().Contain(set => set.AccessToken == "other");
+            result.Should().Contain(set => set.AccessToken == "fresh");
+        }
+
+        [Fact]
+        public void UpsertAccessTokenSet_ExpiredUpsertTarget_IsRefreshedNotDropped()
+        {
+            // The entry being upserted is itself expired. Pruning must not lose the combination:
+            // it should end up present with the freshly fetched token.
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var existing = new List<AccessTokenSet>
+            {
+                new AccessTokenSet { Audience = "api", AccessToken = "old", Scope = "a", RequestedScope = "a", ExpiresAt = now - 60 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "new", ExpiresIn = 3600, Scope = "a" };
+
+            var result = TokenSetHelpers.UpsertAccessTokenSet(existing, "api", "a", response);
+
+            result.Should().HaveCount(1);
+            result[0].AccessToken.Should().Be("new");
+            result[0].RequestedScope.Should().Be("a");
+            result[0].ExpiresAt.Should().BeGreaterThan(now);
+        }
+
+        [Fact]
         public void UpsertAccessTokenSet_MergesRequestedScopeWhenGrantedScopeMatches()
         {
             // cached entry: granted "a", requested "a b". New request "a c" -> granted "a".
             // Should merge requestedScope to "a b c" on the same entry rather than append.
             var existing = new List<AccessTokenSet>
             {
-                new AccessTokenSet { Audience = "api", AccessToken = "old", Scope = "a", RequestedScope = "a b" }
+                new AccessTokenSet { Audience = "api", AccessToken = "old", Scope = "a", RequestedScope = "a b", ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds() }
             };
             var response = new AccessTokenResponse { AccessToken = "new", ExpiresIn = 3600, Scope = "a" };
 

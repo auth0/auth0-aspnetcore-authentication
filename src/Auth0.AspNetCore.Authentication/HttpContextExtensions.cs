@@ -23,10 +23,32 @@ namespace Auth0.AspNetCore.Authentication
         /// Reuses a cached token from the session when one is present and not expired; otherwise
         /// exchanges the session's refresh token for a new token and persists it.
         /// </summary>
+        /// <remarks>
+        /// This method is not safe to call concurrently for the same session. It reads the session,
+        /// modifies the stored tokens in memory, and writes them back; concurrent calls each operate on
+        /// their own snapshot, so the last write wins and a freshly fetched token from another in-flight
+        /// call can be silently dropped. More importantly, when refresh-token rotation is enabled,
+        /// concurrent calls exchange the same refresh token: the second exchange presents an
+        /// already-rotated token, which can trigger refresh-token reuse detection and invalidate the
+        /// entire session.
+        /// <para>
+        /// To avoid this, ensure only one <see cref="GetAccessTokenAsync"/> call is in flight per session
+        /// at a time. Either don't issue parallel requests that each trigger a refresh, or plug in a
+        /// server-side session store via
+        /// <see cref="Auth0WebAppAuthenticationBuilder.WithSessionStore(Microsoft.AspNetCore.Authentication.Cookies.ITicketStore)"/>
+        /// whose <c>ITicketStore</c> serializes concurrent access per session.
+        /// </para>
+        /// </remarks>
         /// <param name="context">The current <see cref="HttpContext"/>.</param>
         /// <param name="request">The audience/scope to request a token for.</param>
         /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
         /// <returns>The access token, or <c>null</c> when no refresh token is available or the refresh failed.</returns>
+        /// <exception cref="System.InvalidOperationException">
+        /// Thrown when a refresh succeeds but the new token cannot be persisted because the response has
+        /// already started. Persisting the refreshed token calls <see cref="AuthenticationHttpContextExtensions.SignInAsync(HttpContext, string?, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties?)"/>,
+        /// which writes the authentication cookie; if the headers have already been sent, this throws and
+        /// the exception propagates out of this method rather than being folded into the refresh-failed path.
+        /// </exception>
         public static async Task<string?> GetAccessTokenAsync(this HttpContext context, AccessTokenRequest request, string? scheme = null)
         {
             scheme ??= Auth0Constants.AuthenticationScheme;
