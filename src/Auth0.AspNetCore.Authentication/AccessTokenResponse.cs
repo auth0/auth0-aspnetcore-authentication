@@ -30,5 +30,11 @@ namespace Auth0.AspNetCore.Authentication
         /// </summary>
         [JsonPropertyName("access_token")]
         public string AccessToken { get; set; } = null!;
+
+        /// <summary>
+        /// Space-separated scopes granted for the access token.
+        /// </summary>
+        [JsonPropertyName("scope")]
+        public string? Scope { get; set; }
     }
 }

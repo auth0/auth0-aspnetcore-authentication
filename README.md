@@ -141,6 +141,20 @@ services.AddAuth0WebAppAuthentication(options =>
 
 For detailed configuration options, caching strategies, security requirements, and more examples, see the [Multiple Custom Domain (MCD) Examples](EXAMPLES.md#multiple-custom-domain-mcd-support).
 
+## Multi-Resource Refresh Tokens (MRRT)
+
+Multi-Resource Refresh Tokens (MRRT) let a single session obtain access tokens for additional audiences and scopes on demand, by exchanging the session's refresh token — without forcing the user through another interactive login.
+
+```csharp
+var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
+{
+    Audience = "https://messages.example.com",
+    Scope = "read:messages"
+});
+```
+
+For configuring per-audience default scopes, forcing a refresh, and handling refresh failures, see the [Multi-Resource Refresh Tokens (MRRT) Examples](EXAMPLES.md#multi-resource-refresh-tokens-mrrt).
+
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
 

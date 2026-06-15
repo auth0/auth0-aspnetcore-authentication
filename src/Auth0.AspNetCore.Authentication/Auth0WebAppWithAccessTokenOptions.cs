@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -18,6 +19,13 @@ namespace Auth0.AspNetCore.Authentication
         public string? Scope { get; set; }
 
         /// <summary>
+        /// Optional per-audience default scopes, used when requesting access tokens for
+        /// additional audiences (MRRT). When an audience is present in this map, its value
+        /// is used as the default scope for that audience; otherwise <see cref="Scope"/> is used.
+        /// </summary>
+        public IReadOnlyDictionary<string, string>? ScopeByAudience { get; set; }
+
+        /// <summary>
         /// Define whether or not Refresh Tokens should be used internally when the access token is expired.
         /// </summary>
         public bool UseRefreshTokens { get; set; }
@@ -25,8 +33,8 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>
         /// The amount of time before an access token expires during which it is treated as
         /// already expired, so that a refresh is triggered proactively rather than the token
-        /// lapsing mid-request. Only applies when <see cref="UseRefreshTokens"/> is enabled.
-        /// Defaults to 60 seconds.
+        /// lapsing mid-request. Applies to both the primary (login-time) token and additional
+        /// audience/scope tokens retrieved on demand (MRRT). Defaults to 60 seconds.
         /// </summary>
         public TimeSpan AccessTokenExpirationLeeway { get; set; } = TimeSpan.FromSeconds(60);
 

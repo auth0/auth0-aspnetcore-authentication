@@ -5,6 +5,11 @@
 - [Calling an API](#calling-an-api)
   - [Configuring the refresh leeway](#configuring-the-refresh-leeway)
 - [Server-side session storage](#server-side-session-storage)
+- [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt)
+  - [Requesting a token for another audience](#requesting-a-token-for-another-audience)
+  - [Configuring default scopes per audience](#configuring-default-scopes-per-audience)
+  - [Forcing a refresh](#forcing-a-refresh)
+  - [Handling refresh failures](#handling-refresh-failures)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -165,6 +170,8 @@ services
 
 A larger leeway refreshes more eagerly (fewer near-expiry tokens, more refresh calls); a smaller leeway refreshes later. The leeway only takes effect when `UseRefreshTokens` is enabled.
 
+> :information_source: To obtain access tokens for **additional** audiences or scopes on demand (without a second login), see [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt).
+
 #### Detecting the absense of a refresh token
 
 In the event where the API, defined in your Auth0 dashboard, isn't configured to [allow offline access](https://auth0.com/docs/get-started/dashboard/api-settings), or the user was already logged in before the use of refresh tokens was enabled (e.g. a user logs in a few minutes before the use of refresh tokens is deployed), it might be useful to detect the absense of a refresh token in order to react accordingly (e.g. log the user out locally and force them to re-login).
@@ -275,6 +282,134 @@ public class RedisTicketStore : ITicketStore
 > :warning: **Running multiple instances:** the store must be shared across them (e.g. a distributed cache such as Redis or SQL Server). An in-memory store only works for a single instance and will cause users to appear logged out when their requests are served by a different instance. Likewise, the [Data Protection keys must be persisted and shared](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview) across all instances - otherwise tickets become unreadable after a key rotation, app restart, or when served by a different node.
 >
 > :warning: **Protecting the ticket:** it holds sensitive data (claims, access and refresh tokens). Encrypting the payload with `IDataProtector` as shown above means an attacker who gains read access to the cache cannot recover those tokens. Treat the cache backend itself as sensitive too: restrict access and enable encryption in transit (e.g. Redis AUTH + TLS) and at rest.
+
+## Multi-Resource Refresh Tokens (MRRT)
+
+[Multi-Resource Refresh Tokens (MRRT)](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token) let a single session obtain access tokens for *additional* audiences and scopes on demand, by exchanging the session's refresh token — without forcing the user through another interactive login.
+
+A typical use case: the user logs in once, and your web app then needs to call a downstream API that expects a token for a *different* audience than the one requested at login. Instead of re-authenticating, you exchange the existing refresh token for a token scoped to that API.
+
+> :information_source: MRRT requires refresh tokens. Configure `UseRefreshTokens = true` and a `ClientSecret`, and ensure MRRT is enabled for your client/APIs in the Auth0 Dashboard. Tokens obtained for additional audiences are cached in the session alongside the login-time ("primary") token and reused until they near expiry.
+
+> :warning: **Token storage and cookie size.** Each additional audience/scope you obtain a token for adds another entry to the cached token set, which by default is serialized into the encrypted **authentication cookie** along with the rest of the session. Cookies cannot grow indefinitely — browsers cap them at around 4 KB each, and request-header limits apply on top of that. An application that fans out across several audiences can therefore accumulate enough tokens to exceed those limits and have the session rejected. If you expect to hold tokens for more than a couple of audiences, move the session **server-side** so only a small session key rides in the cookie while the token set lives in a store you control — see [Server-side session storage](#server-side-session-storage) above. The MRRT API is identical either way; only where the token set is persisted changes.
+
+### Requesting a token for another audience
+
+Use `HttpContext.GetAccessTokenAsync` with an `AccessTokenRequest` describing the `Audience` and/or `Scope` you need. The SDK first tries to satisfy the request from the session (the primary token or a previously cached additional token), and only exchanges the refresh token when no usable cached token exists. Newly obtained tokens are persisted back into the session automatically.
+
+```csharp
+[Authorize]
+public async Task<IActionResult> CallMessagesApi()
+{
+    var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
+    {
+        Audience = "https://messages.example.com",
+        Scope = "read:messages"
+    });
+
+    if (accessToken == null)
+    {
+        // No refresh token available, or the refresh failed — see "Handling refresh failures" below.
+        return Challenge();
+    }
+
+    var request = new HttpRequestMessage(HttpMethod.Get, "https://messages.example.com/api/messages");
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    var response = await _httpClient.SendAsync(request);
+    return Content(await response.Content.ReadAsStringAsync());
+}
+```
+
+The requested `Scope` is merged (order-preserving union) with the configured default scopes for the resolved audience. Omitting `Audience` falls back to the globally configured `Audience`; omitting `Scope` falls back to the configured default for that audience.
+
+> :information_source: `GetAccessTokenAsync` returns `null` rather than throwing when no refresh token is available or the refresh fails. Always check for `null` before using the token.
+
+When called with no arguments matching the primary audience/scope, `GetAccessTokenAsync` is equivalent to retrieving the login-time access token (and refreshing it when expired).
+
+### Configuring default scopes per audience
+
+You can configure default scopes for each additional audience using `ScopeByAudience`. When an audience is present in this map, its value is used as the default scope for that audience; otherwise the global `Scope` is used as the fallback.
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        options.ScopeByAudience = new Dictionary<string, string>
+        {
+            ["https://messages.example.com"] = "read:messages write:messages",
+            ["https://billing.example.com"]  = "read:invoices"
+        };
+    });
+```
+
+With this configured, a request for the `https://messages.example.com` audience defaults to the `read:messages write:messages` scopes, so callers can omit `Scope` for that audience:
+
+```csharp
+var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
+{
+    Audience = "https://messages.example.com"
+});
+```
+
+### Forcing a refresh
+
+Set `ForceRefresh = true` to bypass the cache and always exchange the refresh token for a new access token. The freshly retrieved token still replaces the cached entry.
+
+```csharp
+var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
+{
+    Audience = "https://messages.example.com",
+    Scope = "read:messages",
+    ForceRefresh = true
+});
+```
+
+### Handling refresh failures
+
+When a refresh token is present but the exchange fails, the `OnAccessTokenRefreshFailed` event fires and `GetAccessTokenAsync` returns `null`. The supplied `AccessTokenRefreshFailedContext` carries the failure details so you can distinguish a **terminal** failure (such as an `invalid_grant` for a revoked or expired refresh token, which warrants a re-login) from a **transient** one (such as a timeout or rate-limit, which may be retried).
+
+All refresh failures — token-endpoint rejections, malformed responses, and transport/misconfiguration errors — flow through this single event. For HTTP rejections, `StatusCode`, `Error`, and `ErrorDescription` are populated; for transport failures, `Exception` is populated instead.
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        options.Events = new Auth0WebAppWithAccessTokenEvents
+        {
+            OnAccessTokenRefreshFailed = async (context) =>
+            {
+                // A revoked or expired refresh token is terminal — force a re-login.
+                if (context.Error == "invalid_grant")
+                {
+                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder().WithRedirectUri("/").Build();
+                    await context.HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                }
+                // Otherwise (e.g. a timeout surfaced via context.Exception, or a 429), you may
+                // choose to log and let the caller retry.
+            }
+        };
+    });
+```
+
+> :warning: `AccessTokenRefreshFailedContext.Exception` may contain transport/diagnostic detail — log it server-side only, do not surface it to end users.
 
 ## Organizations
 

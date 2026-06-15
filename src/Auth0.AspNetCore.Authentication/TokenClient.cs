@@ -22,13 +22,23 @@ namespace Auth0.AspNetCore.Authentication
             _httpClient = httpClient;
         }
 
-        public async Task<AccessTokenResponse?> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null)
+        public async Task<TokenRefreshResult> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null, string? audience = null, string? scope = null)
         {
             var body = new Dictionary<string, string> {
                 { "grant_type", "refresh_token" },
                 { "client_id", options.ClientId },
                 { "refresh_token", refreshToken }
             };
+
+            if (!string.IsNullOrWhiteSpace(audience))
+            {
+                body.Add("audience", audience);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scope))
+            {
+                body.Add("scope", scope);
+            }
 
             // Use provided domain for dynamic resolution, fallback to options.Domain
             var tokenEndpointDomain = domain ?? options.Domain;
@@ -50,14 +60,74 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     if (!response.IsSuccessStatusCode)
                     {
-                        return null;
+                        return await BuildFailure(response).ConfigureAwait(false);
                     }
 
                     var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                    return await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
+                    AccessTokenResponse? accessTokenResponse;
+                    try
+                    {
+                        accessTokenResponse = await JsonSerializer.DeserializeAsync<AccessTokenResponse>(contentStream, _jsonSerializerOptions).ConfigureAwait(false);
+                    }
+                    catch (JsonException)
+                    {
+                        // The body is over token-bearing bytes (id_token is a JWT of user claims).
+                        // Swallow the parse error so it never surfaces as an exposed Exception on the
+                        // failure event; report a status-code-only failure with a static, payload-free
+                        // message instead.
+                        return TokenRefreshResult.Failure(
+                            (int)response.StatusCode,
+                            "invalid_token_response",
+                            "The token endpoint returned a response that could not be parsed.");
+                    }
+
+                    // A 200 with no usable access_token (e.g. an empty object or a body missing
+                    // the field) deserializes to a non-null response whose AccessToken is null.
+                    // Treat that as a failure so IsSuccess only ever means "we have a usable token"
+                    // and a useless token is never persisted downstream.
+                    return !string.IsNullOrEmpty(accessTokenResponse?.AccessToken)
+                        ? TokenRefreshResult.Success(accessTokenResponse!)
+                        : TokenRefreshResult.Failure(
+                            (int)response.StatusCode,
+                            "invalid_token_response",
+                            "The token endpoint returned a response without an access token.");
                 }
             }
+        }
+
+        private static async Task<TokenRefreshResult> BuildFailure(HttpResponseMessage response)
+        {
+            string? error = null;
+            string? errorDescription = null;
+
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(body))
+                {
+                    using var document = JsonDocument.Parse(body);
+                    var root = document.RootElement;
+                    if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        if (root.TryGetProperty("error", out var errorElement))
+                        {
+                            error = errorElement.GetString();
+                        }
+
+                        if (root.TryGetProperty("error_description", out var descriptionElement))
+                        {
+                            errorDescription = descriptionElement.GetString();
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // A non-JSON or unreadable error body still yields a result carrying the status code.
+            }
+
+            return TokenRefreshResult.Failure((int)response.StatusCode, error, errorDescription);
         }
 
         private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)

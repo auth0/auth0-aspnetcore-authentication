@@ -32,7 +32,34 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             var client = new TokenClient(new HttpClient(mockHandler.Object));
             var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" }, "123");
 
-            result.Should().BeNull();
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task Returns_Failure_With_Error_Details_When_Rejected()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+              .Protected()
+                  .Setup<Task<HttpResponseMessage>>(
+                     "SendAsync",
+                     ItExpr.IsAny<HttpRequestMessage>(),
+                     ItExpr.IsAny<CancellationToken>()
+                  )
+                  .ReturnsAsync(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.Forbidden,
+                      Content = new StringContent("{\"error\":\"invalid_grant\",\"error_description\":\"token revoked\"}")
+                  });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" }, "123");
+
+            result.IsSuccess.Should().BeFalse();
+            result.StatusCode.Should().Be((int)HttpStatusCode.Forbidden);
+            result.Error.Should().Be("invalid_grant");
+            result.ErrorDescription.Should().Be("token revoked");
         }
 
         [Fact]
@@ -76,8 +103,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 customDomain  // Pass custom domain
             );
 
-            result.Should().NotBeNull();
-            result?.AccessToken.Should().Be("new_token");
+            result.IsSuccess.Should().BeTrue();
+            result.Response?.AccessToken.Should().Be("new_token");
             requestedDomain.Should().Be(customDomain);
         }
 
@@ -122,9 +149,204 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 // No custom domain passed, should use default
             );
 
-            result.Should().NotBeNull();
-            result?.AccessToken.Should().Be("new_token");
+            result.IsSuccess.Should().BeTrue();
+            result.Response?.AccessToken.Should().Be("new_token");
             requestedDomain.Should().Be(defaultDomain);
+        }
+
+        [Fact]
+        public async Task Refresh_WithAudienceAndScope_IncludesThemInBody()
+        {
+            var capturedBody = string.Empty;
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    if (req.Content != null)
+                        capturedBody = req.Content.ReadAsStringAsync().Result;
+                })
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"new_token\",\"token_type\":\"Bearer\",\"expires_in\":86400,\"scope\":\"read:orders\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123",
+                null,
+                "api://orders",
+                "read:orders"
+            );
+
+            result.IsSuccess.Should().BeTrue();
+            result.Response?.Scope.Should().Be("read:orders");
+            capturedBody.Should().Contain("audience=api%3A%2F%2Forders");
+            capturedBody.Should().Contain("scope=read%3Aorders");
+        }
+
+        [Fact]
+        public async Task Refresh_WithoutAudienceAndScope_OmitsThemFromBody()
+        {
+            var capturedBody = string.Empty;
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    if (req.Content != null)
+                        capturedBody = req.Content.ReadAsStringAsync().Result;
+                })
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"new_token\",\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            capturedBody.Should().NotContain("audience=");
+            capturedBody.Should().NotContain("scope=");
+        }
+
+        [Fact]
+        public async Task Refresh_WithMalformedSuccessBody_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{ this is not valid json")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response that could not be parsed.");
+        }
+
+        [Fact]
+        public async Task Refresh_WithEmptyJsonObjectBody_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            // A 200 with no access_token deserializes to a non-null object whose AccessToken is null;
+            // that must be reported as a failure rather than a success carrying an empty token.
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+        }
+
+        [Fact]
+        public async Task Refresh_WithBodyMissingAccessToken_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
+        }
+
+        [Fact]
+        public async Task Refresh_WithEmptyAccessToken_ReturnsFailureWithoutThrowing()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"\",\"token_type\":\"Bearer\",\"expires_in\":86400}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(
+                new Auth0WebAppOptions { Domain = "default.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123"
+            );
+
+            result.IsSuccess.Should().BeFalse();
+            result.Response.Should().BeNull();
+            result.StatusCode.Should().Be((int)HttpStatusCode.OK);
+            result.Error.Should().Be("invalid_token_response");
+            result.ErrorDescription.Should().Be("The token endpoint returned a response without an access token.");
         }
 
         [Fact]
