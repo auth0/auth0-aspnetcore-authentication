@@ -242,7 +242,7 @@ namespace Auth0.AspNetCore.Authentication
                         issuer = $"https://{resolvedDomain}/";
                     }
 
-                    var audience = Utils.ToAuthority(issuer) + "/";
+                    var audience = Utils.ToAuthority(issuer);
                     context.TokenEndpointRequest?.SetParameter("client_assertion",
                         new JwtTokenFactory(auth0Options.ClientAssertionSecurityKey,
                                 auth0Options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
