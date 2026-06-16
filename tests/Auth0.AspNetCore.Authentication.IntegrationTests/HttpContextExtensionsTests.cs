@@ -14,6 +14,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
 {
@@ -83,7 +85,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             // No refresh token stored.
 
             var missingRefreshTokenFired = false;
-            var context = BuildContext(handler.Object, properties, out _, withAccessTokenOptions =>
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: withAccessTokenOptions =>
             {
                 withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
                 {
@@ -154,7 +156,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             properties.Items[".Token.refresh_token"] = "rt";
 
             AccessTokenRefreshFailedContext? captured = null;
-            var context = BuildContext(handler.Object, properties, out _, opts =>
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: opts =>
             {
                 opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
@@ -191,7 +193,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             properties.Items[".Token.refresh_token"] = "rt";
 
             AccessTokenRefreshFailedContext? captured = null;
-            var context = BuildContext(handler.Object, properties, out var authService, opts =>
+            var context = BuildContext(handler.Object, properties, out var authService, configureWithAccessToken: opts =>
             {
                 opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
@@ -236,7 +238,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             properties.Items[".Token.refresh_token"] = "rt";
 
             AccessTokenRefreshFailedContext? captured = null;
-            var context = BuildContext(handler.Object, properties, out _, opts =>
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: opts =>
             {
                 opts.Events = new Auth0WebAppWithAccessTokenEvents
                 {
@@ -442,7 +444,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
             properties.Items[".Token.refresh_token"] = "rt";
 
-            var context = BuildContext(handler.Object, properties, out _, opts =>
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: opts =>
             {
                 opts.ScopeByAudience = new Dictionary<string, string> { ["https://orders"] = "read:orders" };
             });
@@ -455,9 +457,131 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             capturedBody.Should().Contain("scope=read%3Aorders");
         }
 
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenMfaRequired_ThrowsMfaRequiredException_AndDoesNotFireRefreshFailed()
+        {
+            var handler = CreateMfaRequiredHandler();
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var refreshFailedFired = false;
+            var protector = new MfaTokenProtector(new EphemeralDataProtectionProvider());
+            var context = BuildContext(handler.Object, properties, out _, protector, configureWithAccessToken: withAccessTokenOptions =>
+            {
+                withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = _ => { refreshFailedFired = true; return Task.CompletedTask; }
+                };
+            });
+
+            var act = async () => await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            var ex = await act.Should().ThrowAsync<MfaRequiredException>();
+            ex.And.MfaToken.Should().NotBe("the-mfa-token");
+            ex.And.MfaToken.Should().NotBeNullOrEmpty();
+            protector.Unprotect(ex.And.MfaToken!).MfaToken.Should().Be("the-mfa-token");
+            refreshFailedFired.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenMfaRequiredWithoutToken_FiresRefreshFailed_AndDoesNotThrow()
+        {
+            // A mfa_required response with no mfa_token is malformed: it cannot drive the MFA
+            // flow, so it must be treated as a refresh failure rather than throwing a
+            // MfaRequiredException carrying an un-unprotectable blob.
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent("{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\"}")
+                });
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? failedContext = null;
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: withAccessTokenOptions =>
+            {
+                withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = c => { failedContext = c; return Task.CompletedTask; }
+                };
+            });
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            result.Should().BeNull();
+            failedContext.Should().NotBeNull();
+            failedContext!.Error.Should().Be("mfa_required");
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenOtherError_FiresRefreshFailed_AndDoesNotThrow()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent("{\"error\":\"invalid_grant\",\"error_description\":\"token revoked\"}")
+                });
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? failedContext = null;
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: withAccessTokenOptions =>
+            {
+                withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = c => { failedContext = c; return Task.CompletedTask; }
+                };
+            });
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience, ForceRefresh = true });
+
+            result.Should().BeNull();
+            failedContext.Should().NotBeNull();
+            failedContext!.Error.Should().Be("invalid_grant");
+        }
+
         private static string SerializeSets(params AccessTokenSet[] sets)
         {
             return JsonSerializer.Serialize(new List<AccessTokenSet>(sets));
+        }
+
+        private static Mock<HttpMessageHandler> CreateMfaRequiredHandler()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent(
+                        "{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\",\"mfa_token\":\"the-mfa-token\"}")
+                });
+            return handler;
         }
 
         private static Mock<HttpMessageHandler> CreateFailingHandler(HttpStatusCode statusCode, string body)
@@ -516,6 +640,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             HttpMessageHandler backchannelHandler,
             AuthenticationProperties properties,
             out Mock<IAuthenticationService> authService,
+            IMfaTokenProtector? mfaTokenProtector = null,
             Action<Auth0WebAppWithAccessTokenOptions>? configureWithAccessToken = null)
         {
             var webAppOptions = new Auth0WebAppOptions
@@ -554,6 +679,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             services.AddSingleton(authService.Object);
             services.AddSingleton(webAppSnapshot.Object);
             services.AddSingleton(withAccessTokenSnapshot.Object);
+            services.AddSingleton<IMfaTokenProtector>(
+                mfaTokenProtector ?? new MfaTokenProtector(new EphemeralDataProtectionProvider()));
 
             return new DefaultHttpContext
             {

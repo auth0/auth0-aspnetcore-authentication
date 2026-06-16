@@ -4,9 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -124,6 +127,31 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!result.IsSuccess)
             {
+                // mfa_required is a recoverable challenge, not a terminal/transient refresh failure:
+                // surface it as a typed exception so the caller can drive
+                // the MFA flow. 
+                // A mfa_required response with no mfa_token is malformed and cannot drive the flow, so it falls
+                // through to the refresh-failed path rather than yielding a blob that can never
+                // be unprotected.
+                if (result.Error == "mfa_required" && !string.IsNullOrEmpty(result.MfaToken))
+                {
+                    var protector = context.RequestServices.GetRequiredService<IMfaTokenProtector>();
+                    var mfaContext = new MfaTokenContext
+                    {
+                        MfaToken = result.MfaToken!,
+                        Audience = audience,
+                        Scope = mergedScope,
+                        MfaRequirements = result.MfaRequirements
+                    };
+                    var blob = protector.Protect(mfaContext);
+
+                    throw new MfaRequiredException(
+                        blob,
+                        result.MfaRequirements,
+                        (HttpStatusCode)(result.StatusCode ?? (int)HttpStatusCode.Forbidden),
+                        new Exceptions.ApiError { Error = result.Error, Message = result.ErrorDescription ?? string.Empty });
+                }
+
                 await FireRefreshFailed(optionsWithAccessToken,
                     AccessTokenRefreshFailedContext.FromHttpRejection(context, audience, mergedScope, result.StatusCode, result.Error, result.ErrorDescription)).ConfigureAwait(false);
                 return null;

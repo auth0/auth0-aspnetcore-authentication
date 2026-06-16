@@ -10,6 +10,7 @@
   - [Configuring default scopes per audience](#configuring-default-scopes-per-audience)
   - [Forcing a refresh](#forcing-a-refresh)
   - [Handling refresh failures](#handling-refresh-failures)
+  - [Handling MFA during token exchange (mfa_required)](#handling-mfa-during-token-exchange-mfa_required)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -410,6 +411,124 @@ services
 ```
 
 > :warning: `AccessTokenRefreshFailedContext.Exception` may contain transport/diagnostic detail — log it server-side only, do not surface it to end users.
+
+### Handling MFA during token exchange (`mfa_required`)
+
+When an access-token exchange (for example a Multi-Resource Refresh Token request via
+`HttpContext.GetAccessTokenAsync`) returns an `mfa_required` error, the SDK throws an
+`MfaRequiredException`. You drive the MFA challenge/verify flow with `IAuthenticationApiClient`
+and decide what to do with the resulting tokens.
+
+`ex.MfaToken` is an **opaque, encrypted token with a 5-minute lifetime** — the raw `mfa_token`
+never leaves the SDK. Pass it back to the `IAuthenticationApiClient` methods unchanged; do not
+inspect, parse, or store it long-term. `ex.MfaRequirements` describes the challenge types the
+user can satisfy (for example `otp` or `oob`).
+
+#### Register the client
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Configuration["Auth0:Domain"];
+        options.ClientId = Configuration["Auth0:ClientId"];
+        options.ClientSecret = Configuration["Auth0:ClientSecret"];
+    })
+    .WithAccessToken(options =>
+    {
+        options.UseRefreshTokens = true;
+    })
+    .WithAuthenticationApiClient();
+```
+
+#### Catch `mfa_required`, challenge, and verify
+
+```csharp
+public class ResourceController : Controller
+{
+    private readonly IAuthenticationApiClient _authClient;
+
+    public ResourceController(IAuthenticationApiClient authClient) => _authClient = authClient;
+
+    public async Task<IActionResult> CallApi()
+    {
+        try
+        {
+            var accessToken = await HttpContext.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = "https://my-second-api" });
+            // ... use accessToken ...
+            return Ok();
+        }
+        catch (MfaRequiredException ex)
+        {
+            // ex.MfaToken is an opaque, encrypted token valid for 5 minutes.
+            // Inspect ex.MfaRequirements to discover which challenge types are available.
+            var canUseOtp = ex.MfaRequirements?.Challenge?
+                .Any(c => c.Type == "otp") ?? false;
+
+            // Trigger a challenge (e.g. send an OTP / push). authenticatorId is optional.
+            var challenge = await _authClient.MfaChallengeAsync(new MfaChallengeRequest
+            {
+                MfaToken = ex.MfaToken,
+                ChallengeType = "otp"
+            });
+
+            // Store ex.MfaToken (and challenge.OobCode if using OOB) for the verify step,
+            // then prompt the user for their code. The token expires 5 minutes after issue.
+            TempData["mfa_token"] = ex.MfaToken;
+            return RedirectToAction("EnterCode");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> EnterCode(string otp)
+    {
+        var mfaToken = (string)TempData["mfa_token"]!;
+
+        try
+        {
+            var tokens = await _authClient.GetTokenAsync(new MfaOtpTokenRequest
+            {
+                MfaToken = mfaToken,
+                Otp = otp
+            });
+
+            // tokens.AccessToken is now valid for the requested audience.
+            // Persisting these tokens into the session is your responsibility — see below.
+            return Ok();
+        }
+        catch (MfaTokenExpiredException)
+        {
+            // The 5-minute window elapsed — restart the flow to obtain a fresh token.
+            return RedirectToAction("CallApi");
+        }
+        catch (MfaTokenInvalidException)
+        {
+            // The token was tampered with or malformed — restart the flow.
+            return RedirectToAction("CallApi");
+        }
+    }
+}
+```
+
+> :information_source: The SDK returns the MFA-grant tokens to you; it does not write them back
+> into the authentication session automatically. If you want subsequent
+> `GetAccessTokenAsync` calls to reuse them, persist them yourself — for example by updating
+> the authentication properties and calling `HttpContext.SignInAsync(...)` with the updated
+> principal.
+
+A bad code (rejected by Auth0) surfaces as an `ErrorApiException` (with `StatusCode` and
+`ApiError`), the base type of `MfaRequiredException`. A token that has passed its 5-minute
+lifetime throws `MfaTokenExpiredException`; a tampered or malformed token throws
+`MfaTokenInvalidException`. Both derive from `ErrorApiException`.
+
+> :warning: **Multi-instance deployments:** the encrypted `mfa_token` is protected with the
+> application's ASP.NET Core Data Protection key ring. If your app runs on more than one
+> instance, the key ring must be persisted and shared (for example with
+> `PersistKeysToFileSystem` plus a `ProtectKeysWith*` provider, or a shared key store);
+> otherwise a token encrypted on one instance cannot be decrypted on another within the
+> 5-minute window. This is the **same requirement** as the authentication cookie that already
+> carries these tokens.
 
 ## Organizations
 
