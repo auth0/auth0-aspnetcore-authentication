@@ -11,6 +11,7 @@
   - [Forcing a refresh](#forcing-a-refresh)
   - [Handling refresh failures](#handling-refresh-failures)
   - [Handling MFA during token exchange (mfa_required)](#handling-mfa-during-token-exchange-mfa_required)
+    - [Completing an out-of-band (OOB) challenge with polling](#completing-an-out-of-band-oob-challenge-with-polling)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -424,6 +425,12 @@ never leaves the SDK. Pass it back to the `IAuthenticationApiClient` methods unc
 inspect, parse, or store it long-term. `ex.MfaRequirements` describes the challenge types the
 user can satisfy (for example `otp` or `oob`).
 
+> :information_source: `MfaRequiredException` is raised by `GetAccessTokenAsync` whenever the
+> exchange returns `mfa_required`, regardless of whether you called `WithAuthenticationApiClient()`.
+> You still need `WithAuthenticationApiClient()` to register the `IAuthenticationApiClient` that
+> *completes* the challenge — so register it whenever your tenant may return `mfa_required` on a
+> refresh, otherwise you can catch the exception but have no client to drive the verify step.
+
 #### Register the client
 
 ```csharp
@@ -521,6 +528,76 @@ A bad code (rejected by Auth0) surfaces as an `ErrorApiException` (with `StatusC
 `ApiError`), the base type of `MfaRequiredException`. A token that has passed its 5-minute
 lifetime throws `MfaTokenExpiredException`; a tampered or malformed token throws
 `MfaTokenInvalidException`. Both derive from `ErrorApiException`.
+
+#### Completing an out-of-band (OOB) challenge with polling
+
+Out-of-band factors (push notifications, SMS) are **asynchronous**: after you trigger the
+challenge you must poll the token endpoint until the user approves it. Unlike the OTP grant, the
+OOB grant does **not** throw while the user has not yet responded — Auth0 replies with
+`authorization_pending` (or `slow_down` if you are polling too fast), and the SDK surfaces those
+on `MfaOobTokenResponse.Error` so you can keep polling. A populated `AccessToken` (with
+`Error == null`) means the challenge succeeded. Any genuine failure (for example an expired
+`oob_code`) still throws `ErrorApiException`, just like the OTP grant.
+
+```csharp
+public async Task<IActionResult> StartOob()
+{
+    var mfaToken = (string)TempData["mfa_token"]!;
+
+    // Trigger the push/SMS. The returned oob_code identifies this challenge.
+    var challenge = await _authClient.MfaChallengeAsync(new MfaChallengeRequest
+    {
+        MfaToken = mfaToken,
+        ChallengeType = "oob"
+    });
+
+    TempData["mfa_token"] = mfaToken;          // still needed for the verify step
+    TempData["oob_code"] = challenge.OobCode;
+    return RedirectToAction("PollOob");
+}
+
+[HttpPost]
+public async Task<IActionResult> PollOob()
+{
+    var mfaToken = (string)TempData["mfa_token"]!;
+    var oobCode = (string)TempData["oob_code"]!;
+
+    try
+    {
+        var response = await _authClient.GetTokenAsync(new MfaOobTokenRequest
+        {
+            MfaToken = mfaToken,
+            OobCode = oobCode
+            // BindingCode = "1234"   // only when the challenge's binding_method requires it
+        });
+
+        if (response.Error == "authorization_pending" || response.Error == "slow_down")
+        {
+            // Not approved yet. Keep mfaToken/oobCode and poll again shortly. Back off a little
+            // on slow_down. Remember the mfa_token's overall 5-minute lifetime still applies.
+            TempData["mfa_token"] = mfaToken;
+            TempData["oob_code"] = oobCode;
+            return RedirectToAction("PollOob");
+        }
+
+        // response.Error is null here: the user approved and response.AccessToken is valid for
+        // the requested audience. Persisting it into the session is your responsibility.
+        return Ok();
+    }
+    catch (MfaTokenExpiredException)
+    {
+        // The 5-minute window elapsed — restart the flow to obtain a fresh token.
+        return RedirectToAction("CallApi");
+    }
+    // A genuine rejection (e.g. invalid/expired oob_code) throws ErrorApiException.
+}
+```
+
+> :information_source: The `mfa_token` blob is encrypted and **self-expires 5 minutes after the
+> original `mfa_required`** — not after the challenge is triggered. Since OOB approval is
+> user-paced, treat that window as your real polling budget: if it lapses, the next
+> `GetTokenAsync` throws `MfaTokenExpiredException` before any network call, and you must restart
+> from `GetAccessTokenAsync` to mint a fresh token.
 
 > :warning: **Multi-instance deployments:** the encrypted `mfa_token` is protected with the
 > application's ASP.NET Core Data Protection key ring. If your app runs on more than one

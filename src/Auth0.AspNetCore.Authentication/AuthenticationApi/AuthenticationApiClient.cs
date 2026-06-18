@@ -26,6 +26,13 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     private const string MfaOobGrantType = "http://auth0.com/oauth/grant-type/mfa-oob";
     private const string MfaRecoveryCodeGrantType = "http://auth0.com/oauth/grant-type/mfa-recovery-code";
 
+    // OOB push/SMS verification is asynchronous: until the user approves, Auth0 answers the token
+    // request with HTTP 400 and one of these error codes. They are not failures — they signal the
+    // caller should keep polling — so the OOB grant surfaces them on MfaOobTokenResponse rather
+    // than throwing.
+    private const string AuthorizationPendingError = "authorization_pending";
+    private const string SlowDownError = "slow_down";
+
     private readonly HttpClient _httpClient;
     private readonly Auth0WebAppOptions _options;
     private readonly string _domain;
@@ -96,7 +103,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     }
 
     /// <inheritdoc />
-    public Task<MfaOobTokenResponse> GetTokenAsync(MfaOobTokenRequest request, CancellationToken cancellationToken = default)
+    public async Task<MfaOobTokenResponse> GetTokenAsync(MfaOobTokenRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null) throw new ArgumentNullException(nameof(request));
 
@@ -113,7 +120,34 @@ public class AuthenticationApiClient : IAuthenticationApiClient
         AddBoundAudienceScope(body, mfaContext);
         ApplyClientAuthentication(body);
 
-        return PostFormAsync<MfaOobTokenResponse>("oauth/token", body, cancellationToken);
+        var content = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value)));
+        using var message = new HttpRequestMessage(HttpMethod.Post, BuildUri("oauth/token")) { Content = content };
+        using var response = await _httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+
+        // authorization_pending / slow_down arrive as HTTP 400 while the user has not yet approved
+        // the push/SMS. Surface them on the response so callers can poll, rather than throwing —
+        // any other non-2xx is a genuine failure and is thrown like the other grants.
+        var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode && !IsOobPending(payload))
+        {
+            throw new ErrorApiException(response.StatusCode, ApiError.Parse(payload));
+        }
+
+        return JsonSerializer.Deserialize<MfaOobTokenResponse>(payload, SerializerOptions)!;
+    }
+
+    // True when the body is an OOB token error that means "not yet — keep polling".
+    private static bool IsOobPending(string payload)
+    {
+        try
+        {
+            var error = JsonSerializer.Deserialize<MfaOobTokenResponse>(payload, SerializerOptions)?.Error;
+            return error == AuthorizationPendingError || error == SlowDownError;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     /// <inheritdoc />

@@ -203,6 +203,16 @@ namespace Auth0.AspNetCore.Authentication
             // available.
             _services.AddHttpClient();
 
+            // GetAccessTokenAsync encrypts the mfa_token into the MfaRequiredException blob on the
+            // mfa_required path. That path is reachable whenever refresh tokens are in use, even
+            // without WithAuthenticationApiClient(), so the protector must be registered here too —
+            // otherwise the mfa_required response would surface as an opaque DI resolution failure
+            // instead of the typed exception. TryAddSingleton keeps WithAuthenticationApiClient()'s
+            // own registration idempotent. Depends only on IDataProtectionProvider, which ASP.NET
+            // Core registers by default.
+            _services.TryAddSingleton<IMfaTokenProtector>(sp =>
+                new MfaTokenProtector(sp.GetRequiredService<IDataProtectionProvider>()));
+
             _services.Configure(_authenticationScheme, configureOptions);
             _services.AddOptions<OpenIdConnectOptions>(_authenticationScheme)
                 .Configure(options =>

@@ -123,6 +123,61 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.AuthenticationApi
             capturedBody.Should().Contain("binding_code=999");
         }
 
+        [Theory]
+        [InlineData("authorization_pending")]
+        [InlineData("slow_down")]
+        public async Task GetTokenAsync_Oob_Pending_DoesNotThrow_And_PopulatesError(string errorCode)
+        {
+            // While the user has not yet approved the OOB push/SMS, Auth0 replies HTTP 400 with a
+            // pending error. The OOB grant must surface that on the response so callers can poll,
+            // not throw.
+            var handler = Handler(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.BadRequest,
+                Content = new StringContent($"{{\"error\":\"{errorCode}\",\"error_description\":\"still waiting\"}}")
+            }, (_, _) => { });
+            var client = Client(handler);
+
+            var result = await client.GetTokenAsync(new MfaOobTokenRequest { MfaToken = Blob("mt"), OobCode = "oc" });
+
+            result.Error.Should().Be(errorCode);
+            result.ErrorDescription.Should().Be("still waiting");
+            result.AccessToken.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetTokenAsync_Oob_Success_PopulatesToken_And_NoError()
+        {
+            var handler = Handler(Ok("{\"access_token\":\"at\",\"token_type\":\"Bearer\",\"expires_in\":3600}"),
+                (_, _) => { });
+            var client = Client(handler);
+
+            var result = await client.GetTokenAsync(new MfaOobTokenRequest { MfaToken = Blob("mt"), OobCode = "oc" });
+
+            result.AccessToken.Should().Be("at");
+            result.ExpiresIn.Should().Be(3600);
+            result.Error.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetTokenAsync_Oob_GenuineError_Throws_ErrorApiException()
+        {
+            // A non-pending failure (e.g. invalid_grant) is a real error and must still throw,
+            // exactly like the OTP/recovery grants.
+            var handler = Handler(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.Forbidden,
+                Content = new StringContent("{\"error\":\"invalid_grant\",\"error_description\":\"Invalid oob_code.\"}")
+            }, (_, _) => { });
+            var client = Client(handler);
+
+            var act = async () => await client.GetTokenAsync(new MfaOobTokenRequest { MfaToken = Blob("mt"), OobCode = "oc" });
+
+            var ex = await act.Should().ThrowAsync<ErrorApiException>();
+            ex.And.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+            ex.And.ApiError!.Error.Should().Be("invalid_grant");
+        }
+
         [Fact]
         public async Task GetTokenAsync_RecoveryCode_Posts_RecoveryGrant()
         {
@@ -336,6 +391,27 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.AuthenticationApi
 
             client.Should().NotBeNull();
             client!.BaseUri.Should().Be(new Uri("https://test.auth0.com"));
+        }
+
+        [Fact]
+        public void WithAccessToken_Registers_MfaTokenProtector_WithoutAuthenticationApiClient()
+        {
+            // GetAccessTokenAsync resolves IMfaTokenProtector on the mfa_required path. Because MRRT
+            // refresh is supported without WithAuthenticationApiClient(), the base WithAccessToken
+            // path must register the protector too — otherwise mfa_required surfaces as an opaque DI
+            // failure instead of the typed MfaRequiredException.
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            Microsoft.Extensions.DependencyInjection.DataProtectionServiceCollectionExtensions.AddDataProtection(services);
+            var options = new Auth0WebAppOptions { Domain = "test.auth0.com", ClientId = "cid", ClientSecret = "secret" };
+            var builder = new Auth0WebAppAuthenticationBuilder(services, options);
+
+            builder.WithAccessToken(o => o.UseRefreshTokens = true);
+
+            var provider = Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(services);
+            var protector = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetService<IMfaTokenProtector>(provider);
+
+            protector.Should().NotBeNull();
         }
     }
 }

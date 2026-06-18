@@ -46,6 +46,14 @@ namespace Auth0.AspNetCore.Authentication
         /// <param name="request">The audience/scope to request a token for.</param>
         /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
         /// <returns>The access token, or <c>null</c> when no refresh token is available or the refresh failed.</returns>
+        /// <exception cref="MfaRequiredException">
+        /// Thrown when the token exchange returns an <c>mfa_required</c> error carrying an <c>mfa_token</c>.
+        /// This is a recoverable challenge rather than a terminal failure: drive the MFA challenge/verify
+        /// flow with <see cref="AuthenticationApi.IAuthenticationApiClient"/> (registered via
+        /// <see cref="Auth0WebAppAuthenticationBuilder.WithAuthenticationApiClient"/>) using the
+        /// <see cref="MfaRequiredException.MfaToken"/> blob. A malformed <c>mfa_required</c> response with no
+        /// <c>mfa_token</c> is folded into the refresh-failed path instead.
+        /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown when a refresh succeeds but the new token cannot be persisted because the response has
         /// already started. Persisting the refreshed token calls <see cref="AuthenticationHttpContextExtensions.SignInAsync(HttpContext, string?, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties?)"/>,
