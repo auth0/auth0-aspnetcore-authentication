@@ -1,3 +1,5 @@
+using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
+
 namespace Auth0.AspNetCore.Authentication
 {
     /// <summary>
@@ -23,17 +25,25 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>The <c>error_description</c> from the token endpoint's error body, when present.</summary>
         public string? ErrorDescription { get; private set; }
 
+        /// <summary>The <c>mfa_token</c> from an <c>mfa_required</c> error body, when present.</summary>
+        public string? MfaToken { get; private set; }
+
+        /// <summary>The <c>mfa_requirements</c> from an <c>mfa_required</c> error body, when present.</summary>
+        public MfaRequirements? MfaRequirements { get; private set; }
+
         public bool IsSuccess => Response != null;
 
         public static TokenRefreshResult Success(AccessTokenResponse response) =>
             new TokenRefreshResult { Response = response };
 
-        public static TokenRefreshResult Failure(int? statusCode, string? error = null, string? errorDescription = null) =>
+        public static TokenRefreshResult Failure(int? statusCode, string? error = null, string? errorDescription = null, string? mfaToken = null, MfaRequirements? mfaRequirements = null) =>
             new TokenRefreshResult
             {
                 StatusCode = statusCode,
                 Error = error,
-                ErrorDescription = errorDescription
+                ErrorDescription = errorDescription,
+                MfaToken = mfaToken,
+                MfaRequirements = mfaRequirements
             };
     }
 }

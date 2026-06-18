@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,8 @@ using System;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
 using Auth0.AspNetCore.Authentication.CustomDomains;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Auth0.AspNetCore.Authentication
@@ -60,11 +63,37 @@ namespace Auth0.AspNetCore.Authentication
         /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/></returns>
         public Auth0WebAppAuthenticationBuilder WithBackchannelLogout()
         {
-            _services.AddTransient<BackchannelLogoutHandler>(sp => 
+            _services.AddTransient<BackchannelLogoutHandler>(sp =>
                 new BackchannelLogoutHandler(
-                    sp.GetRequiredService<ILogoutTokenHandler>(), 
+                    sp.GetRequiredService<ILogoutTokenHandler>(),
                     _authenticationScheme));
             _services.AddTransient<ILogoutTokenHandler, DefaultLogoutTokenHandler>();
+            return this;
+        }
+
+        /// <summary>
+        /// Registers an <see cref="IAuthenticationApiClient"/> for calling Auth0 Authentication API
+        /// MFA endpoints (for example, to recover from an <c>mfa_required</c> error). The client
+        /// authenticates using the <see cref="Auth0WebAppOptions.ClientId"/> and client credentials
+        /// configured on the SDK.
+        /// </summary>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/>.</returns>
+        public Auth0WebAppAuthenticationBuilder WithAuthenticationApiClient()
+        {
+            _services.AddHttpClient();
+            _services.TryAddSingleton<IMfaTokenProtector>(sp =>
+                new MfaTokenProtector(sp.GetRequiredService<IDataProtectionProvider>()));
+            _services.AddTransient<IAuthenticationApiClient>(sp =>
+            {
+                var backchannel = _options.Backchannel;
+                var httpClient = backchannel ?? sp.GetRequiredService<IHttpClientFactory>().CreateClient();
+                return new AuthenticationApiClient(
+                    httpClient,
+                    new Uri($"https://{_options.Domain}"),
+                    _options,
+                    sp.GetRequiredService<IMfaTokenProtector>(),
+                    ownsHttpClient: backchannel == null);
+            });
             return this;
         }
 
@@ -173,6 +202,16 @@ namespace Auth0.AspNetCore.Authentication
             // token when no Backchannel is configured. Register it here so the factory is always
             // available.
             _services.AddHttpClient();
+
+            // GetAccessTokenAsync encrypts the mfa_token into the MfaRequiredException blob on the
+            // mfa_required path. That path is reachable whenever refresh tokens are in use, even
+            // without WithAuthenticationApiClient(), so the protector must be registered here too —
+            // otherwise the mfa_required response would surface as an opaque DI resolution failure
+            // instead of the typed exception. TryAddSingleton keeps WithAuthenticationApiClient()'s
+            // own registration idempotent. Depends only on IDataProtectionProvider, which ASP.NET
+            // Core registers by default.
+            _services.TryAddSingleton<IMfaTokenProtector>(sp =>
+                new MfaTokenProtector(sp.GetRequiredService<IDataProtectionProvider>()));
 
             _services.Configure(_authenticationScheme, configureOptions);
             _services.AddOptions<OpenIdConnectOptions>(_authenticationScheme)

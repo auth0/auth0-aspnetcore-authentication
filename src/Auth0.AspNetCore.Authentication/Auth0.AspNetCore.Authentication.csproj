@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Auth0.AspNetCore.Authentication.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="BackchannelLogout\" />
   </ItemGroup>
   <ItemGroup>

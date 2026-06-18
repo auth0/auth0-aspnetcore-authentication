@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests
 {
@@ -374,22 +375,75 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         public async Task Refresh_WithEmptyCustomDomain_ThrowsInvalidOperationException()
         {
             var mockHandler = new Mock<HttpMessageHandler>();
-            
+
             var client = new TokenClient(new HttpClient(mockHandler.Object));
-            
+
             Func<Task> act = async () => await client.Refresh(
-                new Auth0WebAppOptions 
-                { 
+                new Auth0WebAppOptions
+                {
                     Domain = "default.auth0.com",
-                    ClientId = "cid", 
-                    ClientSecret = "secret" 
-                }, 
+                    ClientId = "cid",
+                    ClientSecret = "secret"
+                },
                 "refresh_123",
                 string.Empty  // Empty custom domain
             );
 
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("Cannot determine domain for token endpoint*");
+        }
+
+        [Fact]
+        public async Task Returns_Failure_With_MfaToken_When_MfaRequired()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+              .Protected()
+                  .Setup<Task<HttpResponseMessage>>(
+                     "SendAsync",
+                     ItExpr.IsAny<HttpRequestMessage>(),
+                     ItExpr.IsAny<CancellationToken>()
+                  )
+                  .ReturnsAsync(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.Forbidden,
+                      Content = new StringContent("{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\",\"mfa_token\":\"the-mfa-token\"}")
+                  });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.Refresh(new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" }, "123");
+
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Be("mfa_required");
+            result.MfaToken.Should().Be("the-mfa-token");
+        }
+
+        [Fact]
+        public async Task Refresh_WhenMfaRequired_ParsesMfaRequirements()
+        {
+            var body = "{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\",\"mfa_token\":\"mt\",\"mfa_requirements\":{\"challenge\":[{\"type\":\"otp\"},{\"type\":\"oob\",\"oob_channels\":[\"sms\"]}]}}";
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent(body)
+                });
+
+            var client = new TokenClient(new HttpClient(handler.Object));
+            var options = new Auth0WebAppOptions { Domain = "test.auth0.com", ClientId = "cid", ClientSecret = "secret" };
+
+            var result = await client.Refresh(options, "rt", "test.auth0.com");
+
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Be("mfa_required");
+            result.MfaToken.Should().Be("mt");
+            result.MfaRequirements.Should().NotBeNull();
+            result.MfaRequirements!.Challenge.Should().HaveCount(2);
+            result.MfaRequirements.Challenge![1].OobChannels.Should().ContainSingle().Which.Should().Be("sms");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Auth0.AspNetCore.Authentication;
+using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -100,6 +101,8 @@ namespace Auth0.AspNetCore.Authentication
         {
             string? error = null;
             string? errorDescription = null;
+            string? mfaToken = null;
+            MfaRequirements? mfaRequirements = null;
 
             try
             {
@@ -119,6 +122,24 @@ namespace Auth0.AspNetCore.Authentication
                         {
                             errorDescription = descriptionElement.GetString();
                         }
+
+                        if (root.TryGetProperty("mfa_token", out var mfaTokenElement))
+                        {
+                            mfaToken = mfaTokenElement.GetString();
+                        }
+
+                        if (root.TryGetProperty("mfa_requirements", out var mfaRequirementsElement) &&
+                            mfaRequirementsElement.ValueKind == JsonValueKind.Object)
+                        {
+                            try
+                            {
+                                mfaRequirements = mfaRequirementsElement.Deserialize<MfaRequirements>();
+                            }
+                            catch (JsonException)
+                            {
+                                // Best-effort: a shape we can't map is simply omitted.
+                            }
+                        }
                     }
                 }
             }
@@ -127,7 +148,7 @@ namespace Auth0.AspNetCore.Authentication
                 // A non-JSON or unreadable error body still yields a result carrying the status code.
             }
 
-            return TokenRefreshResult.Failure((int)response.StatusCode, error, errorDescription);
+            return TokenRefreshResult.Failure((int)response.StatusCode, error, errorDescription, mfaToken, mfaRequirements);
         }
 
         private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)

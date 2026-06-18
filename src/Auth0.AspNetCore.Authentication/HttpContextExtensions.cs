@@ -4,9 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -43,6 +46,14 @@ namespace Auth0.AspNetCore.Authentication
         /// <param name="request">The audience/scope to request a token for.</param>
         /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
         /// <returns>The access token, or <c>null</c> when no refresh token is available or the refresh failed.</returns>
+        /// <exception cref="MfaRequiredException">
+        /// Thrown when the token exchange returns an <c>mfa_required</c> error carrying an <c>mfa_token</c>.
+        /// This is a recoverable challenge rather than a terminal failure: drive the MFA challenge/verify
+        /// flow with <see cref="AuthenticationApi.IAuthenticationApiClient"/> (registered via
+        /// <see cref="Auth0WebAppAuthenticationBuilder.WithAuthenticationApiClient"/>) using the
+        /// <see cref="MfaRequiredException.MfaToken"/> blob. A malformed <c>mfa_required</c> response with no
+        /// <c>mfa_token</c> is folded into the refresh-failed path instead.
+        /// </exception>
         /// <exception cref="System.InvalidOperationException">
         /// Thrown when a refresh succeeds but the new token cannot be persisted because the response has
         /// already started. Persisting the refreshed token calls <see cref="AuthenticationHttpContextExtensions.SignInAsync(HttpContext, string?, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties?)"/>,
@@ -124,6 +135,31 @@ namespace Auth0.AspNetCore.Authentication
 
             if (!result.IsSuccess)
             {
+                // mfa_required is a recoverable challenge, not a terminal/transient refresh failure:
+                // surface it as a typed exception so the caller can drive
+                // the MFA flow. 
+                // A mfa_required response with no mfa_token is malformed and cannot drive the flow, so it falls
+                // through to the refresh-failed path rather than yielding a blob that can never
+                // be unprotected.
+                if (result.Error == "mfa_required" && !string.IsNullOrEmpty(result.MfaToken))
+                {
+                    var protector = context.RequestServices.GetRequiredService<IMfaTokenProtector>();
+                    var mfaContext = new MfaTokenContext
+                    {
+                        MfaToken = result.MfaToken!,
+                        Audience = audience,
+                        Scope = mergedScope,
+                        MfaRequirements = result.MfaRequirements
+                    };
+                    var blob = protector.Protect(mfaContext);
+
+                    throw new MfaRequiredException(
+                        blob,
+                        result.MfaRequirements,
+                        (HttpStatusCode)(result.StatusCode ?? (int)HttpStatusCode.Forbidden),
+                        new Exceptions.ApiError { Error = result.Error, Message = result.ErrorDescription ?? string.Empty });
+                }
+
                 await FireRefreshFailed(optionsWithAccessToken,
                     AccessTokenRefreshFailedContext.FromHttpRejection(context, audience, mergedScope, result.StatusCode, result.Error, result.ErrorDescription)).ConfigureAwait(false);
                 return null;
