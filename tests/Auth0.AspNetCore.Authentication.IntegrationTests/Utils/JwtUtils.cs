@@ -22,7 +22,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Utils
         /// <param name="orgId">The (optional) org_id claim to be used.</param>
         /// <param name="nonce">The (optional) nonce to be used.</param>
         /// <returns>The generated JWT token.</returns>
-        public static string GenerateToken(int userId, string issuer, string audience, string orgId = null, string nonce = null, DateTime? expires = null)
+        public static string GenerateToken(int userId, string issuer, string audience, string orgId = null, string nonce = null, DateTime? expires = null, string name = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new List<Claim>
@@ -39,6 +39,11 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Utils
             if (!string.IsNullOrWhiteSpace(nonce))
             {
                 claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, nonce));
+            }
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                claims.Add(new Claim("name", name));
             }
 
             JsonWebKeySet keys = new JsonWebKeySet(GetKeys().Result);

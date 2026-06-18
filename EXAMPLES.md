@@ -4,6 +4,7 @@
 - [Scopes](#scopes)
 - [Calling an API](#calling-an-api)
   - [Configuring the refresh leeway](#configuring-the-refresh-leeway)
+  - [Updating claims and observing a successful refresh](#updating-claims-and-observing-a-successful-refresh)
 - [Server-side session storage](#server-side-session-storage)
 - [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt)
   - [Requesting a token for another audience](#requesting-a-token-for-another-audience)
@@ -204,6 +205,58 @@ services
 The above snippet checks whether the SDK is configured to use refresh tokens, if there is an existing ID token (meaning the user is authenticated) as well as the absence of a refresh token. If each of these criteria are met, it logs the user out from the application and initializes a new login flow.
 
 > :information_source: In order for Auth0 to redirect back to the application's login URL, ensure to add the configured redirect URL to the application's `Allowed Logout URLs` in Auth0's dashboard.
+
+#### Updating claims and observing a successful refresh
+
+When the SDK refreshes an expired access token, it persists the new tokens but, by default, leaves the `ClaimsPrincipal` untouched — so `User.Claims` keeps serving the login-time snapshot for the lifetime of the refresh token, even though each refresh can return a fresh `id_token` that may carry updated user information.
+
+Two opt-in additions let you react to a refresh:
+
+- **`RebuildPrincipalOnRefresh`** — when `true`, the `ClaimsPrincipal` is rebuilt from the refreshed `id_token` after a successful primary refresh, so `User.Claims` (and `User.Identity.Name`) reflect current user information. Defaults to `false` (today's behavior).
+- **`OnTokensRefreshed`** — a success event that fires after a successful primary refresh, carrying the refreshed `AccessToken`, `IdToken`, `RefreshToken` (null when not rotated), and `ExpiresAt`. It fires independently of `RebuildPrincipalOnRefresh`, and when both are used the event fires *after* the rebuild so it observes the updated principal.
+
+```csharp
+services
+    .AddAuth0WebAppAuthentication(options => {})
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+
+        // Rebuild User.Claims from the refreshed id_token.
+        options.RebuildPrincipalOnRefresh = true;
+
+        options.Events = new Auth0WebAppWithAccessTokenEvents
+        {
+            OnTokensRefreshed = (context) =>
+            {
+                // context.AccessToken, context.IdToken, context.RefreshToken, context.ExpiresAt
+                return Task.CompletedTask;
+            }
+        };
+    });
+```
+
+##### Controlling how the refreshed id_token is validated
+
+`RefreshClaimsValidationType` controls how rigorously the refreshed `id_token` is validated before its claims replace the principal. It is only consulted when `RebuildPrincipalOnRefresh` is `true`:
+
+- **`Full`** (default) — validates the refreshed `id_token`'s signature against the cached JWKS, plus issuer/audience and the SDK's business-rule checks. Highest fidelity. The signature check runs only on an actual refresh (when the token expired), not on every request, and the JWKS is cached, so it is inexpensive in the hot path.
+- **`SkipSignature`** — skips signature validation (trusting the back-channel TLS exchange for token authenticity) while still running the SDK's business-rule checks. Lower cost, lower fidelity; an opt-in escape hatch.
+
+```csharp
+    .WithAccessToken(options =>
+    {
+        options.Audience = Configuration["Auth0:Audience"];
+        options.UseRefreshTokens = true;
+        options.RebuildPrincipalOnRefresh = true;
+        options.RefreshClaimsValidationType = RefreshClaimsValidationType.SkipSignature;
+    });
+```
+
+If a refresh succeeds but rebuilding the principal fails (a signature failure in `Full` mode, a malformed `id_token`, or a business-rule failure), the SDK degrades gracefully: the refreshed tokens are kept, the existing (stale) principal is retained, a warning is logged, and `OnTokensRefreshed` still fires — the refresh genuinely succeeded.
+
+> :information_source: Both additions apply only to the primary (login-time) refresh path. Tokens fetched for **additional** audiences via [MRRT](#multi-resource-refresh-tokens-mrrt) do not rebuild the principal or fire `OnTokensRefreshed`.
 
 ## Server-side session storage
 

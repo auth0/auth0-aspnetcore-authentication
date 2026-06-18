@@ -215,7 +215,42 @@ namespace Auth0.AspNetCore.Authentication
                                     context.Properties.UpdateTokenValue("refresh_token", result.RefreshToken);
                                 }
                                 context.Properties.UpdateTokenValue("id_token", result.IdToken);
-                                context.Properties.UpdateTokenValue("expires_at", DateTimeOffset.Now.AddSeconds(result.ExpiresIn).ToString("o"));
+                                var newExpiresAt = DateTimeOffset.Now.AddSeconds(result.ExpiresIn);
+                                context.Properties.UpdateTokenValue("expires_at", newExpiresAt.ToString("o"));
+
+                                if (optionsWithAccessToken.RebuildPrincipalOnRefresh && context.Principal != null)
+                                {
+                                    var rebuilt = await PrincipalRefresher.RebuildAsync(
+                                        result.IdToken,
+                                        context.Principal,
+                                        options,
+                                        oidcOptions,
+                                        optionsWithAccessToken.RefreshClaimsValidationType,
+                                        context.Properties.Items,
+                                        context.HttpContext.RequestAborted);
+
+                                    if (rebuilt != null)
+                                    {
+                                        context.ReplacePrincipal(rebuilt);
+                                    }
+                                    else
+                                    {
+                                        var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                                        loggerFactory?.CreateLogger("Auth0").LogWarning(
+                                            "Token refresh succeeded but rebuilding the principal from the refreshed id_token failed; keeping the existing claims.");
+                                    }
+                                }
+
+                                if (optionsWithAccessToken.Events?.OnTokensRefreshed != null)
+                                {
+                                    await optionsWithAccessToken.Events.OnTokensRefreshed(
+                                        AccessTokenRefreshedContext.Create(
+                                            context.HttpContext,
+                                            result.AccessToken,
+                                            result.IdToken,
+                                            string.IsNullOrEmpty(result.RefreshToken) ? null : result.RefreshToken,
+                                            newExpiresAt));
+                                }
                             }
                             else
                             {
