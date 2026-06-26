@@ -274,6 +274,63 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
+        /// Performs a Custom Token Exchange : exchanges the external token described by
+        /// <paramref name="request"/> for Auth0 tokens, without a browser redirect. This is the
+        /// stateless utility — it has <b>no session side-effects</b> (it does not sign the user in or
+        /// write any cookie); the caller decides what to persist. Use it for delegation/impersonation
+        /// and agent-identity scenarios.
+        /// </summary>
+        /// <param name="context">The current <see cref="HttpContext"/>.</param>
+        /// <param name="request">The exchange request (subject token + type, and optional audience,
+        /// scope, actor token pair, organization).</param>
+        /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
+        /// <returns>The exchanged tokens.</returns>
+        /// <exception cref="CustomTokenExchangeException">
+        /// Thrown when the request fails client-side validation, or when the token endpoint rejects
+        /// the exchange.
+        /// </exception>
+        public static async Task<CustomTokenExchangeResult> CustomTokenExchangeAsync(this HttpContext context, CustomTokenExchangeRequest request, string? scheme = null)
+        {
+            scheme ??= Auth0Constants.AuthenticationScheme;
+
+            CustomTokenExchangeRequestValidator.Validate(request);
+
+            var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
+
+            var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
+            var tokenClient = new TokenClient(httpClient);
+            var resolvedDomain = context.GetResolvedDomain();
+
+            var result = await tokenClient.ExchangeCustomToken(
+                options,
+                request.SubjectToken,
+                request.SubjectTokenType,
+                request.Audience,
+                request.Scope,
+                request.ActorToken,
+                request.ActorTokenType,
+                request.Organization,
+                resolvedDomain).ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                throw new CustomTokenExchangeException(result.StatusCode, result.Error, result.ErrorDescription);
+            }
+
+            var response = result.Response!;
+
+            return new CustomTokenExchangeResult
+            {
+                AccessToken = response.AccessToken,
+                IdToken = response.IdToken,
+                RefreshToken = response.RefreshToken,
+                ExpiresIn = response.ExpiresIn,
+                Scope = response.Scope,
+                Act = ActClaimReader.TryRead(response.IdToken)
+            };
+        }
+
+        /// <summary>
         /// Retrieves the resolved domain from the <see cref="HttpContext.Items"/> collection.
         /// </summary>
         /// <param name="httpContext">The current HTTP context.</param>
