@@ -636,6 +636,125 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             return handler;
         }
 
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_WithCachedToken_ReturnsCachedWithoutCallingBackchannel()
+        {
+            // A handler that would throw if called — proves the cache short-circuits the grant.
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new InvalidOperationException("backchannel should not be called on a cache hit"));
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[HttpContextExtensions.ConnectionTokensItemKey] = JsonSerializer.Serialize(new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet
+                {
+                    Connection = "google-oauth2",
+                    AccessToken = "cached_google_token",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+                    Scope = "email"
+                }
+            });
+
+            var context = BuildContext(handler.Object, properties, out var authService);
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2" });
+
+            result.Should().Be("cached_google_token");
+            authService.Verify(s => s.SignInAsync(
+                It.IsAny<HttpContext>(), It.IsAny<string>(),
+                It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_WithForceRefresh_BypassesCacheAndPersistsNewToken()
+        {
+            var handler = CreateRawTokenHandler("{\"access_token\":\"fresh_google_token\",\"expires_in\":3600,\"scope\":\"email\"}");
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[HttpContextExtensions.ConnectionTokensItemKey] = JsonSerializer.Serialize(new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet
+                {
+                    Connection = "google-oauth2",
+                    AccessToken = "stale_cached_token",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds()
+                }
+            });
+
+            AuthenticationProperties? persisted = null;
+            var context = BuildContext(handler.Object, properties, out var authService);
+            authService
+                .Setup(s => s.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Callback<HttpContext, string, ClaimsPrincipal, AuthenticationProperties>(
+                    (_, _, _, p) => persisted = p)
+                .Returns(Task.CompletedTask);
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2", ForceRefresh = true });
+
+            result.Should().Be("fresh_google_token");
+            authService.Verify(s => s.SignInAsync(
+                It.IsAny<HttpContext>(), It.IsAny<string>(),
+                It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Once());
+            persisted.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_NoRefreshToken_FiresEventAndReturnsNull()
+        {
+            var handler = CreateRawTokenHandler("{\"access_token\":\"unused\",\"expires_in\":3600}");
+
+            var properties = new AuthenticationProperties(); // no refresh token
+
+            var missingRefreshTokenFired = false;
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: withAccessTokenOptions =>
+            {
+                withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnMissingRefreshToken = _ => { missingRefreshTokenFired = true; return Task.CompletedTask; }
+                };
+            });
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2" });
+
+            result.Should().BeNull();
+            missingRefreshTokenFired.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_WhenExchangeRejected_FiresRefreshFailedEventAndReturnsNull()
+        {
+            var handler = CreateFailingHandler(HttpStatusCode.BadRequest, "{\"error\":\"invalid_request\",\"error_description\":\"no linked account\"}");
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            AccessTokenRefreshFailedContext? failedContext = null;
+            var context = BuildContext(handler.Object, properties, out _, configureWithAccessToken: withAccessTokenOptions =>
+            {
+                withAccessTokenOptions.Events = new Auth0WebAppWithAccessTokenEvents
+                {
+                    OnAccessTokenRefreshFailed = c => { failedContext = c; return Task.CompletedTask; }
+                };
+            });
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2" });
+
+            result.Should().BeNull();
+            failedContext.Should().NotBeNull();
+            failedContext!.Error.Should().Be("invalid_request");
+        }
+
         private static HttpContext BuildContext(
             HttpMessageHandler backchannelHandler,
             AuthenticationProperties properties,
