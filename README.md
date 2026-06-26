@@ -155,9 +155,23 @@ var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
 
 For configuring per-audience default scopes, forcing a refresh, and handling refresh failures, see the [Multi-Resource Refresh Tokens (MRRT) Examples](EXAMPLES.md#multi-resource-refresh-tokens-mrrt).
 
+## Token Vault (Federated Connection Access Tokens)
+
+Token Vault lets your web app obtain a third-party API access token (for a federated connection such as Google, GitHub, or Slack) for the logged-in user, by exchanging the session's refresh token — without running a separate provider OAuth flow.
+
+```csharp
+var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessTokenForConnectionRequest
+{
+    Connection = "google-oauth2"
+});
+```
+
+For forcing a refresh, supplying a login hint, and handling missing refresh tokens or exchange failures, see the [Token Vault Examples](EXAMPLES.md#token-vault-federated-connection-access-tokens).
+
 ## API reference
 Explore public API's available in auth0-aspnetcore-authentication.
 
+- [AccessTokenForConnectionRequest](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.AccessTokenForConnectionRequest.html)
 - [Auth0WebAppOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppOptions.html)
 - [Auth0WebAppWithAccessTokenOptions](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.Auth0WebAppWithAccessTokenOptions.html)
 - [LoginAuthenticationPropertiesBuilder](https://auth0.github.io/auth0-aspnetcore-authentication/api/Auth0.AspNetCore.Authentication.LoginAuthenticationPropertiesBuilder.html)

@@ -12,6 +12,10 @@
   - [Handling refresh failures](#handling-refresh-failures)
   - [Handling MFA during token exchange (mfa_required)](#handling-mfa-during-token-exchange-mfa_required)
     - [Completing an out-of-band (OOB) challenge with polling](#completing-an-out-of-band-oob-challenge-with-polling)
+- [Token Vault (Federated Connection Access Tokens)](#token-vault-federated-connection-access-tokens)
+  - [Retrieving a federated connection token](#retrieving-a-federated-connection-token)
+  - [Forcing a refresh](#forcing-a-refresh-1)
+  - [Handling a missing refresh token or exchange failure](#handling-a-missing-refresh-token-or-exchange-failure)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -606,6 +610,73 @@ public async Task<IActionResult> PollOob()
 > otherwise a token encrypted on one instance cannot be decrypted on another within the
 > 5-minute window. This is the **same requirement** as the authentication cookie that already
 > carries these tokens.
+
+## Token Vault (Federated Connection Access Tokens)
+
+[Token Vault](https://auth0.com/docs/secure/tokens/token-vault) lets your web app obtain a **third-party API access token** (for a federated connection such as Google, GitHub, or Slack) for the logged-in user — so your app, or an agent acting on the user's behalf, can call that provider's API. The token is obtained by exchanging the session's refresh token; the user does not have to re-authenticate.
+
+A typical use case: the user logged in with (or has linked) their Google account, and your app needs a Google access token to read their calendar. Instead of running a separate Google OAuth flow, you exchange the existing refresh token for a Google connection token.
+
+> :information_source: Token Vault requires refresh tokens. Configure `UseRefreshTokens = true` and a `ClientSecret`, and enable Token Vault for the connection in the Auth0 Dashboard. Connection tokens are cached in the session, keyed by connection name, and reused until they near expiry.
+
+> :information_source: Unlike MRRT, the federated-connection exchange does **not** take a requested `scope` — it returns the scopes already granted for the connection. Tokens are therefore cached per **connection**, not per audience/scope. To change the granted scopes, reconfigure the connection (or re-link the account) in the Auth0 Dashboard.
+
+> :warning: **Token storage and cookie size.** Like MRRT, each connection token is cached in the encrypted **authentication cookie** by default, so retrieving tokens for several connections grows the session the same way fanning out across audiences does. If you expect to hold tokens for more than a couple of connections, move the session **server-side** — see [Server-side session storage](#server-side-session-storage). Where the token set is persisted is the only thing that changes; the API is identical either way.
+
+### Retrieving a federated connection token
+
+Use `HttpContext.GetAccessTokenForConnectionAsync` with an `AccessTokenForConnectionRequest` describing the `Connection`. The SDK serves a cached token from the session when one is present and unexpired, and only exchanges the refresh token otherwise. Newly obtained tokens are persisted back into the session automatically.
+
+```csharp
+[Authorize]
+public async Task<IActionResult> CallGoogleCalendar()
+{
+    var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessTokenForConnectionRequest
+    {
+        Connection = "google-oauth2"
+    });
+
+    if (googleToken == null)
+    {
+        // No refresh token available, or the exchange failed — see "Handling…" below.
+        return Challenge();
+    }
+
+    var request = new HttpRequestMessage(HttpMethod.Get, "https://www.googleapis.com/calendar/v3/users/me/calendarList");
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", googleToken);
+
+    var response = await _httpClient.SendAsync(request);
+    return Content(await response.Content.ReadAsStringAsync());
+}
+```
+
+> :information_source: `GetAccessTokenForConnectionAsync` returns `null` rather than throwing when no refresh token is available or the exchange fails. Always check for `null` before using the token.
+
+The optional `LoginHint` disambiguates which linked identity to use when the user has more than one. It is the **provider-side identity-provider user ID** (e.g. a Google user ID) — not the Auth0 user `sub`, and not the user's email.
+
+```csharp
+var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessTokenForConnectionRequest
+{
+    Connection = "google-oauth2",
+    LoginHint = "108251234567890123456"
+});
+```
+
+### Forcing a refresh
+
+Set `ForceRefresh = true` to bypass the cache and always exchange the refresh token for a new connection token. The freshly retrieved token replaces the cached entry.
+
+```csharp
+var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessTokenForConnectionRequest
+{
+    Connection = "google-oauth2",
+    ForceRefresh = true
+});
+```
+
+### Handling a missing refresh token or exchange failure
+
+A federated connection token can only be obtained via the session's refresh token. When none is present, the `OnMissingRefreshToken` event fires and the method returns `null`. When a refresh token is present but the exchange is rejected, the `OnAccessTokenRefreshFailed` event fires (carrying `StatusCode`, `Error`, `ErrorDescription`) and the method returns `null`. These are the same events used by MRRT — see [Handling refresh failures](#handling-refresh-failures) and [Detecting the absense of a refresh token](#detecting-the-absense-of-a-refresh-token) for full configuration examples.
 
 ## Organizations
 
