@@ -49,7 +49,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Version>1.7.1</Version>
+    <Version>1.8.0</Version>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyVersion>$(Version)</AssemblyVersion>
