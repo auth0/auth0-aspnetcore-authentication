@@ -1,5 +1,28 @@
 # Change Log
 
+## [1.8.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.8.0) (2026-06-29)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.7.1...1.8.0)
+
+**Added**
+
+- **Multi-Resource Refresh Token (MRRT) support** [\#249](https://github.com/auth0/auth0-aspnetcore-authentication/pull/249), [\#251](https://github.com/auth0/auth0-aspnetcore-authentication/pull/251) ([kailash-b](https://github.com/kailash-b)) - applications can now obtain access tokens for additional audiences and scopes on demand by exchanging the session's refresh token, without forcing the user through another interactive login.
+  - New `HttpContext.GetAccessTokenAsync(AccessTokenRequest)` extension returns an access token for a requested audience and/or scope, served from the session cache when possible and otherwise via a refresh-token exchange.
+  - Configure default scopes per audience with `Auth0WebAppWithAccessTokenOptions.ScopeByAudience`.
+  - The new `OnAccessTokenRefreshFailed` event surfaces refresh failures, letting callers distinguish terminal failures (warranting re-login) from transient ones.
+  - **MFA challenge handling** - when a refresh requires MFA, a new `MfaRequiredException` surfaces the challenge, and `IAuthenticationApiClient` (registered via `WithAuthenticationApiClient()`) lets the application complete OTP, OOB, or recovery-code grants and manage authenticators.
+- **Configurable access-token expiration leeway** [\#247](https://github.com/auth0/auth0-aspnetcore-authentication/pull/247) ([kailash-b](https://github.com/kailash-b)) - new `Auth0WebAppWithAccessTokenOptions.AccessTokenExpirationLeeway` (`TimeSpan`, default 60s) controls how far ahead of expiry the SDK proactively refreshes the access token. Previously hard-coded to 60 seconds; the default preserves prior behavior. Applies to both primary and additional (MRRT) cached tokens, and only takes effect when `UseRefreshTokens` is enabled.
+- **Configurable server-side session store** [\#246](https://github.com/auth0/auth0-aspnetcore-authentication/pull/246) ([kailash-b](https://github.com/kailash-b)) - new `WithSessionStore` method on `Auth0WebAppAuthenticationBuilder` stores the authentication session server-side (via `ITicketStore`) instead of in the cookie. It attaches the store to the SDK's own resolved cookie scheme, so it works even with a custom `CookieAuthenticationScheme`. Two overloads are provided: `WithSessionStore<TStore>()` (resolved from DI) and `WithSessionStore(ITicketStore instance)`. Opt-in and additive; the default stateless cookie session is unchanged.
+
+**Fixed**
+
+- **Remove duplicate trailing slash from `client_assertion` audience** [\#236](https://github.com/auth0/auth0-aspnetcore-authentication/pull/236) ([samjetski](https://github.com/samjetski)) - fixes a regression introduced in 1.7.0 (#206) where the Private Key JWT client assertion `aud` claim was built as `https://{tenant}//` (double slash), causing Auth0's `/oauth/token` endpoint to reject the assertion with `401 invalid_client` and leaving affected apps (any using `ClientAssertionSecurityKey`) in a callback loop.
+- **Wire `OnValidatePrincipal` to the configured cookie scheme** [\#248](https://github.com/auth0/auth0-aspnetcore-authentication/pull/248) ([kailash-b](https://github.com/kailash-b)) - fixes a scheme mismatch where the access-token refresh hook was registered against the default `"Cookies"` scheme rather than the configured `CookieAuthenticationScheme`.
+
+**Security**
+
+- **Bump dependencies** [\#250](https://github.com/auth0/auth0-aspnetcore-authentication/pull/250) ([kailash-b](https://github.com/kailash-b)) - consolidates several Dependabot bumps (supersedes #240, #242, #243, #244): `Microsoft.IdentityModel.Protocols.OpenIdConnect` 8.18.0 → 8.19.1, `Microsoft.AspNetCore.Mvc.Testing` 10.0.8 → 10.0.9, `Microsoft.AspNetCore.Mvc.ViewFeatures` 2.3.10 → 2.3.11, `System.Text.Encodings.Web` 10.0.8 → 10.0.9.
+- **Pin GitHub Actions to commit SHAs** [\#241](https://github.com/auth0/auth0-aspnetcore-authentication/pull/241) ([jcchavezs](https://github.com/jcchavezs)) - pins all third-party actions in the workflow files to commit SHAs for improved supply-chain security and reproducibility.
+
 ## [1.7.1](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.7.1) (2026-06-08)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.7.0...1.7.1)
 
