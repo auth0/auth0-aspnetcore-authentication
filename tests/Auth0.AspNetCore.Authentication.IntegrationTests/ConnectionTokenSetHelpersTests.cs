@@ -85,5 +85,120 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             result.Should().HaveCount(1);
             result[0].Connection.Should().Be("google-oauth2");
         }
+
+        [Fact]
+        public void FindConnectionTokenSet_DistinguishesByLoginHint()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", LoginHint = "identityA", AccessToken = "tokenA", ExpiresAt = now + 100 },
+                new ConnectionTokenSet { Connection = "google-oauth2", LoginHint = "identityB", AccessToken = "tokenB", ExpiresAt = now + 100 }
+            };
+
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2", "identityA")!.AccessToken.Should().Be("tokenA");
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2", "identityB")!.AccessToken.Should().Be("tokenB");
+        }
+
+        [Fact]
+        public void FindConnectionTokenSet_WithLoginHint_DoesNotMatchEntryWithDifferentHint()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", LoginHint = "identityA", AccessToken = "tokenA", ExpiresAt = now + 100 }
+            };
+
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2", "identityB").Should().BeNull();
+        }
+
+        [Fact]
+        public void FindConnectionTokenSet_WithoutLoginHint_MatchesLegacyEntryWithNoHint()
+        {
+            // Entries cached before login-hint awareness deserialize with LoginHint == null;
+            // a request with no hint must still match them so existing sessions keep working.
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", AccessToken = "legacy", ExpiresAt = now + 100 }
+            };
+
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2").Should().NotBeNull();
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2")!.AccessToken.Should().Be("legacy");
+        }
+
+        [Fact]
+        public void FindConnectionTokenSet_WithLoginHint_DoesNotMatchLegacyEntryWithNoHint()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", AccessToken = "legacy", ExpiresAt = now + 100 }
+            };
+
+            ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, "google-oauth2", "identityA").Should().BeNull();
+        }
+
+        [Fact]
+        public void Upsert_AppendsWhenSameConnectionButDifferentLoginHint()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", LoginHint = "identityA", AccessToken = "tokenA", ExpiresAt = now + 100 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "tokenB", ExpiresIn = 3600, Scope = "email" };
+
+            var result = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(sets, "google-oauth2", response, "identityB");
+
+            result.Should().HaveCount(2);
+            result.Should().Contain(s => s.LoginHint == "identityA" && s.AccessToken == "tokenA");
+            result.Should().Contain(s => s.LoginHint == "identityB" && s.AccessToken == "tokenB");
+        }
+
+        [Fact]
+        public void Upsert_ReplacesWhenConnectionAndLoginHintMatch()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", LoginHint = "identityA", AccessToken = "old", ExpiresAt = now + 100 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "new", ExpiresIn = 3600, Scope = "email" };
+
+            var result = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(sets, "google-oauth2", response, "identityA");
+
+            result.Should().HaveCount(1);
+            result[0].LoginHint.Should().Be("identityA");
+            result[0].AccessToken.Should().Be("new");
+        }
+
+        [Fact]
+        public void Upsert_StoresLoginHintOnNewEntry()
+        {
+            var response = new AccessTokenResponse { AccessToken = "tokenA", ExpiresIn = 3600, Scope = "email" };
+
+            var result = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(null, "google-oauth2", response, "identityA");
+
+            result.Should().HaveCount(1);
+            result[0].LoginHint.Should().Be("identityA");
+        }
+
+        [Fact]
+        public void Upsert_WithLoginHint_DoesNotOverwriteLegacyEntryWithNoHint()
+        {
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sets = new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet { Connection = "google-oauth2", AccessToken = "legacy", ExpiresAt = now + 100 }
+            };
+            var response = new AccessTokenResponse { AccessToken = "tokenA", ExpiresIn = 3600, Scope = "email" };
+
+            var result = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(sets, "google-oauth2", response, "identityA");
+
+            result.Should().HaveCount(2);
+            result.Should().Contain(s => s.LoginHint == null && s.AccessToken == "legacy");
+            result.Should().Contain(s => s.LoginHint == "identityA" && s.AccessToken == "tokenA");
+        }
     }
 }

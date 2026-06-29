@@ -15,6 +15,14 @@ namespace Auth0.AspNetCore.Authentication
         public string Connection { get; set; } = null!;
 
         /// <summary>
+        /// The login hint the token was retrieved for, when supplied. Part of the cache key
+        /// alongside <see cref="Connection"/> so tokens for different linked identities on the
+        /// same connection are cached separately rather than overwriting one another.
+        /// </summary>
+        [JsonPropertyName("login_hint")]
+        public string? LoginHint { get; set; }
+
+        /// <summary>
         /// The federated connection access token.
         /// </summary>
         [JsonPropertyName("access_token")]

@@ -207,11 +207,16 @@ namespace Auth0.AspNetCore.Authentication
 
             var properties = authenticateResult.Properties;
 
+            // Normalize the login hint so the cache key matches what is actually sent to the token
+            // endpoint, which omits an empty/whitespace hint (see TokenClient). Without this, a "" hint
+            // and a null hint would address the same server-side identity but cache under different keys.
+            var loginHint = string.IsNullOrWhiteSpace(request.LoginHint) ? null : request.LoginHint;
+
             // 1. Serve from the per-connection cache unless the caller bypasses it.
             if (!request.ForceRefresh)
             {
                 var sets = ReadConnectionTokenSets(properties);
-                var match = ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, request.Connection);
+                var match = ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, request.Connection, loginHint);
                 if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.Add(optionsWithAccessToken.AccessTokenExpirationLeeway).ToUnixTimeSeconds())
                 {
                     return match.AccessToken;
@@ -236,7 +241,7 @@ namespace Auth0.AspNetCore.Authentication
             TokenRefreshResult result;
             try
             {
-                result = await tokenClient.ExchangeRefreshTokenForConnectionToken(options, refreshToken, request.Connection, resolvedDomain, request.LoginHint).ConfigureAwait(false);
+                result = await tokenClient.ExchangeRefreshTokenForConnectionToken(options, refreshToken, request.Connection, resolvedDomain, loginHint).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -255,7 +260,7 @@ namespace Auth0.AspNetCore.Authentication
             var response = result.Response!;
 
             // 3. Cache the connection token and persist. A rotated refresh token, if any, is also persisted.
-            var updated = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(ReadConnectionTokenSets(properties), request.Connection, response);
+            var updated = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(ReadConnectionTokenSets(properties), request.Connection, response, loginHint);
             WriteConnectionTokenSets(properties, updated);
 
             if (!string.IsNullOrEmpty(response.RefreshToken))

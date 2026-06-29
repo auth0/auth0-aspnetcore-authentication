@@ -708,6 +708,118 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task GetAccessTokenForConnectionAsync_DifferentLoginHint_DoesNotReturnOtherIdentitysCachedToken()
+        {
+            // Identity A's token is cached for the connection. A request for identity B on the
+            // same connection must not be served A's token from the cache — it must exchange and
+            // return B's own token.
+            var handler = CreateRawTokenHandler("{\"access_token\":\"identityB_token\",\"expires_in\":3600,\"scope\":\"email\"}");
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[HttpContextExtensions.ConnectionTokensItemKey] = JsonSerializer.Serialize(new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet
+                {
+                    Connection = "google-oauth2",
+                    LoginHint = "identityA",
+                    AccessToken = "identityA_token",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+                    Scope = "email"
+                }
+            });
+
+            AuthenticationProperties? persisted = null;
+            var context = BuildContext(handler.Object, properties, out var authService);
+            authService
+                .Setup(s => s.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .Callback<HttpContext, string, ClaimsPrincipal, AuthenticationProperties>(
+                    (_, _, _, p) => persisted = p)
+                .Returns(Task.CompletedTask);
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2", LoginHint = "identityB" });
+
+            result.Should().Be("identityB_token");
+            result.Should().NotBe("identityA_token");
+
+            // Both identities should now be cached side by side under the one connection.
+            persisted.Should().NotBeNull();
+            var stored = JsonSerializer.Deserialize<List<ConnectionTokenSet>>(
+                persisted!.Items[HttpContextExtensions.ConnectionTokensItemKey]!);
+            stored.Should().HaveCount(2);
+            stored.Should().Contain(s => s.LoginHint == "identityA" && s.AccessToken == "identityA_token");
+            stored.Should().Contain(s => s.LoginHint == "identityB" && s.AccessToken == "identityB_token");
+        }
+
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_MatchingLoginHint_ReturnsCachedWithoutCallingBackchannel()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new InvalidOperationException("backchannel should not be called on a cache hit"));
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[HttpContextExtensions.ConnectionTokensItemKey] = JsonSerializer.Serialize(new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet
+                {
+                    Connection = "google-oauth2",
+                    LoginHint = "identityA",
+                    AccessToken = "identityA_token",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+                    Scope = "email"
+                }
+            });
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2", LoginHint = "identityA" });
+
+            result.Should().Be("identityA_token");
+        }
+
+        [Fact]
+        public async Task GetAccessTokenForConnectionAsync_WhitespaceLoginHint_TreatedSameAsNoHint_ReturnsCachedWithoutCallingBackchannel()
+        {
+            // An empty/whitespace LoginHint addresses the same default identity as no hint (the token
+            // endpoint omits it either way), so it must hit the entry cached with no hint rather than
+            // missing the cache and triggering a redundant exchange.
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new InvalidOperationException("backchannel should not be called on a cache hit"));
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[HttpContextExtensions.ConnectionTokensItemKey] = JsonSerializer.Serialize(new List<ConnectionTokenSet>
+            {
+                new ConnectionTokenSet
+                {
+                    Connection = "google-oauth2",
+                    AccessToken = "no_hint_token",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+                    Scope = "email"
+                }
+            });
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenForConnectionAsync(
+                new AccessTokenForConnectionRequest { Connection = "google-oauth2", LoginHint = "   " });
+
+            result.Should().Be("no_hint_token");
+        }
+
+        [Fact]
         public async Task GetAccessTokenForConnectionAsync_NoRefreshToken_FiresEventAndReturnsNull()
         {
             var handler = CreateRawTokenHandler("{\"access_token\":\"unused\",\"expires_in\":3600}");

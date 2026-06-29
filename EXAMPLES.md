@@ -654,6 +654,8 @@ public async Task<IActionResult> CallGoogleCalendar()
 
 The optional `LoginHint` disambiguates which linked identity to use when the user has more than one. It is the **provider-side identity-provider user ID** (e.g. a Google user ID) — not the Auth0 user `sub`, and not the user's email.
 
+`LoginHint` is part of the cache key: tokens for different login hints on the same connection are cached separately, so requesting identity B never returns identity A's cached token. A request with no `LoginHint` is cached separately from one that specifies a hint.
+
 ```csharp
 var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessTokenForConnectionRequest
 {
