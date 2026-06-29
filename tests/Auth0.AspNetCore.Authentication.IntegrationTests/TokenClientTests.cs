@@ -445,5 +445,99 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             result.MfaRequirements!.Challenge.Should().HaveCount(2);
             result.MfaRequirements.Challenge![1].OobChannels.Should().ContainSingle().Which.Should().Be("sms");
         }
+
+        [Fact]
+        public async Task ExchangeForConnection_Succeeds_AndReturnsToken()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"fc_token\",\"expires_in\":3600,\"scope\":\"email\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.ExchangeRefreshTokenForConnectionToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123",
+                "google-oauth2");
+
+            result.IsSuccess.Should().BeTrue();
+            result.Response!.AccessToken.Should().Be("fc_token");
+            result.Response.Scope.Should().Be("email");
+        }
+
+        [Fact]
+        public async Task ExchangeForConnection_SendsFederatedConnectionGrantParameters()
+        {
+            string capturedBody = string.Empty;
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    capturedBody = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                })
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"fc_token\",\"expires_in\":3600,\"scope\":\"\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.ExchangeRefreshTokenForConnectionToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123",
+                "google-oauth2",
+                loginHint: "108251234567890123456");
+
+            capturedBody.Should().Contain("grant_type=urn%3Aauth0%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange%3Afederated-connection-access-token");
+            capturedBody.Should().Contain("subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Arefresh_token");
+            capturedBody.Should().Contain("requested_token_type=http%3A%2F%2Fauth0.com%2Foauth%2Ftoken-type%2Ffederated-connection-access-token");
+            capturedBody.Should().Contain("subject_token=refresh_123");
+            capturedBody.Should().Contain("connection=google-oauth2");
+            capturedBody.Should().Contain("login_hint=108251234567890123456");
+            // The federated-connection exchange must not send a requested scope — this is
+            // what makes the connection cache key scope-independent.
+            capturedBody.Should().NotContain("scope=");
+        }
+
+        [Fact]
+        public async Task ExchangeForConnection_ReturnsFailure_WhenRejected()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("{\"error\":\"invalid_request\",\"error_description\":\"no linked account\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.ExchangeRefreshTokenForConnectionToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                "refresh_123",
+                "google-oauth2");
+
+            result.IsSuccess.Should().BeFalse();
+            result.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
+            result.Error.Should().Be("invalid_request");
+            result.ErrorDescription.Should().Be("no linked account");
+        }
     }
 }

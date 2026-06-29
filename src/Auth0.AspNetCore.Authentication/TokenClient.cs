@@ -53,6 +53,47 @@ namespace Auth0.AspNetCore.Authentication
 
             ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
+            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+        }
+
+        public async Task<TokenRefreshResult> ExchangeRefreshTokenForConnectionToken(
+            Auth0WebAppOptions options,
+            string refreshToken,
+            string connection,
+            string? domain = null,
+            string? loginHint = null)
+        {
+            var body = new Dictionary<string, string>
+            {
+                { "grant_type", "urn:auth0:params:oauth:grant-type:token-exchange:federated-connection-access-token" },
+                { "subject_token_type", "urn:ietf:params:oauth:token-type:refresh_token" },
+                { "subject_token", refreshToken },
+                { "requested_token_type", "http://auth0.com/oauth/token-type/federated-connection-access-token" },
+                { "connection", connection },
+                { "client_id", options.ClientId }
+            };
+
+            if (!string.IsNullOrWhiteSpace(loginHint))
+            {
+                body.Add("login_hint", loginHint);
+            }
+
+            var tokenEndpointDomain = domain ?? options.Domain;
+
+            if (string.IsNullOrWhiteSpace(tokenEndpointDomain))
+            {
+                throw new InvalidOperationException(
+                    "Cannot determine domain for token endpoint. " +
+                    "Ensure Domain is set or domain resolution is properly configured.");
+            }
+
+            ApplyClientAuthentication(options, body, tokenEndpointDomain);
+
+            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+        }
+
+        private async Task<TokenRefreshResult> Send(Dictionary<string, string> body, string tokenEndpointDomain)
+        {
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{tokenEndpointDomain}/oauth/token") { Content = requestContent })

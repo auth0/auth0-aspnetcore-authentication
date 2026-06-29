@@ -20,6 +20,7 @@ namespace Auth0.AspNetCore.Authentication
     public static class HttpContextExtensions
     {
         internal const string AccessTokensItemKey = ".Token.access_tokens";
+        internal const string ConnectionTokensItemKey = ".Token.connection_tokens";
 
         /// <summary>
         /// Retrieves an access token for the audience/scope described by <paramref name="request"/>.
@@ -176,6 +177,103 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
+        /// Retrieves a federated connection (Token Vault) access token for the audience/connection
+        /// described by <paramref name="request"/> — a third-party API token (e.g. Google, GitHub)
+        /// for the logged-in user. Reuses a cached token from the session when one is present and not
+        /// expired; otherwise exchanges the session's refresh token for a new connection token and
+        /// persists it.
+        /// </summary>
+        /// <remarks>
+        /// Like <see cref="GetAccessTokenAsync"/>, this method is not safe to call concurrently for the
+        /// same session: it reads, mutates, and writes the stored tokens, and a concurrent refresh-token
+        /// exchange can trip rotation reuse detection. Serialize calls per session.
+        /// </remarks>
+        /// <param name="context">The current <see cref="HttpContext"/>.</param>
+        /// <param name="request">The connection (and optional login hint) to request a token for.</param>
+        /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
+        /// <returns>The connection access token, or <c>null</c> when no refresh token is available or the exchange failed.</returns>
+        public static async Task<string?> GetAccessTokenForConnectionAsync(this HttpContext context, AccessTokenForConnectionRequest request, string? scheme = null)
+        {
+            scheme ??= Auth0Constants.AuthenticationScheme;
+
+            var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
+            var optionsWithAccessToken = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(scheme);
+
+            var authenticateResult = await context.AuthenticateAsync(options.CookieAuthenticationScheme).ConfigureAwait(false);
+            if (!authenticateResult.Succeeded || authenticateResult.Properties == null)
+            {
+                return null;
+            }
+
+            var properties = authenticateResult.Properties;
+
+            // Normalize the login hint so the cache key matches what is actually sent to the token
+            // endpoint, which omits an empty/whitespace hint (see TokenClient). Without this, a "" hint
+            // and a null hint would address the same server-side identity but cache under different keys.
+            var loginHint = string.IsNullOrWhiteSpace(request.LoginHint) ? null : request.LoginHint;
+
+            // 1. Serve from the per-connection cache unless the caller bypasses it.
+            if (!request.ForceRefresh)
+            {
+                var sets = ReadConnectionTokenSets(properties);
+                var match = ConnectionTokenSetHelpers.FindConnectionTokenSet(sets, request.Connection, loginHint);
+                if (match != null && match.ExpiresAt > DateTimeOffset.UtcNow.Add(optionsWithAccessToken.AccessTokenExpirationLeeway).ToUnixTimeSeconds())
+                {
+                    return match.AccessToken;
+                }
+            }
+
+            // 2. A federated connection token can only be obtained via the refresh token.
+            if (!properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
+            {
+                if (optionsWithAccessToken.Events?.OnMissingRefreshToken != null)
+                {
+                    await optionsWithAccessToken.Events.OnMissingRefreshToken(context).ConfigureAwait(false);
+                }
+
+                return null;
+            }
+
+            var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
+            var tokenClient = new TokenClient(httpClient);
+            var resolvedDomain = context.GetResolvedDomain();
+
+            TokenRefreshResult result;
+            try
+            {
+                result = await tokenClient.ExchangeRefreshTokenForConnectionToken(options, refreshToken, request.Connection, resolvedDomain, loginHint).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await FireRefreshFailed(optionsWithAccessToken,
+                    AccessTokenRefreshFailedContext.FromException(context, null, null, ex)).ConfigureAwait(false);
+                return null;
+            }
+
+            if (!result.IsSuccess)
+            {
+                await FireRefreshFailed(optionsWithAccessToken,
+                    AccessTokenRefreshFailedContext.FromHttpRejection(context, null, null, result.StatusCode, result.Error, result.ErrorDescription)).ConfigureAwait(false);
+                return null;
+            }
+
+            var response = result.Response!;
+
+            // 3. Cache the connection token and persist. A rotated refresh token, if any, is also persisted.
+            var updated = ConnectionTokenSetHelpers.UpsertConnectionTokenSet(ReadConnectionTokenSets(properties), request.Connection, response, loginHint);
+            WriteConnectionTokenSets(properties, updated);
+
+            if (!string.IsNullOrEmpty(response.RefreshToken))
+            {
+                properties.UpdateTokenValue("refresh_token", response.RefreshToken);
+            }
+
+            await context.SignInAsync(options.CookieAuthenticationScheme, authenticateResult.Principal!, properties).ConfigureAwait(false);
+
+            return response.AccessToken;
+        }
+
+        /// <summary>
         /// Retrieves the resolved domain from the <see cref="HttpContext.Items"/> collection.
         /// </summary>
         /// <param name="httpContext">The current HTTP context.</param>
@@ -281,6 +379,30 @@ namespace Auth0.AspNetCore.Authentication
         private static void WriteAccessTokenSets(AuthenticationProperties properties, List<AccessTokenSet> sets)
         {
             properties.Items[AccessTokensItemKey] = JsonSerializer.Serialize(sets);
+        }
+
+        private static List<ConnectionTokenSet> ReadConnectionTokenSets(AuthenticationProperties properties)
+        {
+            if (properties.Items.TryGetValue(ConnectionTokensItemKey, out var json) && !string.IsNullOrEmpty(json))
+            {
+                // Corrupted or version-skewed session data is treated as a cache miss: the
+                // token gets re-fetched, which is preferable to throwing out of a public method.
+                try
+                {
+                    return JsonSerializer.Deserialize<List<ConnectionTokenSet>>(json) ?? new List<ConnectionTokenSet>();
+                }
+                catch (JsonException)
+                {
+                    return new List<ConnectionTokenSet>();
+                }
+            }
+
+            return new List<ConnectionTokenSet>();
+        }
+
+        private static void WriteConnectionTokenSets(AuthenticationProperties properties, List<ConnectionTokenSet> sets)
+        {
+            properties.Items[ConnectionTokensItemKey] = JsonSerializer.Serialize(sets);
         }
     }
 }
