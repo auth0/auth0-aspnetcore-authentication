@@ -87,5 +87,35 @@ namespace Auth0.AspNetCore.Authentication
         /// </code>
         /// </example>
         public Func<AccessTokenRefreshFailedContext, Task>? OnAccessTokenRefreshFailed { get; set; }
+
+        /// <summary>
+        /// Executed after a successful primary token refresh, allowing you to react to the new
+        /// tokens (for example to mirror claims into another store, or invalidate caches). The
+        /// supplied <see cref="AccessTokenRefreshedContext"/> carries the refreshed access, ID,
+        /// and (when rotated) refresh tokens, plus the new expiry. This fires independently of
+        /// <see cref="Auth0WebAppWithAccessTokenOptions.RebuildPrincipalOnRefresh"/>; when that
+        /// option is enabled the principal has already been rebuilt by the time this fires.
+        /// It does not fire on a failed refresh (see <see cref="OnAccessTokenRefreshFailed"/>),
+        /// nor for additional-audience (MRRT) token fetches.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// services
+        ///   .AddAuth0WebAppAuthentication(options => {})
+        ///   .WithAccessToken(options =>
+        ///   {
+        ///       options.UseRefreshTokens = true;
+        ///       options.Events = new Auth0WebAppWithAccessTokenEvents
+        ///       {
+        ///           OnTokensRefreshed = (context) =>
+        ///           {
+        ///               // React to the refreshed tokens, e.g. log or mirror claims.
+        ///               return Task.CompletedTask;
+        ///           }
+        ///       };
+        ///   });
+        /// </code>
+        /// </example>
+        public Func<AccessTokenRefreshedContext, Task>? OnTokensRefreshed { get; set; }
     }
 }

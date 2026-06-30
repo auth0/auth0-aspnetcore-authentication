@@ -63,7 +63,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                     var ticket = await context.AuthenticateAsync(cookieScheme);
                                     await res.WriteAsync(JsonSerializer.Serialize(new
                                     {
-                                        RefreshToken = await context.GetTokenAsync(cookieScheme, "refresh_token")
+                                        RefreshToken = await context.GetTokenAsync(cookieScheme, "refresh_token"),
+                                        Name = ticket.Principal?.FindFirst("name")?.Value
                                     }));
                                 }
                                 else

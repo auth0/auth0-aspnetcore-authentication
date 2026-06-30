@@ -39,6 +39,21 @@ namespace Auth0.AspNetCore.Authentication
         public TimeSpan AccessTokenExpirationLeeway { get; set; } = TimeSpan.FromSeconds(60);
 
         /// <summary>
+        /// When <c>true</c>, the <see cref="System.Security.Claims.ClaimsPrincipal"/> is rebuilt
+        /// from the refreshed <c>id_token</c> after a successful primary token refresh, so
+        /// <c>User.Claims</c> reflect current user information. Defaults to <c>false</c>, which
+        /// preserves the historical behavior where claims are never updated on refresh.
+        /// </summary>
+        public bool RebuildPrincipalOnRefresh { get; set; } = false;
+
+        /// <summary>
+        /// Controls how rigorously the refreshed <c>id_token</c> is validated before its claims
+        /// replace the principal. Only consulted when <see cref="RebuildPrincipalOnRefresh"/> is
+        /// <c>true</c>. Defaults to <see cref="RefreshClaimsValidationType.Full"/>.
+        /// </summary>
+        public RefreshClaimsValidationType RefreshClaimsValidationType { get; set; } = RefreshClaimsValidationType.Full;
+
+        /// <summary>
         /// Events allowing you to hook into specific moments in the Auth0 middleware.
         /// </summary>
         public Auth0WebAppWithAccessTokenEvents? Events { get; set; }
