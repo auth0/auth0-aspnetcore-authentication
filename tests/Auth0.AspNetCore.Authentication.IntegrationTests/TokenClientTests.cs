@@ -539,5 +539,141 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             result.Error.Should().Be("invalid_request");
             result.ErrorDescription.Should().Be("no linked account");
         }
+
+        [Fact]
+        public async Task ExchangeCustomToken_SendsExpectedGrantBody()
+        {
+            string capturedBody = string.Empty;
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    capturedBody = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                })
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"at\",\"expires_in\":3600}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.ExchangeCustomToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                subjectToken: "ext-token",
+                subjectTokenType: "urn:acme:legacy-token",
+                audience: "https://api.example.com",
+                scope: "read:data");
+
+            capturedBody.Should().Contain("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange");
+            capturedBody.Should().Contain("client_id=cid");
+            capturedBody.Should().Contain("subject_token=ext-token");
+            capturedBody.Should().Contain("subject_token_type=urn%3Aacme%3Alegacy-token");
+            capturedBody.Should().Contain("audience=https%3A%2F%2Fapi.example.com");
+            capturedBody.Should().Contain("scope=read%3Adata");
+            // CTE selects the issued token type via the Action/profile, so no requested_token_type.
+            capturedBody.Should().NotContain("requested_token_type=");
+        }
+
+        [Fact]
+        public async Task ExchangeCustomToken_SendsActorTokenPair_AndOrganization()
+        {
+            string capturedBody = string.Empty;
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    capturedBody = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                })
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"at\",\"expires_in\":3600}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.ExchangeCustomToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                subjectToken: "ext-token",
+                subjectTokenType: "urn:acme:legacy-token",
+                actorToken: "act-token",
+                actorTokenType: "urn:acme:actor-token",
+                organization: "org_123");
+
+            capturedBody.Should().Contain("actor_token=act-token");
+            capturedBody.Should().Contain("actor_token_type=urn%3Aacme%3Aactor-token");
+            capturedBody.Should().Contain("organization=org_123");
+        }
+
+        [Fact]
+        public async Task ExchangeCustomToken_OmitsOptionalParams_WhenNotProvided()
+        {
+            string capturedBody = string.Empty;
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                {
+                    capturedBody = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                })
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"at\",\"expires_in\":3600}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            await client.ExchangeCustomToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                subjectToken: "ext-token",
+                subjectTokenType: "urn:acme:legacy-token");
+
+            capturedBody.Should().NotContain("audience=");
+            capturedBody.Should().NotContain("scope=");
+            capturedBody.Should().NotContain("organization=");
+            capturedBody.Should().NotContain("actor_token=");
+            capturedBody.Should().NotContain("actor_token_type=");
+        }
+
+        [Fact]
+        public async Task ExchangeCustomToken_ReturnsFailure_WhenRejected()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent("{\"error\":\"invalid_request\",\"error_description\":\"bad profile\"}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.ExchangeCustomToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                subjectToken: "ext-token",
+                subjectTokenType: "urn:acme:legacy-token");
+
+            result.IsSuccess.Should().BeFalse();
+            result.StatusCode.Should().Be((int)HttpStatusCode.Forbidden);
+            result.Error.Should().Be("invalid_request");
+            result.ErrorDescription.Should().Be("bad profile");
+        }
     }
 }

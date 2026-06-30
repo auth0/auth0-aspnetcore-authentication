@@ -16,6 +16,8 @@
   - [Retrieving a federated connection token](#retrieving-a-federated-connection-token)
   - [Forcing a refresh](#forcing-a-refresh-1)
   - [Handling a missing refresh token or exchange failure](#handling-a-missing-refresh-token-or-exchange-failure)
+- [Custom Token Exchange](#custom-token-exchange)
+  - [Delegation / impersonation](#delegation--impersonation)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -679,6 +681,58 @@ var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessT
 ### Handling a missing refresh token or exchange failure
 
 A federated connection token can only be obtained via the session's refresh token. When none is present, the `OnMissingRefreshToken` event fires and the method returns `null`. When a refresh token is present but the exchange is rejected, the `OnAccessTokenRefreshFailed` event fires (carrying `StatusCode`, `Error`, `ErrorDescription`) and the method returns `null`. These are the same events used by MRRT — see [Handling refresh failures](#handling-refresh-failures) and [Detecting the absense of a refresh token](#detecting-the-absense-of-a-refresh-token) for full configuration examples.
+
+## Custom Token Exchange
+
+[Custom Token Exchange](https://auth0.com/docs/authenticate/custom-token-exchange) (RFC 8693) exchanges an
+existing external/custom security token for Auth0 tokens, without a browser redirect. Use it for
+delegation/impersonation and agent-identity scenarios. It requires a configured Custom Token Exchange Profile
+and a validation Action in your Auth0 tenant.
+
+`CustomTokenExchangeAsync` is **stateless**: it performs the exchange and returns the tokens, but does **not**
+sign the user in or write any cookie. The caller decides what to persist.
+
+```csharp
+try
+{
+    var result = await HttpContext.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+    {
+        SubjectToken = externalToken,
+        SubjectTokenType = "urn:acme:legacy-token", // a custom URI matching your CTE Profile
+        Audience = "https://api.example.com",       // optional
+        Scope = "read:data"                          // optional
+    });
+
+    // result.AccessToken, result.IdToken, result.RefreshToken, result.ExpiresIn, result.Scope
+}
+catch (CustomTokenExchangeException ex)
+{
+    // ex.StatusCode, ex.Error, ex.ErrorDescription describe a token-endpoint rejection;
+    // a validation failure carries a descriptive message instead.
+}
+```
+
+### Delegation / impersonation
+
+Pass an actor token pair to act on behalf of another party (RFC 8693 delegation). When delegation is in play,
+the `act` claim from the returned ID token is decoded and exposed on `result.Act` (the outermost `Sub` is the
+current actor; nested `Act` values are prior actors, informational only). Auth0 suppresses the refresh token in
+delegation flows.
+
+```csharp
+var result = await HttpContext.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+{
+    SubjectToken = externalToken,
+    SubjectTokenType = "urn:acme:legacy-token",
+    ActorToken = actorToken,
+    ActorTokenType = "urn:acme:actor-token"
+});
+
+var currentActor = result.Act?.Sub;
+```
+
+> **Note:** `subject_token_type` (and `actor_token_type`) must be custom URIs. The reserved `urn:ietf:` and
+> `urn:auth0:` namespaces are rejected client-side.
 
 ## Organizations
 

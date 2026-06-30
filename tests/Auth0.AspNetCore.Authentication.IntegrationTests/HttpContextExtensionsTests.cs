@@ -867,6 +867,267 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             failedContext!.Error.Should().Be("invalid_request");
         }
 
+        [Fact]
+        public async Task CustomTokenExchangeAsync_OnSuccess_MapsResponseToResult()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        "{\"access_token\":\"at\",\"id_token\":\"id\",\"refresh_token\":\"rt\",\"expires_in\":3600,\"scope\":\"read:data\"}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            result.AccessToken.Should().Be("at");
+            result.IdToken.Should().Be("id");
+            result.RefreshToken.Should().Be("rt");
+            result.ExpiresIn.Should().Be(3600);
+            result.Scope.Should().Be("read:data");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_OnSuccess_DoesNotEstablishSession()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"access_token\":\"at\",\"expires_in\":3600}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out var authService);
+
+            await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            authService.Verify(s => s.SignInAsync(
+                It.IsAny<HttpContext>(), It.IsAny<string>(),
+                It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WhenRejected_ThrowsWithErrorDetails()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent("{\"error\":\"invalid_request\",\"error_description\":\"bad profile\"}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            var assertion = await act.Should().ThrowAsync<CustomTokenExchangeException>();
+            assertion.Which.StatusCode.Should().Be((int)HttpStatusCode.Forbidden);
+            assertion.Which.Error.Should().Be("invalid_request");
+            assertion.Which.ErrorDescription.Should().Be("bad profile");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_OnInvalidRequest_ThrowsBeforeNetworkCall()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            await act.Should().ThrowAsync<CustomTokenExchangeException>();
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_OnDelegation_ExposesActClaim()
+        {
+            // id_token payload {"sub":"auth0|u","act":{"sub":"mcp_client"}}
+            string B64Url(string s)
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(s);
+                return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+            }
+            var idToken = $"{B64Url("{\"alg\":\"RS256\"}")}." +
+                          $"{B64Url("{\"sub\":\"auth0|u\",\"act\":{\"sub\":\"mcp_client\"}}")}.sig";
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        "{\"access_token\":\"at\",\"id_token\":\"" + idToken + "\",\"expires_in\":3600}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                ActorToken = "act-token",
+                ActorTokenType = "urn:acme:actor-token"
+            });
+
+            result.Act.Should().NotBeNull();
+            result.Act!.Sub.Should().Be("mcp_client");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WithMatchingOrgId_Succeeds()
+        {
+            var idToken = BuildIdToken("{\"sub\":\"auth0|u\",\"org_id\":\"org_abc123\"}");
+            var handler = CreateRawTokenHandler(
+                "{\"access_token\":\"at\",\"id_token\":\"" + idToken + "\",\"expires_in\":3600}");
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                Organization = "org_abc123"
+            });
+
+            result.AccessToken.Should().Be("at");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WithMatchingOrgName_IsCaseInsensitive()
+        {
+            var idToken = BuildIdToken("{\"sub\":\"auth0|u\",\"org_name\":\"acme\"}");
+            var handler = CreateRawTokenHandler(
+                "{\"access_token\":\"at\",\"id_token\":\"" + idToken + "\",\"expires_in\":3600}");
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                Organization = "ACME"
+            });
+
+            result.AccessToken.Should().Be("at");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WithMismatchedOrgId_Throws()
+        {
+            var idToken = BuildIdToken("{\"sub\":\"auth0|u\",\"org_id\":\"org_other\"}");
+            var handler = CreateRawTokenHandler(
+                "{\"access_token\":\"at\",\"id_token\":\"" + idToken + "\",\"expires_in\":3600}");
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                Organization = "org_abc123"
+            });
+
+            await act.Should().ThrowAsync<CustomTokenExchangeException>().WithMessage("*org_id*mismatch*");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WithMissingOrgClaim_Throws()
+        {
+            var idToken = BuildIdToken("{\"sub\":\"auth0|u\"}");
+            var handler = CreateRawTokenHandler(
+                "{\"access_token\":\"at\",\"id_token\":\"" + idToken + "\",\"expires_in\":3600}");
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                Organization = "org_abc123"
+            });
+
+            await act.Should().ThrowAsync<CustomTokenExchangeException>().WithMessage("*org_id*present*");
+        }
+
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WithOrgButNoIdToken_DoesNotThrow()
+        {
+            // No ID token returned (e.g. access-token-only exchange): nothing to validate against.
+            var handler = CreateRawTokenHandler("{\"access_token\":\"at\",\"expires_in\":3600}");
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token",
+                Organization = "org_abc123"
+            });
+
+            result.AccessToken.Should().Be("at");
+        }
+
+        private static string BuildIdToken(string payloadJson)
+        {
+            string B64Url(string s)
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(s);
+                return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+            }
+
+            return $"{B64Url("{\"alg\":\"none\",\"typ\":\"JWT\"}")}.{B64Url(payloadJson)}.sig";
+        }
+
         private static HttpContext BuildContext(
             HttpMessageHandler backchannelHandler,
             AuthenticationProperties properties,

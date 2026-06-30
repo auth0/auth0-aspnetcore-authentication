@@ -92,6 +92,61 @@ namespace Auth0.AspNetCore.Authentication
             return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
         }
 
+        public async Task<TokenRefreshResult> ExchangeCustomToken(
+            Auth0WebAppOptions options,
+            string subjectToken,
+            string subjectTokenType,
+            string? audience = null,
+            string? scope = null,
+            string? actorToken = null,
+            string? actorTokenType = null,
+            string? organization = null,
+            string? domain = null)
+        {
+            var body = new Dictionary<string, string>
+            {
+                { "grant_type", "urn:ietf:params:oauth:grant-type:token-exchange" },
+                { "client_id", options.ClientId },
+                { "subject_token", subjectToken },
+                { "subject_token_type", subjectTokenType }
+            };
+
+            if (!string.IsNullOrWhiteSpace(audience))
+            {
+                body.Add("audience", audience);
+            }
+
+            if (!string.IsNullOrWhiteSpace(scope))
+            {
+                body.Add("scope", scope);
+            }
+
+            if (!string.IsNullOrWhiteSpace(organization))
+            {
+                body.Add("organization", organization);
+            }
+
+            // The actor pair is added together; the mutual requirement is enforced by validation.
+            if (!string.IsNullOrWhiteSpace(actorToken))
+            {
+                body.Add("actor_token", actorToken);
+                body.Add("actor_token_type", actorTokenType!);
+            }
+
+            var tokenEndpointDomain = domain ?? options.Domain;
+
+            if (string.IsNullOrWhiteSpace(tokenEndpointDomain))
+            {
+                throw new InvalidOperationException(
+                    "Cannot determine domain for token endpoint. " +
+                    "Ensure Domain is set or domain resolution is properly configured.");
+            }
+
+            ApplyClientAuthentication(options, body, tokenEndpointDomain);
+
+            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+        }
+
         private async Task<TokenRefreshResult> Send(Dictionary<string, string> body, string tokenEndpointDomain)
         {
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
