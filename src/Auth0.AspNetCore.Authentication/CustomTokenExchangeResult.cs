@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Auth0.AspNetCore.Authentication
 {
     /// <summary>
-    /// The result of a Custom Token Exchange . Carries the exchanged tokens. This method
+    /// The result of a Custom Token Exchange. Carries the exchanged tokens. This method
     /// has no session side-effects — the caller decides what (if anything) to persist.
     /// </summary>
     public class CustomTokenExchangeResult

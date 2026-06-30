@@ -3,7 +3,7 @@ using System;
 namespace Auth0.AspNetCore.Authentication
 {
     /// <summary>
-    /// Thrown when a Custom Token Exchange  fails — either client-side validation of the
+    /// Thrown when a Custom Token Exchange fails — either client-side validation of the
     /// request, or rejection by the Auth0 token endpoint. Carries the token-endpoint status code and
     /// error details when the failure came from the network; never carries token-bearing bytes.
     /// </summary>

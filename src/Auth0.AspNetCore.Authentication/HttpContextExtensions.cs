@@ -319,6 +319,11 @@ namespace Auth0.AspNetCore.Authentication
 
             var response = result.Response!;
 
+            if (!string.IsNullOrWhiteSpace(request.Organization))
+            {
+                OrganizationClaimValidator.Validate(response.IdToken, request.Organization!);
+            }
+
             return new CustomTokenExchangeResult
             {
                 AccessToken = response.AccessToken,

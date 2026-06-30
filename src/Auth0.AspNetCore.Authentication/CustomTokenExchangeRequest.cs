@@ -15,8 +15,8 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>
         /// A custom URI identifying the subject token type, used as the routing key to select a
-        /// Custom Token Exchange Profile. Required; must be 10-100 characters and a valid URI
-        /// (URL or URN). Reserved <c>urn:ietf:</c> and <c>urn:auth0:</c> namespaces are rejected.
+        /// Custom Token Exchange Profile. Required. The token endpoint validates the value against
+        /// your configured profile.
         /// </summary>
         public string SubjectTokenType { get; set; } = null!;
 
@@ -27,13 +27,13 @@ namespace Auth0.AspNetCore.Authentication
         public string? Scope { get; set; }
 
         /// <summary>
-        /// Actor token for delegation/impersonation . If set, <see cref="ActorTokenType"/>
+        /// Actor token for delegation/impersonation. If set, <see cref="ActorTokenType"/>
         /// is required.
         /// </summary>
         public string? ActorToken { get; set; }
 
         /// <summary>
-        /// Actor token type URI. Required when <see cref="ActorToken"/> is set; must be a valid URI.
+        /// Actor token type URI. Required when <see cref="ActorToken"/> is set.
         /// </summary>
         public string? ActorTokenType { get; set; }
 

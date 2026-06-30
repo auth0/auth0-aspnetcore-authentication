@@ -31,51 +31,37 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             act.Should().Throw<CustomTokenExchangeException>().WithMessage("*subject_token*");
         }
 
-        [Fact]
-        public void Rejects_SubjectToken_With_Bearer_Prefix()
+        [Theory]
+        [InlineData("Bearer abc")]
+        [InlineData("bearer abc")]
+        [InlineData("BEARER abc")]
+        public void Rejects_SubjectToken_With_Bearer_Prefix(string token)
         {
             var req = Valid();
-            req.SubjectToken = "Bearer abc";
+            req.SubjectToken = token;
             var act = () => CustomTokenExchangeRequestValidator.Validate(req);
             act.Should().Throw<CustomTokenExchangeException>().WithMessage("*Bearer*");
         }
 
-        [Fact]
-        public void Rejects_SubjectTokenType_Shorter_Than_10_Chars()
-        {
-            var req = Valid();
-            req.SubjectTokenType = "urn:a:b"; // 7 chars
-            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*subject_token_type*");
-        }
-
-        [Fact]
-        public void Rejects_SubjectTokenType_Longer_Than_100_Chars()
-        {
-            var req = Valid();
-            req.SubjectTokenType = "urn:acme:" + new string('a', 100);
-            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*subject_token_type*");
-        }
-
-        [Fact]
-        public void Rejects_SubjectTokenType_That_Is_Not_A_Uri()
-        {
-            var req = Valid();
-            req.SubjectTokenType = "not a uri!!";
-            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*subject_token_type*");
-        }
-
         [Theory]
-        [InlineData("urn:ietf:params:oauth:token-type:id_token")]
-        [InlineData("urn:auth0:something:reserved")]
-        public void Rejects_Reserved_Namespaces(string reserved)
+        [InlineData(" external-token-value")]
+        [InlineData("external-token-value ")]
+        [InlineData(" external-token-value ")]
+        public void Rejects_SubjectToken_With_Surrounding_Whitespace(string token)
         {
             var req = Valid();
-            req.SubjectTokenType = reserved;
+            req.SubjectToken = token;
             var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*reserved*");
+            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*whitespace*");
+        }
+
+        [Fact]
+        public void Accepts_Short_Valid_Urn_SubjectTokenType()
+        {
+            var req = Valid();
+            req.SubjectTokenType = "urn:a:b"; // 7 chars — a legal URN, no length floor
+            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
+            act.Should().NotThrow();
         }
 
         [Theory]
@@ -94,25 +80,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         {
             var req = Valid();
             req.ActorToken = "actor-token";
-            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*actor_token_type*");
-        }
-
-        [Fact]
-        public void Rejects_ActorTokenType_Without_ActorToken()
-        {
-            var req = Valid();
-            req.ActorTokenType = "urn:acme:actor";
-            var act = () => CustomTokenExchangeRequestValidator.Validate(req);
-            act.Should().Throw<CustomTokenExchangeException>().WithMessage("*actor_token*");
-        }
-
-        [Fact]
-        public void Rejects_ActorTokenType_That_Is_Not_A_Uri()
-        {
-            var req = Valid();
-            req.ActorToken = "actor-token";
-            req.ActorTokenType = "not a uri!!";
             var act = () => CustomTokenExchangeRequestValidator.Validate(req);
             act.Should().Throw<CustomTokenExchangeException>().WithMessage("*actor_token_type*");
         }
