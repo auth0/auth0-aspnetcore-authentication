@@ -152,6 +152,18 @@ namespace Auth0.AspNetCore.Authentication
                     }
                 }
 
+                // Upstream-IdP session ceiling (session_expiry). Once the ceiling is reached the
+                // session must behave identically to "no session": reject the principal and sign out
+                // so the app's existing challenge/redirect re-authenticates transparently. Enforced on
+                // every read, ahead of any refresh. Absent ceiling falls through to existing behavior.
+                if (SessionExpiryHelpers.IsSessionExpired(context.Properties, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+                {
+                    context.RejectPrincipal();
+                    await context.HttpContext.SignOutAsync();
+
+                    return;
+                }
+
                 if (logoutTokenHandler != null)
                 {
                     await VerifyBackchannelLogoutSupport(context.HttpContext, oidcOptions);

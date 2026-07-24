@@ -1099,6 +1099,98 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task Should_Persist_And_Expose_SessionExpiry_When_Present_In_IdToken()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            var sessionExpiry = DateTimeOffset.UtcNow.AddHours(8).ToUnixTimeSeconds();
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, sessionExpiry: sessionExpiry), (me) => me.HasAuth0ClientHeader())
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+                    var content = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+                    content.GetValue("SessionExpiry").Value<long>().Should().Be(sessionExpiry);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Should_Fail_Login_When_SessionExpiry_Already_Past_At_Login()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            // session_expiry before the token's iat (now) => already past its ceiling at login.
+            var sessionExpiry = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds();
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, sessionExpiry: sessionExpiry), (me) => me.HasAuth0ClientHeader())
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opt =>
+            {
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+
+                    Func<Task> act = async () =>
+                    {
+                        await client.SendAsync(message, setCookie.Value);
+                    };
+
+                    var innerException = act
+                        .Should()
+                        .ThrowAsync<Exception>()
+                        .Result
+                        .And.InnerException;
+
+                    innerException
+                        .Should()
+                        .BeOfType<AuthenticationFailureException>()
+                        .Which.Message.Should().Contain("session_expiry");
+                }
+            }
+        }
+
+        [Fact]
         public async void Should_Refresh_Access_Token_When_Expired()
         {
             var nonce = "";

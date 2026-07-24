@@ -22,7 +22,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Utils
         /// <param name="orgId">The (optional) org_id claim to be used.</param>
         /// <param name="nonce">The (optional) nonce to be used.</param>
         /// <returns>The generated JWT token.</returns>
-        public static string GenerateToken(int userId, string issuer, string audience, string orgId = null, string nonce = null, DateTime? expires = null, string name = null, DateTime? authTime = null)
+        public static string GenerateToken(int userId, string issuer, string audience, string orgId = null, string nonce = null, DateTime? expires = null, string name = null, DateTime? authTime = null, long? sessionExpiry = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new List<Claim>
@@ -30,6 +30,11 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Utils
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             };
+
+            if (sessionExpiry.HasValue)
+            {
+                claims.Add(new Claim(Auth0Constants.SessionExpiryClaim, sessionExpiry.Value.ToString(), ClaimValueTypes.Integer64));
+            }
 
             if (!string.IsNullOrWhiteSpace(orgId))
             {

@@ -78,6 +78,15 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var properties = authenticateResult.Properties;
+
+            // Hard pre-check against the upstream-IdP session ceiling (session_expiry): once reached,
+            // never serve a cached token or call the token endpoint — surface no-session (null) so the
+            // caller's re-auth path runs. Absent ceiling falls through to existing behavior.
+            if (SessionExpiryHelpers.IsSessionExpired(properties, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+            {
+                return null;
+            }
+
             var matchesPrimaryToken = MatchesPrimaryToken(audience, mergedScope, optionsWithAccessToken);
 
             // 1. Try to satisfy the request from what is already stored in the session,
@@ -207,6 +216,14 @@ namespace Auth0.AspNetCore.Authentication
 
             var properties = authenticateResult.Properties;
 
+            // Hard pre-check against the upstream-IdP session ceiling (session_expiry): once reached,
+            // never serve a cached token or call the token endpoint — surface no-session (null) so the
+            // caller's re-auth path runs. Absent ceiling falls through to existing behavior.
+            if (SessionExpiryHelpers.IsSessionExpired(properties, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+            {
+                return null;
+            }
+
             // Normalize the login hint so the cache key matches what is actually sent to the token
             // endpoint, which omits an empty/whitespace hint (see TokenClient). Without this, a "" hint
             // and a null hint would address the same server-side identity but cache under different keys.
@@ -333,6 +350,21 @@ namespace Auth0.AspNetCore.Authentication
                 Scope = response.Scope,
                 Act = ActClaimReader.TryRead(response.IdToken)
             };
+        }
+
+        /// <summary>
+        /// Retrieves the upstream-IdP session ceiling (<c>session_expiry</c>, Unix seconds) from the
+        /// authenticated user's claims, when the connection emitted one. This is the read-back of the
+        /// value the SDK enforces internally: use it for app-level logic such as a session countdown.
+        /// Returns <c>null</c> when the claim is absent (no ceiling) or the user is not authenticated.
+        /// </summary>
+        /// <param name="context">The current <see cref="HttpContext"/>.</param>
+        /// <returns>The session ceiling in Unix seconds, or <c>null</c> when there is none.</returns>
+        public static long? GetSessionExpiry(this HttpContext context)
+        {
+            var raw = context.User?.FindFirst(Auth0Constants.SessionExpiryClaim)?.Value;
+
+            return SessionExpiryHelpers.TryParseCeiling(raw, out var seconds) ? seconds : (long?)null;
         }
 
         /// <summary>

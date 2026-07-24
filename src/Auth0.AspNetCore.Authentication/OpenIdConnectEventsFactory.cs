@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.PushedAuthorizationRequest;
@@ -166,6 +168,7 @@ namespace Auth0.AspNetCore.Authentication
                 try
                 {
                     IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties?.Items);
+                    PersistSessionExpiry(context);
                 }
                 catch (IdTokenValidationException ex)
                 {
@@ -210,6 +213,40 @@ namespace Auth0.AspNetCore.Authentication
 
                 return Task.CompletedTask;
             };
+        }
+
+        /// <summary>
+        /// Reads the upstream-IdP <c>session_expiry</c> ceiling from the freshly validated ID token
+        /// and persists it on the session so it can be enforced on every subsequent read/refresh.
+        /// Absent claim: nothing is persisted (no ceiling — existing behavior). Present but already
+        /// past at login (<c>session_expiry &lt;= iat</c>): fails rather than persisting an
+        /// already-expired session.
+        /// </summary>
+        private static void PersistSessionExpiry(TokenValidatedContext context)
+        {
+            var sessionExpiryRaw = context.SecurityToken.Claims
+                .FirstOrDefault(c => c.Type == Auth0Constants.SessionExpiryClaim)?.Value;
+
+            if (!SessionExpiryHelpers.TryParseCeiling(sessionExpiryRaw, out var sessionExpiry))
+            {
+                return;
+            }
+
+            var iatRaw = context.SecurityToken.Claims
+                .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Iat)?.Value;
+
+            if (SessionExpiryHelpers.TryParseCeiling(iatRaw, out var iat) && sessionExpiry <= iat)
+            {
+                throw new IdTokenValidationException(
+                    $"Session Expiry (session_expiry) claim in the ID token indicates the session is already " +
+                    $"past its ceiling at login. session_expiry ({sessionExpiry}) is not after iat ({iat}).");
+            }
+
+            if (context.Properties != null)
+            {
+                context.Properties.Items[Auth0Constants.SessionExpiryItemKey] =
+                    sessionExpiry.ToString(CultureInfo.InvariantCulture);
+            }
         }
 
 
