@@ -38,5 +38,13 @@
         /// the wall-clock ceiling, never after.
         /// </summary>
         internal static readonly long SessionExpiryLeewaySeconds = 30;
+
+        /// <summary>
+        /// Upper bound (exclusive) for a valid <c>session_expiry</c> value, in Unix seconds. A value
+        /// at or above this is rejected and treated as "no ceiling": a millisecond value emitted by
+        /// mistake would read as a date thousands of years out and silently switch off enforcement.
+        /// No real seconds value is this large (10,000,000,000 seconds is the year 2286).
+        /// </summary>
+        internal static readonly long SessionExpiryMaxSeconds = 10_000_000_000;
     }
 }

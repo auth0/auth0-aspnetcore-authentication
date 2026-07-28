@@ -14,6 +14,15 @@ namespace Auth0.AspNetCore.Authentication
         /// Parses a raw <c>session_expiry</c> value (Unix seconds) into a <see cref="long"/>.
         /// Tolerant of a missing, empty, or malformed value: returns <c>false</c> rather than throwing,
         /// so a session with no (or an unreadable) ceiling falls through to existing behavior.
+        /// Only a sane positive seconds value enforces a ceiling; every nonsensical value falls
+        /// through to "no ceiling" (fail open) rather than locking the user out:
+        /// <list type="bullet">
+        ///   <item>non-numeric (a string) — cannot be parsed;</item>
+        ///   <item>zero or negative — not a real forward-in-time ceiling;</item>
+        ///   <item>at or above <see cref="Auth0Constants.SessionExpiryMaxSeconds"/> — a millisecond
+        ///     value emitted by mistake would otherwise read as a date thousands of years out and
+        ///     silently switch off enforcement.</item>
+        /// </list>
         /// </summary>
         public static bool TryParseCeiling(string? raw, out long seconds)
         {
@@ -28,7 +37,14 @@ namespace Auth0.AspNetCore.Authentication
             // value serialized as "1712345678.0", matching how auth_time is read elsewhere.
             if (double.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
             {
-                seconds = (long)parsed;
+                var candidate = (long)parsed;
+
+                if (candidate <= 0 || candidate >= Auth0Constants.SessionExpiryMaxSeconds)
+                {
+                    return false;
+                }
+
+                seconds = candidate;
                 return true;
             }
 

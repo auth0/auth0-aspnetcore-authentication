@@ -27,6 +27,37 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             seconds.Should().Be(expected);
         }
 
+        [Theory]
+        // A millisecond value (seconds * 1000) is far above the cap and must be rejected as "no
+        // ceiling" so a units mistake in an Action can't silently switch off enforcement.
+        [InlineData("1712345678000")]
+        [InlineData("10000000000")]
+        public void TryParseCeiling_RejectsValuesAtOrAboveCap(string raw)
+        {
+            SessionExpiryHelpers.TryParseCeiling(raw, out var seconds).Should().BeFalse();
+            seconds.Should().Be(0);
+        }
+
+        [Fact]
+        public void TryParseCeiling_AcceptsValueJustBelowCap()
+        {
+            SessionExpiryHelpers.TryParseCeiling("9999999999", out var seconds).Should().BeTrue();
+            seconds.Should().Be(9999999999L);
+        }
+
+        [Theory]
+        // Zero and negative are numbers, so they clear the range check — but they are not a real
+        // forward-in-time ceiling. They must fall through to "no ceiling" (fail open) rather than
+        // reaching the at-or-before-iat throw and locking the user out.
+        [InlineData("0")]
+        [InlineData("-1")]
+        [InlineData("-1712345678")]
+        public void TryParseCeiling_ReturnsFalse_ForZeroOrNegative(string raw)
+        {
+            SessionExpiryHelpers.TryParseCeiling(raw, out var seconds).Should().BeFalse();
+            seconds.Should().Be(0);
+        }
+
         [Fact]
         public void IsExpired_IsFalse_WellBeforeCeiling()
         {
