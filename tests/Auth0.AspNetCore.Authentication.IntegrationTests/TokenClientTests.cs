@@ -675,5 +675,32 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             result.Error.Should().Be("invalid_request");
             result.ErrorDescription.Should().Be("bad profile");
         }
+
+        [Fact]
+        public async Task ExchangeCustomToken_ParsesIssuedTokenType_WhenPresent()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        "{\"access_token\":\"stt-value\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+                });
+
+            var client = new TokenClient(new HttpClient(mockHandler.Object));
+            var result = await client.ExchangeCustomToken(
+                new Auth0WebAppOptions { Domain = "local.auth0.com", ClientId = "cid", ClientSecret = "secret" },
+                subjectToken: "ext-token",
+                subjectTokenType: "urn:acme:legacy-token");
+
+            result.IsSuccess.Should().BeTrue();
+            result.Response!.IssuedTokenType.Should().Be("urn:auth0:params:oauth:token-type:session_transfer_token");
+        }
     }
 }

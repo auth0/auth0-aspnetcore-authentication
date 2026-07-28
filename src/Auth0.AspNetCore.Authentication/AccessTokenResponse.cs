@@ -36,5 +36,18 @@ namespace Auth0.AspNetCore.Authentication
         /// </summary>
         [JsonPropertyName("scope")]
         public string? Scope { get; set; }
+
+        /// <summary>
+        /// The RFC 8693 <c>issued_token_type</c>. For a Session Transfer Token exchange this is
+        /// <see cref="Auth0Constants.SessionTransferTokenType"/>. Null for ordinary exchanges.
+        /// </summary>
+        [JsonPropertyName("issued_token_type")]
+        public string? IssuedTokenType { get; set; }
+
+        /// <summary>
+        /// The <c>token_type</c>; informational only (typically <c>Bearer</c> or <c>N_A</c> for STTs).
+        /// </summary>
+        [JsonPropertyName("token_type")]
+        public string? TokenType { get; set; }
     }
 }

@@ -20,6 +20,7 @@
   - [Handling a missing refresh token or exchange failure](#handling-a-missing-refresh-token-or-exchange-failure)
 - [Custom Token Exchange](#custom-token-exchange)
   - [Delegation / impersonation](#delegation--impersonation)
+- [Impersonation via Session Transfer](#impersonation-via-session-transfer)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -836,6 +837,94 @@ var currentActor = result.Act?.Sub;
 
 > **Note:** `subject_token_type` (and `actor_token_type`) must be custom URIs. The reserved `urn:ietf:` and
 > `urn:auth0:` namespaces are rejected client-side.
+
+## Impersonation via Session Transfer
+
+Session Transfer builds on Custom Token Exchange to let an initiator app (e.g. a support/admin console —
+the *actor*) start an authenticated web session in a target app *as a customer* (the *subject*), with the
+agent recorded in the `act` claim. The initiator requests a short-lived, single-use **Session Transfer
+Token (STT)** and redirects the agent's browser to the target's login URL carrying that STT; the target
+redeems it at `/authorize`.
+
+This requires a two-client tenant setup (initiator + target, with `session_transfer` delegation configured)
+that is provisioned out of band via the Management API.
+
+### Initiator: request an STT and redirect
+
+`RequestSessionTransferTokenAsync` performs the exchange. The **actor is auto-sourced from the agent's
+current session id_token** (refreshed automatically if stale), so the agent must be logged in. Pass an
+explicit `ActorToken` only to override that. The audience is set for you to
+`urn:{your-domain}:session_transfer`. The STT is one-shot and **never stored** — use it immediately.
+
+```csharp
+// Minimal API — the agent (actor) is already logged in on this app.
+app.MapGet("/impersonate/{customerToken}", async (HttpContext http, string customerToken) =>
+{
+    try
+    {
+        var result = await http.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+        {
+            SubjectToken = customerToken,                 // the customer to impersonate (opaque to Auth0)
+            SubjectTokenType = "urn:acme:customer-token", // routes to your CTE Profile
+        });
+
+        var url = http.BuildSessionTransferRedirect(
+            "https://customer-app.example.com/login",     // app-controlled target login URL (absolute HTTPS)
+            result);
+
+        return Results.Redirect(url);
+    }
+    catch (CustomTokenExchangeException ex) when (ex.Code == CustomTokenExchangeErrorCode.ActorUnavailable)
+    {
+        // The agent has no usable session to act as. Send them to log in first.
+        return Results.Challenge();
+    }
+    catch (CustomTokenExchangeException ex)
+    {
+        // ex.StatusCode / ex.Error / ex.ErrorDescription describe a token-endpoint rejection
+        // (e.g. session transfer disabled, or setActor required).
+        return Results.Problem(ex.Message);
+    }
+});
+```
+
+`BuildSessionTransferRedirect` returns a `string` (not an `IActionResult`) so it works in both Minimal APIs
+(`Results.Redirect(url)`) and MVC (`return Redirect(url);`). It requires an absolute HTTPS `targetLoginUrl`
+and throws `ArgumentException` otherwise — the STT is a live credential, so the target must be app-controlled.
+
+### Target: redeem the STT at login
+
+On the target app, forward the incoming `session_transfer_token` query parameter into the Auth0 login
+request using the existing `LoginAuthenticationPropertiesBuilder`:
+
+```csharp
+app.MapGet("/login", async (HttpContext http, string? session_transfer_token) =>
+{
+    var propertiesBuilder = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri("/");
+
+    if (!string.IsNullOrEmpty(session_transfer_token))
+    {
+        propertiesBuilder.WithParameter("session_transfer_token", session_transfer_token);
+    }
+
+    await http.ChallengeAsync(Auth0Constants.AuthenticationScheme, propertiesBuilder.Build());
+});
+```
+
+After redemption, the established session is short-lived and non-refreshable. The agent behind the
+impersonated session is available via the `act` claim on `HttpContext.User`:
+
+```csharp
+var actor = http.User.FindFirst("act")?.Value; // JSON: {"sub":"<agent>"}
+```
+
+> **Notes:**
+> - The agent must be logged in on the initiator app — that session is the actor source.
+> - The STT is single-use and short-lived (~60s); never persist it.
+> - Branch on `result.IssuedTokenType` (`Auth0Constants.SessionTransferTokenType`), never on
+>   `result.TokenType` (which is the informational `N_A`).
+> - The two-client tenant prerequisites are configured out of band.
 
 ## Organizations
 

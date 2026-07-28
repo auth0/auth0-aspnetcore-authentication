@@ -378,6 +378,389 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
+        /// Requests a Session Transfer Token (STT) via Custom Token Exchange: exchanges the customer
+        /// <see cref="SessionTransferTokenRequest.SubjectToken"/> for a short-lived, single-use STT
+        /// that can be placed on a redirect to a target app (see
+        /// <see cref="BuildSessionTransferRedirect"/>). The actor (the agent) is auto-sourced from the
+        /// current session's id_token unless an explicit <see cref="SessionTransferTokenRequest.ActorToken"/>
+        /// is supplied. The audience is set by the SDK to <c>urn:{resolved-domain}:session_transfer</c>.
+        /// <para>
+        /// The STT is <b>never persisted</b>. Auto-sourcing the actor may, however, refresh and persist
+        /// the agent's session id_token when it is stale - identical to
+        /// <see cref="GetAccessTokenAsync"/> and required for refresh-token rotation safety. How close to
+        /// its <c>exp</c> the id_token must be to count as stale is governed by
+        /// <see cref="Auth0WebAppWithAccessTokenOptions.AccessTokenExpirationLeeway"/>, which the SDK uses
+        /// as its single expiry margin rather than exposing a separate id_token setting.
+        /// </para>
+        /// <para>
+        /// <b>Enable <see cref="Auth0WebAppWithAccessTokenOptions.UseRefreshTokens"/>.</b> It defaults to
+        /// <c>false</c>, and without it the session carries no <c>.Token.refresh_token</c>, so a stale
+        /// id_token cannot be refreshed and this method throws
+        /// <see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/>.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// This method is not safe to call concurrently for the same session. When the actor is
+        /// auto-sourced and the session id_token is stale, it performs the same read, refresh and
+        /// <see cref="AuthenticationHttpContextExtensions.SignInAsync(HttpContext, string?, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties?)"/>
+        /// sequence as <see cref="GetAccessTokenAsync"/>, and carries the same hazard.
+        /// <para>
+        /// To avoid it, ensure only one call that may refresh the session is in flight per session at a
+        /// time - counting <see cref="GetAccessTokenAsync"/> and
+        /// <see cref="GetAccessTokenForConnectionAsync"/> as well, since they share the same session
+        /// slots. Either don't issue such requests in parallel, or plug in a server-side session store via
+        /// <see cref="Auth0WebAppAuthenticationBuilder.WithSessionStore(Microsoft.AspNetCore.Authentication.Cookies.ITicketStore)"/>
+        /// whose <c>ITicketStore</c> serializes concurrent access per session. Passing an explicit
+        /// <see cref="SessionTransferTokenRequest.ActorToken"/> skips the refresh path entirely and avoids
+        /// the hazard.
+        /// </para>
+        /// </remarks>
+        /// <param name="context">The current <see cref="HttpContext"/>.</param>
+        /// <param name="request">The session-transfer request (subject token + type, optional explicit
+        /// actor pair, organization, scope).</param>
+        /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
+        /// <returns>The issued Session Transfer Token and metadata.</returns>
+        /// <exception cref="CustomTokenExchangeException">
+        /// Thrown on client-side validation failure; when an explicit actor is blank, untrimmed or
+        /// <c>"Bearer "</c>-prefixed, or when <see cref="SessionTransferTokenRequest.ActorTokenType"/> is
+        /// set without an <see cref="SessionTransferTokenRequest.ActorToken"/>
+        /// (<see cref="CustomTokenExchangeErrorCode.InvalidTokenFormat"/>); when no actor can be
+        /// resolved (<see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/>); when the token
+        /// endpoint rejects the exchange (carrying the raw status/error/error_description, plus
+        /// <see cref="CustomTokenExchangeException.Code"/> when the server's <c>error</c> maps onto
+        /// <see cref="CustomTokenExchangeErrorCode.SetActorRequired"/> or
+        /// <see cref="CustomTokenExchangeErrorCode.SessionTransferDisabled"/> - Auth0 reports both as a
+        /// generic <c>invalid_request</c> today, so match on
+        /// <see cref="CustomTokenExchangeException.ErrorDescription"/> for now); or when it
+        /// returns 200 without <c>issued_token_type</c> set to
+        /// <see cref="Auth0Constants.SessionTransferTokenType"/> (<see cref="CustomTokenExchangeException.Error"/>
+        /// is <c>invalid_issued_token_type</c>), which indicates the CTE profile or client is not
+        /// configured for session transfer. Also thrown when a transport error prevents reaching the
+        /// token endpoint - either on the actor refresh or on the exchange itself - with the original
+        /// <see cref="System.Net.Http.HttpRequestException"/> / <see cref="System.Threading.Tasks.TaskCanceledException"/>
+        /// preserved on <see cref="System.Exception.InnerException"/>.
+        /// </exception>
+        /// <exception cref="MfaRequiredException">
+        /// Thrown when auto-sourcing the actor requires refreshing a stale session id_token and that
+        /// refresh returns <c>mfa_required</c> with an <c>mfa_token</c>. This is a recoverable step-up
+        /// challenge rather than an unresolvable actor: drive the challenge/verify flow with
+        /// <see cref="AuthenticationApi.IAuthenticationApiClient"/> using the
+        /// <see cref="MfaRequiredException.MfaToken"/> blob, then pass the <c>id_token</c> from the
+        /// completed grant back as <see cref="SessionTransferTokenRequest.ActorToken"/> and retry.
+        /// The actor refresh binds the <c>openid</c> scope into the blob so the MFA grant returns one.
+        /// An <c>mfa_required</c> response with no <c>mfa_token</c> cannot drive the flow and falls
+        /// through to <see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/> instead.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// Thrown when auto-sourcing the actor refreshes a stale session id_token but the rotated
+        /// session cannot be persisted because the response has already started. Persisting calls
+        /// <see cref="AuthenticationHttpContextExtensions.SignInAsync(HttpContext, string?, System.Security.Claims.ClaimsPrincipal, AuthenticationProperties?)"/>,
+        /// which writes the authentication cookie; if the headers have already been sent, this throws
+        /// and the exception propagates out of this method (identical to <see cref="GetAccessTokenAsync"/>).
+        /// </exception>
+        public static async Task<SessionTransferTokenResult> RequestSessionTransferTokenAsync(this HttpContext context, SessionTransferTokenRequest request, string? scheme = null)
+        {
+            scheme ??= Auth0Constants.AuthenticationScheme;
+
+            // Reuse the existing CTE subject-token validation (empty / whitespace / "Bearer " prefix).
+            CustomTokenExchangeRequestValidator.Validate(new CustomTokenExchangeRequest
+            {
+                SubjectToken = request.SubjectToken,
+                SubjectTokenType = request.SubjectTokenType
+            });
+
+            var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
+            var optionsWithAccessToken = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppWithAccessTokenOptions>>().Get(scheme);
+
+            var (actorToken, actorTokenType) = await ResolveActorTokenAsync(context, request, options, optionsWithAccessToken).ConfigureAwait(false);
+
+            var resolvedDomain = context.GetResolvedDomain();
+
+            // The audience must carry the bare host. A DomainResolver may return either a bare host
+            // ("tenant.custom.com") or a full issuer ("https://tenant.custom.com/") - both shapes are
+            // supported and Auth0CustomDomainStartupFilter stores whichever it gets verbatim in
+            // HttpContext.Items - so interpolating the raw value would yield
+            // urn:https://tenant.custom.com:session_transfer. Normalizing through Utils.ToAuthority
+            // first is how the rest of the SDK consumes this value (see
+            // Auth0CustomDomainsOpenIdConnectConfigurationManager and BackchannelLogoutHandler).
+            var audienceHost = new Uri(Utils.ToAuthority(resolvedDomain ?? options.Domain)).Host;
+            var audience = $"urn:{audienceHost}:session_transfer";
+
+            var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
+            var tokenClient = new TokenClient(httpClient);
+
+            TokenRefreshResult result;
+            try
+            {
+                result = await tokenClient.ExchangeCustomToken(
+                    options,
+                    request.SubjectToken,
+                    request.SubjectTokenType,
+                    audience,
+                    request.Scope,
+                    actorToken,
+                    actorTokenType,
+                    request.Organization,
+                    resolvedDomain).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Keep a single failure protocol: a transport error reaching the token endpoint is
+                // reported the same way as a rejection by it, with the original exception preserved
+                // on InnerException.
+                throw new CustomTokenExchangeException(
+                    "The session transfer token exchange could not reach the token endpoint.", ex);
+            }
+
+            if (!result.IsSuccess)
+            {
+                // The raw error/error_description are always preserved; Code is additionally set when
+                // the server's error field is one the SDK recognises, so a caller can match on
+                // CustomTokenExchangeErrorCode instead of parsing text. Null today - Auth0 reports both
+                // session-transfer rejections as a generic invalid_request.
+                throw new CustomTokenExchangeException(
+                    result.StatusCode,
+                    result.Error,
+                    result.ErrorDescription,
+                    CustomTokenExchangeErrorCode.MapServerError(result.Error));
+            }
+
+            var response = result.Response!;
+
+
+            // A CTE profile that is not set up for session transfer
+            // returns an ordinary, long-lived, multi-use access token through this exact path.
+            // A tenant misconfiguration must surface as an error.
+            if (!string.Equals(response.IssuedTokenType, Auth0Constants.SessionTransferTokenType, StringComparison.Ordinal))
+            {
+                throw new CustomTokenExchangeException(
+                    result.StatusCode,
+                    "invalid_issued_token_type",
+                    $"The token endpoint did not return a session transfer token.");
+            }
+
+            // The STT is returned in the access_token field. It is surfaced to the caller and never persisted.
+            return new SessionTransferTokenResult
+            {
+                SessionTransferToken = response.AccessToken,
+                IssuedTokenType = response.IssuedTokenType!,
+                ExpiresIn = response.ExpiresIn,
+                TokenType = response.TokenType,
+                Scope = response.Scope
+            };
+        }
+
+        /// <summary>
+        /// Resolves the actor token for a session-transfer exchange. Explicit actor wins; otherwise the
+        /// session id_token is used when fresh, refreshed when stale (persisting the rotated session),
+        /// and <see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/> is thrown when nothing is
+        /// resolvable - before any STT exchange call.
+        /// </summary>
+        private static async Task<(string ActorToken, string ActorTokenType)> ResolveActorTokenAsync(
+            HttpContext context,
+            SessionTransferTokenRequest request,
+            Auth0WebAppOptions options,
+            Auth0WebAppWithAccessTokenOptions optionsWithAccessToken)
+        {
+            if (request.ActorToken != null)
+            {
+                return SessionTransferActorResolver.ResolveExplicitActor(request.ActorToken, request.ActorTokenType);
+            }
+
+            // An ActorTokenType with no ActorToken cannot be honoured
+            if (!string.IsNullOrWhiteSpace(request.ActorTokenType))
+            {
+                throw new CustomTokenExchangeException(
+                    CustomTokenExchangeErrorCode.InvalidTokenFormat,
+                    "ActorTokenType was provided without an ActorToken. Supply both to use an explicit actor");
+            }
+
+            var authenticateResult = await context.AuthenticateAsync(options.CookieAuthenticationScheme).ConfigureAwait(false);
+            if (!authenticateResult.Succeeded || authenticateResult.Properties == null)
+            {
+                throw new CustomTokenExchangeException(
+                    CustomTokenExchangeErrorCode.ActorUnavailable,
+                    "No authenticated session is available to source the actor token.");
+            }
+
+            var properties = authenticateResult.Properties;
+            properties.Items.TryGetValue(".Token.id_token", out var idToken);
+
+            // AccessTokenExpirationLeeway is reused for the id_token deliberately, rather than given a
+            // dedicated option.
+            // AuthenticationBuilderExtensions.RefreshTokenIfNeccesary applies it to a refresh that
+            // rotates the stored id_token alongside the access token, so it governs id_token freshness
+            // on the cookie-validation path too. If a caller ever needs them to differ, they can pass an explicit ActorToken.
+            var leeway = optionsWithAccessToken.AccessTokenExpirationLeeway;
+            if (SessionTransferActorResolver.IsIdTokenFresh(idToken, leeway))
+            {
+                return (idToken!, Auth0Constants.IdTokenType);
+            }
+
+            // Stale/missing id_token - try to refresh via the session refresh token (rotation-safe).
+            if (properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
+            {
+                var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
+                var tokenClient = new TokenClient(httpClient);
+                var resolvedDomain = context.GetResolvedDomain();
+
+                const string actorRefreshScope = "openid";
+
+                TokenRefreshResult refreshResult;
+                try
+                {
+                    refreshResult = await tokenClient.Refresh(options, refreshToken!, resolvedDomain, scope: actorRefreshScope).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Transport errors (HttpRequestException, TaskCanceledException) would otherwise
+                    // escape raw from a method documented to fail via CustomTokenExchangeException.
+                    // ActorUnavailable would be a lie here - the session is fine, the network was not.
+                    throw new CustomTokenExchangeException(
+                        "Failed to refresh the session id_token needed to source the actor token.", ex);
+                }
+
+                // A step-up challenge is a recoverable case distinct from "no usable actor": collapsing
+                // it into ActorUnavailable would tell the agent its session has no refresh token, which
+                // is false, and leave no path to complete MFA and retry.
+                if (!refreshResult.IsSuccess &&
+                    refreshResult.Error == "mfa_required" &&
+                    !string.IsNullOrEmpty(refreshResult.MfaToken))
+                {
+                    var protector = context.RequestServices.GetRequiredService<IMfaTokenProtector>();
+                    var blob = protector.Protect(new MfaTokenContext
+                    {
+                        MfaToken = refreshResult.MfaToken!,
+                        Audience = null,
+                        Scope = actorRefreshScope,
+                        MfaRequirements = refreshResult.MfaRequirements
+                    });
+
+                    throw new MfaRequiredException(
+                        blob,
+                        refreshResult.MfaRequirements,
+                        (HttpStatusCode)(refreshResult.StatusCode ?? (int)HttpStatusCode.Forbidden),
+                        new Exceptions.ApiError { Error = refreshResult.Error, Message = refreshResult.ErrorDescription ?? string.Empty });
+                }
+
+                if (refreshResult.IsSuccess && !string.IsNullOrEmpty(refreshResult.Response!.IdToken))
+                {
+                    var response = refreshResult.Response!;
+
+                    // Only the id_token (and a rotated refresh token) are persisted. The primary
+                    // .Token.access_token / .Token.expires_at slots are deliberately left alone:
+                    // this refresh requests no audience or scope, so the access token it returns is
+                    // for the tenant default rather than the application's configured audience -
+                    // exactly the contract MatchesPrimaryToken and IsPrimaryExpired rely on.
+                    // Writing it (and resetting expires_at to a full fresh lifetime) would make the
+                    // next GetAccessTokenAsync serve a wrong-audience token from cache, and the reset
+                    // expiry would keep it doing so for that whole lifetime.
+                    //
+                    // Assigned directly rather than via UpdateTokenValue, which only writes a key
+                    // that is already present: a session with no stored id_token would otherwise
+                    // no-op here and persist nothing, burning a refresh-token rotation per call.
+                    properties.Items[".Token.id_token"] = response.IdToken;
+
+                    if (!string.IsNullOrEmpty(response.RefreshToken))
+                    {
+                        properties.UpdateTokenValue("refresh_token", response.RefreshToken);
+                    }
+
+                    await context.SignInAsync(options.CookieAuthenticationScheme, authenticateResult.Principal!, properties).ConfigureAwait(false);
+
+                    return (response.IdToken, Auth0Constants.IdTokenType);
+                }
+            }
+
+            // UseRefreshTokens defaults to false, so "no refresh token" is the SDK's out-of-the-box
+            // state rather than an unusual one. Naming the option here means the exception explains
+            // its own most likely cause instead of reading as an unrecoverable session problem.
+            throw new CustomTokenExchangeException(
+                CustomTokenExchangeErrorCode.ActorUnavailable,
+                "Could not source an actor token: the session has no usable id_token and no refresh token to obtain one. " +
+                "Enable refresh tokens with .WithAccessToken(o => o.UseRefreshTokens = true) so a stale id_token can be " +
+                "refreshed, or pass an explicit ActorToken on the request.");
+        }
+
+        /// <summary>
+        /// Builds the redirect URL that carries a Session Transfer Token to a target app's login
+        /// endpoint. Appends <c>session_transfer_token</c> (URL-encoded) to <paramref name="targetLoginUrl"/>,
+        /// preserving any existing query, and appends <c>organization</c> when supplied. Performs no
+        /// network call and writes nothing.
+        /// </summary>
+        /// <remarks>
+        /// Returns a <see cref="string"/> rather than an <c>IActionResult</c> so the same helper works
+        /// in Minimal APIs (<c>Results.Redirect(url)</c>) and MVC (<c>Redirect(url)</c>) - an
+        /// <c>IActionResult</c> would not compose with a Minimal API endpoint return.
+        /// <para>
+        /// <b>Security:</b> <paramref name="targetLoginUrl"/> must be app-controlled - the STT is a live
+        /// credential. The URL must be absolute HTTPS; a relative or non-HTTPS target throws.
+        /// </para>
+        /// This is kept as an <see cref="HttpContext"/> extension (though it does not read the context)
+        /// so it sits discoverably alongside <see cref="RequestSessionTransferTokenAsync"/>.
+        /// </remarks>
+        /// <param name="context">The current <see cref="HttpContext"/> (unused; present for a consistent surface).</param>
+        /// <param name="targetLoginUrl">The target app's login URL. Must be an absolute HTTPS URI.</param>
+        /// <param name="result">The result from <see cref="RequestSessionTransferTokenAsync"/>.</param>
+        /// <param name="organization">Optional organization ID/name to forward to the target.</param>
+        /// <returns>The absolute redirect URL carrying the STT.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="targetLoginUrl"/> is not an absolute HTTPS URI.</exception>
+        public static string BuildSessionTransferRedirect(this HttpContext context, string targetLoginUrl, SessionTransferTokenResult result, string? organization = null)
+        {
+            if (!Uri.TryCreate(targetLoginUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new ArgumentException(
+                    "targetLoginUrl must be an absolute HTTPS URL.", nameof(targetLoginUrl));
+            }
+
+            // Split off any fragment so the query is inserted before it. Appending to the raw
+            // string would place session_transfer_token after '#', where the browser never
+            // transmits it and the STT silently never reaches the target.
+            var hashIndex = targetLoginUrl.IndexOf('#');
+            var baseUrl = hashIndex >= 0 ? targetLoginUrl.Substring(0, hashIndex) : targetLoginUrl;
+            var fragment = hashIndex >= 0 ? targetLoginUrl.Substring(hashIndex) : string.Empty;
+
+            var separator = string.IsNullOrEmpty(uri.Query) ? "?" : "&";
+            var builder = new System.Text.StringBuilder(baseUrl);
+            builder.Append(separator);
+            builder.Append("session_transfer_token=");
+            builder.Append(Uri.EscapeDataString(result.SessionTransferToken));
+
+            if (!string.IsNullOrWhiteSpace(organization))
+            {
+                builder.Append("&organization=");
+                builder.Append(Uri.EscapeDataString(organization!));
+            }
+
+            builder.Append(fragment);
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Builds the redirect URL that carries a Session Transfer Token to a target app's login
+        /// endpoint, taking the <c>organization</c> from the same <paramref name="request"/> that was
+        /// exchanged. Prefer this overload when the exchange was organization-scoped: the request stays
+        /// the single source of truth, so the redirect cannot silently disagree with the exchange.
+        /// </summary>
+        /// <param name="context">The current <see cref="HttpContext"/> (unused; present for a consistent surface).</param>
+        /// <param name="targetLoginUrl">The target app's login URL. Must be an absolute HTTPS URI.</param>
+        /// <param name="result">The result from <see cref="RequestSessionTransferTokenAsync"/>.</param>
+        /// <param name="request">The request that produced <paramref name="result"/>; its
+        /// <see cref="SessionTransferTokenRequest.Organization"/> is forwarded to the target.</param>
+        /// <returns>The absolute redirect URL carrying the STT.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="targetLoginUrl"/> is not an absolute HTTPS URI.</exception>
+        public static string BuildSessionTransferRedirect(this HttpContext context, string targetLoginUrl, SessionTransferTokenResult result, SessionTransferTokenRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            return context.BuildSessionTransferRedirect(targetLoginUrl, result, request.Organization);
+        }
+
+        /// <summary>
         /// Retrieves the resolved domain from the <see cref="HttpContext.Items"/> collection.
         /// </summary>
         /// <param name="httpContext">The current HTTP context.</param>

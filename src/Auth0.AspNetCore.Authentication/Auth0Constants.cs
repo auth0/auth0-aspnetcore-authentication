@@ -46,5 +46,16 @@
         /// No real seconds value is this large (10,000,000,000 seconds is the year 2286).
         /// </summary>
         internal static readonly long SessionExpiryMaxSeconds = 10_000_000_000;
+        /// The <c>issued_token_type</c> value that identifies a response as carrying a
+        /// Session Transfer Token (STT). Branch on this value — never on <c>token_type</c>,
+        /// which is the informational <c>N_A</c> for STT responses.
+        /// </summary>
+        public const string SessionTransferTokenType = "urn:auth0:params:oauth:token-type:session_transfer_token";
+
+        /// <summary>
+        /// The RFC 8693 token-type URI for an ID token. Used as the default
+        /// <c>actor_token_type</c> when the actor is auto-sourced from the agent's session id_token.
+        /// </summary>
+        internal const string IdTokenType = "urn:ietf:params:oauth:token-type:id_token";
     }
 }

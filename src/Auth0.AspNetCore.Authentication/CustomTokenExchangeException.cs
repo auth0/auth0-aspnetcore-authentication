@@ -18,9 +18,22 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>The <c>error_description</c> from the token endpoint's error body, when present.</summary>
         public string? ErrorDescription { get; }
 
+        /// <summary>
+        /// A machine-readable SDK error code (see <see cref="CustomTokenExchangeErrorCode"/>) for
+        /// failures the SDK raises itself before or around the network call. Null for the existing
+        /// message-only and token-endpoint-rejection constructors.
+        /// </summary>
+        public string? Code { get; }
+
         /// <summary>Creates an exception for a client-side validation failure.</summary>
         public CustomTokenExchangeException(string message) : base(message)
         {
+        }
+
+        /// <summary>Creates an exception carrying a machine-readable SDK error code.</summary>
+        public CustomTokenExchangeException(string code, string message) : base(message)
+        {
+            Code = code;
         }
 
         /// <summary>Creates an exception for a token-endpoint rejection.</summary>
