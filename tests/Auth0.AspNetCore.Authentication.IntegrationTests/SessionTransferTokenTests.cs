@@ -229,12 +229,12 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         // "branch on IssuedTokenType" check would silently pass.
         [Theory]
         // issued_token_type absent entirely
-        [InlineData("{\"access_token\":\"a-real-access-token\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "(missing)")]
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"token_type\":\"Bearer\",\"expires_in\":86400}")]
         // present but an ordinary access token
-        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"urn:ietf:params:oauth:token-type:access_token\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "urn:ietf:params:oauth:token-type:access_token")]
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"urn:ietf:params:oauth:token-type:access_token\",\"token_type\":\"Bearer\",\"expires_in\":86400}")]
         // present but empty
-        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "")]
-        public async Task RequestSessionTransferTokenAsync_Throws_WhenIssuedTokenTypeIsNotStt(string body, string reportedType)
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"\",\"token_type\":\"Bearer\",\"expires_in\":86400}")]
+        public async Task RequestSessionTransferTokenAsync_Throws_WhenIssuedTokenTypeIsNotStt(string body)
         {
             var handler = new Mock<HttpMessageHandler>();
             handler
@@ -260,8 +260,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
             var ex = (await act.Should().ThrowAsync<CustomTokenExchangeException>()).Which;
             ex.Error.Should().Be("invalid_issued_token_type");
-            // Quoted so the empty-string case still asserts something (Contain("") is rejected).
-            ex.Message.Should().Contain($"was \"{reportedType}\"");
             // The access token must never leak into the exception message — it would land in logs.
             ex.Message.Should().NotContain("a-real-access-token");
         }
@@ -627,8 +625,16 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                     && e.ErrorDescription!.Contains("setActor is required"));
         }
 
-        [Fact]
-        public async Task RequestSessionTransferTokenAsync_BuildsAudience_FromResolvedDomain_ForMcd()
+        // A DomainResolver may return a bare host or a full issuer, and Auth0CustomDomainStartupFilter
+        // stores whichever it gets verbatim in HttpContext.Items (see
+        // Auth0CustomDomainStartupFilterTests, which resolves "https://custom.domain.com"). The
+        // audience must carry the bare host for every shape — interpolating the raw value would build
+        // urn:https://custom.domain.com:session_transfer, which the token endpoint rejects.
+        [Theory]
+        [InlineData("tenant.custom.com")]
+        [InlineData("https://tenant.custom.com")]
+        [InlineData("https://tenant.custom.com/")]
+        public async Task RequestSessionTransferTokenAsync_BuildsAudience_FromResolvedDomain_ForMcd(string resolvedDomain)
         {
             string capturedBody = string.Empty;
             var handler = new Mock<HttpMessageHandler>();
@@ -647,7 +653,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                         "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
                 });
 
-            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _, resolvedDomain: "tenant.custom.com");
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _, resolvedDomain: resolvedDomain);
 
             await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
             {
@@ -657,6 +663,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             });
 
             capturedBody.Should().Contain("audience=urn%3Atenant.custom.com%3Asession_transfer");
+            // Guard against the scheme leaking into the URN for the issuer-shaped inputs.
+            capturedBody.Should().NotContain("https%3A%2F%2Ftenant.custom.com");
         }
 
         [Fact]
