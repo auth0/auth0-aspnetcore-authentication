@@ -113,7 +113,7 @@ namespace Auth0.AspNetCore.Authentication
                 }
             }
 
-            // 2. No usable token cached — we need the refresh token to obtain one.
+            // 2. No usable token cached - we need the refresh token to obtain one.
             if (!properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
             {
                 if (optionsWithAccessToken.Events?.OnMissingRefreshToken != null)
@@ -135,7 +135,7 @@ namespace Auth0.AspNetCore.Authentication
             }
             catch (Exception ex)
             {
-                // Any refresh failure — transport error, malformed response, or misconfiguration —
+                // Any refresh failure - transport error, malformed response, or misconfiguration -
                 // is folded into the same failure path as a token-endpoint rejection, so callers
                 // have a single failure protocol and nothing escapes this method.
                 await FireRefreshFailed(optionsWithAccessToken,
@@ -187,7 +187,7 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>
         /// Retrieves a federated connection (Token Vault) access token for the audience/connection
-        /// described by <paramref name="request"/> — a third-party API token (e.g. Google, GitHub)
+        /// described by <paramref name="request"/> - a third-party API token (e.g. Google, GitHub)
         /// for the logged-in user. Reuses a cached token from the session when one is present and not
         /// expired; otherwise exchanges the session's refresh token for a new connection token and
         /// persists it.
@@ -290,7 +290,7 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>
         /// Performs a Custom Token Exchange : exchanges the external token described by
         /// <paramref name="request"/> for Auth0 tokens, without a browser redirect. This is the
-        /// stateless utility — it has <b>no session side-effects</b> (it does not sign the user in or
+        /// stateless utility - it has <b>no session side-effects</b> (it does not sign the user in or
         /// write any cookie); the caller decides what to persist. Use it for delegation/impersonation
         /// and agent-identity scenarios.
         /// </summary>
@@ -787,7 +787,7 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>
         /// Determines whether the requested audience/scope matches the application's primary
-        /// (login-time) token — the one stored in the <c>.Token.access_token</c> slot — rather
+        /// (login-time) token - the one stored in the <c>.Token.access_token</c> slot - rather
         /// than an additional MRRT audience/scope kept in the access-token sets.
         /// </summary>
         private static bool MatchesPrimaryToken(string? audience, string? mergedScope, Auth0WebAppWithAccessTokenOptions options)

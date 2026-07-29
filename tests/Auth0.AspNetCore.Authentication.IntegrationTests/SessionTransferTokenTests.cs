@@ -799,10 +799,77 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 ActorToken = "agent-jwt"
             });
 
+            // Code stays null: the mapping keys off the machine-readable `error` field only, and Auth0
+            // reports this today as a generic invalid_request with the detail in error_description.
+            // Matching that text to remap the failure is deliberately not done, so ErrorDescription is
+            // the working predicate for now.
             (await act.Should().ThrowAsync<CustomTokenExchangeException>())
                 .Where(e => e.StatusCode == 400
                     && e.Error == "invalid_request"
-                    && e.ErrorDescription!.Contains("setActor is required"));
+                    && e.ErrorDescription!.Contains("setActor is required")
+                    && e.Code == null);
+        }
+
+        // The named constants exist for the day the platform returns a machine-readable error code.
+        // When it does, the mapping fires with no further change — this is that contract, pinned.
+        [Theory]
+        [InlineData("setactor_required", CustomTokenExchangeErrorCode.SetActorRequired)]
+        [InlineData("session_transfer_disabled", CustomTokenExchangeErrorCode.SessionTransferDisabled)]
+        [InlineData("SetActor_Required", CustomTokenExchangeErrorCode.SetActorRequired)]
+        public async Task RequestSessionTransferTokenAsync_MapsServerErrorOntoCode(string serverError, string expectedCode)
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent(
+                        $"{{\"error\":\"{serverError}\",\"error_description\":\"the server's own words\"}}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer",
+                ActorToken = "agent-jwt"
+            });
+
+            // The raw server values survive the mapping — Code is additive, not a replacement.
+            (await act.Should().ThrowAsync<CustomTokenExchangeException>())
+                .Where(e => e.Code == expectedCode
+                    && e.Error == serverError
+                    && e.ErrorDescription == "the server's own words"
+                    && e.StatusCode == 400);
+        }
+
+        // An unrecognised error must not be forced onto a session-transfer code.
+        [Theory]
+        [InlineData("invalid_request")]
+        [InlineData("invalid_grant")]
+        [InlineData("access_denied")]
+        public void MapServerError_ReturnsNull_ForUnrelatedErrors(string serverError)
+        {
+            CustomTokenExchangeErrorCode.MapServerError(serverError).Should().BeNull();
+            CustomTokenExchangeErrorCode.MapServerError(null).Should().BeNull();
+        }
+
+        [Fact]
+        public void CustomTokenExchangeException_CodeCarryingRejectionConstructor_KeepsRawServerValues()
+        {
+            var ex = new CustomTokenExchangeException(400, "session_transfer_disabled", "desc",
+                CustomTokenExchangeErrorCode.SessionTransferDisabled);
+
+            ex.Code.Should().Be("session_transfer_disabled");
+            ex.Error.Should().Be("session_transfer_disabled");
+            ex.ErrorDescription.Should().Be("desc");
+            ex.StatusCode.Should().Be(400);
         }
 
         // A DomainResolver may return a bare host or a full issuer, and Auth0CustomDomainStartupFilter

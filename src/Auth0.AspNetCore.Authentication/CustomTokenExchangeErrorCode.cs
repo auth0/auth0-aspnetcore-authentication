@@ -2,8 +2,6 @@ namespace Auth0.AspNetCore.Authentication
 {
     /// <summary>
     /// Machine-readable error codes carried on <see cref="CustomTokenExchangeException.Code"/>.
-    /// Constant names are C#-idiomatic PascalCase; values are the spec's snake_case, matching how
-    /// nextjs-auth0 and auth0-server-python represent them.
     /// </summary>
     public static class CustomTokenExchangeErrorCode
     {
@@ -16,11 +14,24 @@ namespace Auth0.AspNetCore.Authentication
         public const string InvalidTokenFormat = "invalid_token_format";
 
         /// <summary>The token endpoint rejected the exchange because <c>setActor</c> is required
-        /// for a session-transfer exchange. Documented; surfaced via the raw server error.</summary>
+        /// for a session-transfer exchange.
+        /// </summary>
         public const string SetActorRequired = "setactor_required";
 
         /// <summary>The token endpoint rejected the exchange because session transfer is disabled
-        /// for the client. Documented; surfaced via the raw server error.</summary>
+        /// for the client.
+        /// </summary>
         public const string SessionTransferDisabled = "session_transfer_disabled";
+
+        /// <summary>
+        /// Maps a token-endpoint <c>error</c> value onto one of the session-transfer codes,
+        /// returning <c>null</c> when it is not one of them.
+        /// </summary>
+        internal static string? MapServerError(string? error) => error?.ToLowerInvariant() switch
+        {
+            SetActorRequired => SetActorRequired,
+            SessionTransferDisabled => SessionTransferDisabled,
+            _ => null
+        };
     }
 }

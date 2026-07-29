@@ -20,8 +20,9 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>
         /// A machine-readable SDK error code (see <see cref="CustomTokenExchangeErrorCode"/>) for
-        /// failures the SDK raises itself before or around the network call. Null for the existing
-        /// message-only and token-endpoint-rejection constructors.
+        /// failures the SDK raises itself before or around the network call, and for token-endpoint
+        /// rejections whose <c>error</c> field maps onto a known code. Inspect <see cref="Error"/> and
+        /// <see cref="ErrorDescription"/> when this is null.
         /// </summary>
         public string? Code { get; }
 
@@ -47,11 +48,22 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>Creates an exception for a token-endpoint rejection.</summary>
         public CustomTokenExchangeException(int? statusCode, string? error, string? errorDescription)
+            : this(statusCode, error, errorDescription, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an exception for a token-endpoint rejection, additionally carrying a machine-readable
+        /// SDK <paramref name="code"/> mapped from the server's <c>error</c> field. <see cref="Error"/>
+        /// and <see cref="ErrorDescription"/> still carry the server's own values verbatim.
+        /// </summary>
+        public CustomTokenExchangeException(int? statusCode, string? error, string? errorDescription, string? code)
             : base(BuildMessage(statusCode, error, errorDescription))
         {
             StatusCode = statusCode;
             Error = error;
             ErrorDescription = errorDescription;
+            Code = code;
         }
 
         private static string BuildMessage(int? statusCode, string? error, string? errorDescription)
