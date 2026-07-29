@@ -21,6 +21,7 @@
 - [Custom Token Exchange](#custom-token-exchange)
   - [Delegation / impersonation](#delegation--impersonation)
 - [Impersonation via Session Transfer](#impersonation-via-session-transfer)
+  - [Handling MFA step-up while sourcing the actor](#handling-mfa-step-up-while-sourcing-the-actor)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -928,6 +929,50 @@ var actor = http.User.FindFirst("act")?.Value; // JSON: {"sub":"<agent>"}
 >   throws `CustomTokenExchangeException` with `Error == "invalid_issued_token_type"` rather than
 >   handing back an ordinary access token as if it were an STT.
 > - The two-client tenant prerequisites are configured out of band.
+
+### Handling MFA step-up while sourcing the actor
+
+When the actor is auto-sourced and the agent's session ID token has expired, the SDK refreshes it. If
+your tenant requires step-up MFA on that refresh, `RequestSessionTransferTokenAsync` throws
+`MfaRequiredException` rather than collapsing it into `ActorUnavailable` — the session is fine, it
+just needs a challenge completed.
+
+The refresh requests the `openid` scope, which is bound into the `mfa_token` blob, so the MFA grant
+returns an `id_token`. Pass that back as `ActorToken` to complete the request:
+
+```csharp
+try
+{
+    var result = await HttpContext.RequestSessionTransferTokenAsync(request);
+    return Redirect(HttpContext.BuildSessionTransferRedirect(targetLoginUrl, result));
+}
+catch (MfaRequiredException ex)
+{
+    // Store ex.MfaToken, run the challenge/verify flow (see the MRRT MFA section above),
+    // then retry with the id_token from the completed grant as the explicit actor.
+    var tokens = await _authClient.GetTokenAsync(new MfaOtpTokenRequest
+    {
+        MfaToken = mfaToken,
+        Otp = otp
+    });
+
+    request.ActorToken = tokens.IdToken;   // skips the refresh path entirely
+    var result = await HttpContext.RequestSessionTransferTokenAsync(request);
+    return Redirect(HttpContext.BuildSessionTransferRedirect(targetLoginUrl, result));
+}
+catch (CustomTokenExchangeException ex) when (ex.Code == CustomTokenExchangeErrorCode.ActorUnavailable)
+{
+    // No usable ID token and no refresh token — the agent must log in again.
+    // Note `UseRefreshTokens` defaults to false; enable it via
+    // .WithAccessToken(o => o.UseRefreshTokens = true) so a stale ID token can be refreshed at all.
+    return Challenge();
+}
+```
+
+> :information_source: A transport failure reaching the token endpoint — on either the actor refresh
+> or the exchange — surfaces as `CustomTokenExchangeException` with the original
+> `HttpRequestException` / `TaskCanceledException` on `InnerException`, so a timeout stays
+> distinguishable from a rejection.
 
 ## Organizations
 

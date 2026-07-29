@@ -36,6 +36,15 @@ namespace Auth0.AspNetCore.Authentication
             Code = code;
         }
 
+        /// <summary>
+        /// Creates an exception wrapping an underlying failure — typically a transport error from the
+        /// token endpoint call. The original exception is preserved on
+        /// <see cref="Exception.InnerException"/> so callers can still distinguish, say, a timeout.
+        /// </summary>
+        public CustomTokenExchangeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
         /// <summary>Creates an exception for a token-endpoint rejection.</summary>
         public CustomTokenExchangeException(int? statusCode, string? error, string? errorDescription)
             : base(BuildMessage(statusCode, error, errorDescription))

@@ -14,4 +14,15 @@ public abstract class TokenBase
     /// <summary>The type of token (typically <c>Bearer</c>).</summary>
     [JsonPropertyName("token_type")]
     public string? TokenType { get; set; }
+
+    /// <summary>
+    /// The ID token, when the completed grant requested the <c>openid</c> scope.
+    /// <para>
+    /// The MFA verify grants answer with the same payload as the password grant, which includes
+    /// <c>id_token</c>; without this property it was deserialized away. It is <c>null</c> whenever
+    /// <c>openid</c> was not among the scopes bound to the originating request.
+    /// </para>
+    /// </summary>
+    [JsonPropertyName("id_token")]
+    public string? IdToken { get; set; }
 }

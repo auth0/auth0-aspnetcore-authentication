@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Xunit;
+using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -92,6 +94,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             services.AddSingleton(authService.Object);
             services.AddSingleton(webAppSnapshot.Object);
             services.AddSingleton(withAccessTokenSnapshot.Object);
+            services.AddSingleton<IMfaTokenProtector>(new MfaTokenProtector(new EphemeralDataProtectionProvider()));
 
             var context = new DefaultHttpContext { RequestServices = services.BuildServiceProvider() };
             if (resolvedDomain != null)
@@ -529,6 +532,183 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             result.SessionTransferToken.Should().Be("the-stt");
             properties.Items[".Token.id_token"].Should().Be(freshIdToken);
             properties.Items[".Token.refresh_token"].Should().Be("rotated-rt");
+        }
+
+        // A step-up challenge on the actor refresh is recoverable and distinct from "no usable actor".
+        // Collapsing it into ActorUnavailable would claim the session has no refresh token — false —
+        // and leave the agent no way to complete MFA and retry.
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_ThrowsMfaRequired_WhenActorRefreshNeedsStepUp()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent(
+                        "{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\",\"mfa_token\":\"raw-mfa-token\"}")
+                });
+
+            // Stale id_token, refresh token present — the refresh is attempted and hits step-up.
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            var ex = (await act.Should().ThrowAsync<MfaRequiredException>()).Which;
+            ex.MfaToken.Should().NotBeNullOrEmpty();
+            // The blob is encrypted — the raw mfa_token must never be handed out in plaintext.
+            ex.MfaToken.Should().NotBe("raw-mfa-token");
+
+            // openid must be bound into the blob so the MFA grant replays it and returns an id_token
+            // the caller can pass back as ActorToken. Without it there is no way to finish the loop.
+            var protector = context.RequestServices.GetRequiredService<IMfaTokenProtector>();
+            var mfaContext = protector.Unprotect(ex.MfaToken!);
+            mfaContext.MfaToken.Should().Be("raw-mfa-token");
+            mfaContext.Scope.Should().Be("openid");
+            // This refresh targets no API, so no audience is bound.
+            mfaContext.Audience.Should().BeNull();
+        }
+
+        // A malformed mfa_required with no mfa_token cannot drive the challenge flow, so it must fall
+        // through to ActorUnavailable rather than yielding a blob that can never be unprotected.
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_FallsBackToActorUnavailable_WhenMfaRequiredHasNoMfaToken()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    Content = new StringContent(
+                        "{\"error\":\"mfa_required\",\"error_description\":\"Multifactor authentication required\"}")
+                });
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            (await act.Should().ThrowAsync<CustomTokenExchangeException>())
+                .Where(e => e.Code == CustomTokenExchangeErrorCode.ActorUnavailable);
+        }
+
+        // The actor refresh requests openid (and no audience) — it exists only to obtain an id_token.
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_ActorRefresh_RequestsOpenIdScope()
+        {
+            var freshIdToken = IdTokenExpiringIn(60);
+            var capturedBodies = new System.Collections.Generic.List<string>();
+
+            var responses = new System.Collections.Generic.Queue<HttpResponseMessage>();
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    $"{{\"access_token\":\"at\",\"id_token\":\"{freshIdToken}\",\"expires_in\":86400}}")
+            });
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+            });
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                    capturedBodies.Add(req.Content!.ReadAsStringAsync().GetAwaiter().GetResult()))
+                .ReturnsAsync(() => responses.Dequeue());
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            capturedBodies.Should().HaveCount(2);
+            capturedBodies[0].Should().Contain("grant_type=refresh_token");
+            capturedBodies[0].Should().Contain("scope=openid");
+            capturedBodies[0].Should().NotContain("audience=");
+        }
+
+        // Transport errors must not escape raw from a method documented to fail via
+        // CustomTokenExchangeException — on either the actor refresh or the exchange.
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task RequestSessionTransferTokenAsync_WrapsTransportErrors(bool failOnActorRefresh)
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            var setup = handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>());
+
+            var properties = new AuthenticationProperties();
+            var request = new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            };
+
+            if (failOnActorRefresh)
+            {
+                // Stale id_token + refresh token, so the actor refresh runs and is the call that dies.
+                properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);
+                properties.Items[".Token.refresh_token"] = "rt";
+                setup.ThrowsAsync(new HttpRequestException("connection reset"));
+            }
+            else
+            {
+                // Explicit actor skips the refresh entirely, so the exchange is the only call.
+                request.ActorToken = "agent-jwt";
+                setup.ThrowsAsync(new HttpRequestException("connection reset"));
+            }
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(request);
+
+            var ex = (await act.Should().ThrowAsync<CustomTokenExchangeException>()).Which;
+            ex.InnerException.Should().BeOfType<HttpRequestException>();
         }
 
         [Fact]

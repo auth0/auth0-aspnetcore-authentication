@@ -32,6 +32,40 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.AuthenticationApi
             result.ExpiresIn.Should().Be(86400);
         }
 
+        // The MFA verify grants answer with the same payload as the password grant, which includes
+        // id_token when openid is among the bound scopes. Without IdToken on TokenBase it was
+        // deserialized away, leaving no way to source an actor token after completing step-up.
+        [Fact]
+        public void MfaOtpTokenResponse_Deserializes_IdToken()
+        {
+            var json = "{\"access_token\":\"at\",\"id_token\":\"the-id-token\",\"token_type\":\"Bearer\",\"expires_in\":86400}";
+
+            var result = JsonSerializer.Deserialize<MfaOtpTokenResponse>(json);
+
+            result!.IdToken.Should().Be("the-id-token");
+        }
+
+        [Fact]
+        public void MfaOobTokenResponse_Deserializes_IdToken()
+        {
+            var json = "{\"access_token\":\"at\",\"id_token\":\"the-id-token\",\"token_type\":\"Bearer\",\"expires_in\":86400}";
+
+            var result = JsonSerializer.Deserialize<MfaOobTokenResponse>(json);
+
+            result!.IdToken.Should().Be("the-id-token");
+        }
+
+        // Absent id_token (openid not requested) must be null rather than empty.
+        [Fact]
+        public void MfaOtpTokenResponse_IdTokenIsNull_WhenAbsent()
+        {
+            var json = "{\"access_token\":\"at\",\"token_type\":\"Bearer\",\"expires_in\":86400}";
+
+            var result = JsonSerializer.Deserialize<MfaOtpTokenResponse>(json);
+
+            result!.IdToken.Should().BeNull();
+        }
+
         [Fact]
         public void MfaOobTokenResponse_Deserializes_ErrorFields()
         {
