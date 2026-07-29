@@ -57,7 +57,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             HttpMessageHandler backchannelHandler,
             AuthenticationProperties properties,
             out Mock<IAuthenticationService> authService,
-            string? resolvedDomain = null)
+            string? resolvedDomain = null,
+            string? audience = null)
         {
             var webAppOptions = new Auth0WebAppOptions
             {
@@ -68,7 +69,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 CookieAuthenticationScheme = CookieScheme
             };
 
-            var withAccessTokenOptions = new Auth0WebAppWithAccessTokenOptions();
+            var withAccessTokenOptions = new Auth0WebAppWithAccessTokenOptions { Audience = audience };
 
             var principal = new ClaimsPrincipal(new ClaimsIdentity("Cookies"));
             var ticket = new AuthenticationTicket(principal, properties, CookieScheme);
@@ -317,6 +318,175 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             // The rotated refresh token was persisted (rotation-safe).
             persisted.Should().NotBeNull();
             persisted!.Items[".Token.refresh_token"].Should().Be("rotated-rt");
+        }
+
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_ActorRefresh_LeavesPrimaryAccessTokenSlotUntouched()
+        {
+            var staleIdToken = IdTokenExpiringIn(-5);
+            var freshIdToken = IdTokenExpiringIn(60);
+
+            var responses = new System.Collections.Generic.Queue<HttpResponseMessage>();
+            // The actor refresh requests no audience/scope, so its access token is for the
+            // tenant default — it must never land in the primary slot.
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    $"{{\"access_token\":\"tenant-default-at\",\"id_token\":\"{freshIdToken}\",\"refresh_token\":\"rotated-rt\",\"expires_in\":86400}}")
+            });
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+            });
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(() => responses.Dequeue());
+
+            var originalExpiresAt = DateTimeOffset.UtcNow.AddMinutes(-10).ToString("o");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = staleIdToken;
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[".Token.access_token"] = "primary-audience-at";
+            properties.Items[".Token.expires_at"] = originalExpiresAt;
+
+            var context = BuildContext(handler.Object, properties, out _, audience: "https://api.example.com");
+
+            await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            // The refreshed id_token and the rotated refresh token are persisted...
+            properties.Items[".Token.id_token"].Should().Be(freshIdToken);
+            properties.Items[".Token.refresh_token"].Should().Be("rotated-rt");
+            // ...but the primary access-token slot and its expiry are left exactly as they were.
+            // Overwriting them would make GetAccessTokenAsync serve a wrong-audience token from
+            // cache, and resetting expires_at would keep it doing so for a full token lifetime.
+            properties.Items[".Token.access_token"].Should().Be("primary-audience-at");
+            properties.Items[".Token.expires_at"].Should().Be(originalExpiresAt);
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_AfterSessionTransfer_DoesNotServePoisonedCachedToken()
+        {
+            var staleIdToken = IdTokenExpiringIn(-5);
+            var freshIdToken = IdTokenExpiringIn(60);
+
+            var capturedBodies = new System.Collections.Generic.List<string>();
+            var responses = new System.Collections.Generic.Queue<HttpResponseMessage>();
+            // 1. actor refresh (no audience/scope)
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    $"{{\"access_token\":\"tenant-default-at\",\"id_token\":\"{freshIdToken}\",\"refresh_token\":\"rotated-rt\",\"expires_in\":86400}}")
+            });
+            // 2. the STT exchange
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+            });
+            // 3. the refresh GetAccessTokenAsync must perform for the app's own audience
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    $"{{\"access_token\":\"correct-audience-at\",\"id_token\":\"{freshIdToken}\",\"expires_in\":3600}}")
+            });
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                    capturedBodies.Add(req.Content!.ReadAsStringAsync().GetAwaiter().GetResult()))
+                .ReturnsAsync(() => responses.Dequeue());
+
+            // An already-expired primary access token, as a real session would have when the
+            // id_token is stale too.
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = staleIdToken;
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[".Token.access_token"] = "expired-primary-at";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.UtcNow.AddMinutes(-10).ToString("o");
+
+            var context = BuildContext(handler.Object, properties, out _, audience: "https://api.example.com");
+
+            await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            var accessToken = await context.GetAccessTokenAsync(new AccessTokenRequest());
+
+            // The STT call must not have left a token that looks fresh in the primary slot:
+            // GetAccessTokenAsync has to refresh for the configured audience and return that.
+            accessToken.Should().Be("correct-audience-at");
+            accessToken.Should().NotBe("tenant-default-at");
+            capturedBodies.Should().HaveCount(3);
+            capturedBodies[2].Should().Contain("audience=https%3A%2F%2Fapi.example.com");
+        }
+
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_PersistsRefreshedIdToken_WhenSessionHadNone()
+        {
+            var freshIdToken = IdTokenExpiringIn(60);
+
+            var responses = new System.Collections.Generic.Queue<HttpResponseMessage>();
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    $"{{\"access_token\":\"at\",\"id_token\":\"{freshIdToken}\",\"refresh_token\":\"rotated-rt\",\"expires_in\":86400}}")
+            });
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+            });
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(() => responses.Dequeue());
+
+            // No .Token.id_token at all. UpdateTokenValue only writes keys that already exist,
+            // so persisting via it would silently no-op and burn a refresh-token rotation per call.
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            result.SessionTransferToken.Should().Be("the-stt");
+            properties.Items[".Token.id_token"].Should().Be(freshIdToken);
+            properties.Items[".Token.refresh_token"].Should().Be("rotated-rt");
         }
 
         [Fact]
