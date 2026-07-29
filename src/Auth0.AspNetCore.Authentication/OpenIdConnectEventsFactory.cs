@@ -219,8 +219,10 @@ namespace Auth0.AspNetCore.Authentication
         /// Reads the upstream-IdP <c>session_expiry</c> ceiling from the freshly validated ID token
         /// and persists it on the session so it can be enforced on every subsequent read/refresh.
         /// Absent claim: nothing is persisted (no ceiling — existing behavior). Present but already
-        /// past at login (<c>session_expiry &lt;= iat</c>): fails rather than persisting an
-        /// already-expired session.
+        /// past at login: fails rather than persisting a session the read-gate would reject on its
+        /// very next read. The login check applies the same negative leeway as the read-gate
+        /// (<see cref="Auth0Constants.SessionExpiryLeewaySeconds"/>), and falls back to the current
+        /// time when the ID token carries no <c>iat</c>.
         /// </summary>
         private static void PersistSessionExpiry(TokenValidatedContext context)
         {
@@ -235,11 +237,18 @@ namespace Auth0.AspNetCore.Authentication
             var iatRaw = context.SecurityToken.Claims
                 .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Iat)?.Value;
 
-            if (SessionExpiryHelpers.TryParseCeiling(iatRaw, out var iat) && sessionExpiry <= iat)
+            // iat is a plain issued-at timestamp, not a ceiling, so parse it directly rather than
+            // through TryParseCeiling (which applies ceiling-specific sanity bounds). When it is
+            // absent, fall back to "now" so an already-past ceiling is still rejected at login.
+            var reference = long.TryParse(iatRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var iat)
+                ? iat
+                : DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            if (sessionExpiry <= reference + Auth0Constants.SessionExpiryLeewaySeconds)
             {
                 throw new IdTokenValidationException(
-                    $"Session Expiry (session_expiry) claim in the ID token indicates the session is already " +
-                    $"past its ceiling at login. session_expiry ({sessionExpiry}) is not after iat ({iat}).");
+                    "The session_expiry claim in the ID token indicates the session is already past its " +
+                    "ceiling at login.");
             }
 
             if (context.Properties != null)

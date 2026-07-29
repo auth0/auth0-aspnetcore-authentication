@@ -359,17 +359,19 @@ Enabling the claim is a connection-level prerequisite done in Auth0, not in your
 - On every session **read**, if the ceiling has been reached the SDK rejects the principal and signs the user out - the request proceeds as if there were no session, which triggers your app's existing redirect-to-login on `[Authorize]` routes.
 - Before using a refresh token the SDK short-circuits once the ceiling is reached, so an expired session is never silently extended by a background refresh.
 
+> **Note:** `GetAccessTokenForConnectionAsync` (Token Vault / federated connection tokens) is **not** gated by the session ceiling. Those tokens follow the upstream IdP's own lifetime, so a passed `session_expiry` ceiling does not block or tear down that exchange.
+
 This **layers on top of** the standard ASP.NET Core cookie idle and absolute lifetimes; it does not replace them. The session ends at whichever limit is hit first - idle timeout, absolute cookie lifetime, or the upstream `session_expiry` ceiling.
 
 A small **negative leeway** (~30 seconds) is applied to the comparison, so the session is treated as expired slightly *before* the wall-clock ceiling rather than after, absorbing minor clock skew between your server and Auth0.
 
 ### Reading the ceiling in your app
 
-The SDK enforces the ceiling for you; if you also want it for app-level logic (for example a "your session ends in N minutes" countdown), read it back with `GetSessionExpiry`:
+The SDK enforces the ceiling for you; if you also want it for app-level logic (for example a "your session ends in N minutes" countdown), read it back with `GetSessionExpiryAsync`:
 
 ```csharp
 // Unix seconds ceiling, or null when the connection emitted no session_expiry claim.
-long? expiresAt = HttpContext.GetSessionExpiry();
+long? expiresAt = await HttpContext.GetSessionExpiryAsync();
 
 if (expiresAt is long ceiling)
 {
@@ -378,7 +380,7 @@ if (expiresAt is long ceiling)
 }
 ```
 
-`GetSessionExpiry` returns `null` when there is no ceiling (the connection did not emit the claim, or the user is not authenticated). It is a read-only convenience over the same value the SDK enforces internally - it does not change any expiry behavior.
+`GetSessionExpiryAsync` returns `null` when there is no ceiling (the connection did not emit the claim, or the user is not authenticated). It reads the persisted value the SDK enforces internally - the same source used for enforcement, so it stays accurate even after a token refresh that does not re-emit the claim - and it does not change any expiry behavior.
 
 ### Fail-open on nonsensical values
 
@@ -388,7 +390,7 @@ Only a sane, positive seconds value enforces a ceiling. Any value that cannot be
 - zero or negative values,
 - values at or above `10,000,000,000` - guarding against a **milliseconds** value emitted by mistake, which would otherwise read as a date thousands of years out and silently switch enforcement off (no real seconds value is that large; `10,000,000,000` seconds is the year 2286).
 
-The one case that fails the login outright is a *valid, positive* ceiling that is already at or before the token's issued-at time (`iat`) - that indicates a session created already-expired, so login is rejected rather than immediately bounced.
+The one case that fails the login outright is a *valid, positive* ceiling that is already at or before the token's issued-at time (`iat`, plus the same ~30s leeway used when enforcing) - that indicates a session created already-expired, so login is rejected rather than persisting a session that would be rejected on its very next read. When the ID token carries no `iat`, the current time is used as the reference.
 
 > :warning: **Upgrade note:** once a connection starts emitting `session_expiry`, an authenticated session read that previously always succeeded can now resolve to "no session" the moment the ceiling passes. This is intentional and flows through your existing authentication challenge (redirect to login); no code change is required, but be aware that a request can transition from authenticated to unauthenticated purely due to the passage of time.
 

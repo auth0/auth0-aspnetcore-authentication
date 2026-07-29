@@ -1176,16 +1176,63 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                         await client.SendAsync(message, setCookie.Value);
                     };
 
-                    var innerException = act
-                        .Should()
-                        .ThrowAsync<Exception>()
-                        .Result
-                        .And.InnerException;
+                    (await act.Should().ThrowAsync<Exception>())
+                        .WithInnerException<AuthenticationFailureException>()
+                        .WithMessage("*session_expiry*");
+                }
+            }
+        }
 
-                    innerException
-                        .Should()
-                        .BeOfType<AuthenticationFailureException>()
-                        .Which.Message.Should().Contain("session_expiry");
+        [Fact]
+        public async Task Should_Preserve_SessionExpiry_Across_Token_Refresh()
+        {
+            var nonce = "";
+            var configuration = TestConfiguration.GetConfiguration();
+            var domain = configuration["Auth0:Domain"];
+            var clientId = configuration["Auth0:ClientId"];
+            // A ceiling far in the future so it never expires during the test.
+            var sessionExpiry = DateTimeOffset.UtcNow.AddHours(8).ToUnixTimeSeconds();
+
+            var mockHandler = new OidcMockBuilder()
+                .MockOpenIdConfig()
+                .MockJwks()
+                // Initial login token carries session_expiry; the short lifetime forces a refresh on the next read.
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, nonce, DateTime.UtcNow.AddSeconds(20), sessionExpiry: sessionExpiry), (me) => me.HasGrantType("authorization_code"), 20)
+                // The refreshed id_token deliberately OMITS session_expiry (the common case). The persisted
+                // ceiling must survive untouched, since it lives outside the token entries.
+                .MockToken(() => JwtUtils.GenerateToken(1, $"https://{domain}/", clientId, null, null, DateTime.UtcNow.AddSeconds(20)), (me) => me.HasGrantType("refresh_token") && me.HasClientSecret(), 20)
+                .Build();
+
+            using (var server = TestServerBuilder.CreateServer(opts =>
+            {
+                opts.ClientSecret = "123";
+                opts.Backchannel = new HttpClient(mockHandler.Object);
+            }, opts =>
+            {
+                opts.Audience = "123";
+                opts.UseRefreshTokens = true;
+            }))
+            {
+                using (var client = server.CreateClient())
+                {
+                    var loginResponse = (await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}"));
+                    var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+                    var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+                    nonce = queryParameters["nonce"];
+                    var state = queryParameters["state"];
+
+                    var message = new HttpRequestMessage(HttpMethod.Get, $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+                    var callbackResponse = (await client.SendAsync(message, setCookie.Value));
+
+                    // /process authenticates the cookie (firing OnValidatePrincipal -> refresh) and reads back
+                    // the persisted ceiling via GetSessionExpiryAsync.
+                    var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Process}", callbackResponse.Headers.GetValues("Set-Cookie"));
+                    var content = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+                    // Refresh happened, yet the ceiling read back is still the original one.
+                    mockHandler.Verify();
+                    content.GetValue("SessionExpiry").Value<long>().Should().Be(sessionExpiry);
                 }
             }
         }

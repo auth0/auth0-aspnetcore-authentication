@@ -216,13 +216,10 @@ namespace Auth0.AspNetCore.Authentication
 
             var properties = authenticateResult.Properties;
 
-            // Hard pre-check against the upstream-IdP session ceiling (session_expiry): once reached,
-            // never serve a cached token or call the token endpoint — surface no-session (null) so the
-            // caller's re-auth path runs. Absent ceiling falls through to existing behavior.
-            if (SessionExpiryHelpers.IsSessionExpired(properties, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
-            {
-                return null;
-            }
+            // Unlike GetAccessTokenAsync, connection (Token Vault) tokens are intentionally NOT gated
+            // by the session_expiry ceiling: they follow the upstream IdP's own token lifetime, so a
+            // passed RP session ceiling must not block or tear down this exchange. This matches the
+            // auth0-server-python reference (test_get_access_token_for_connection_not_gated_by_ceiling).
 
             // Normalize the login hint so the cache key matches what is actually sent to the token
             // endpoint, which omits an empty/whitespace hint (see TokenClient). Without this, a "" hint
@@ -353,18 +350,31 @@ namespace Auth0.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Retrieves the upstream-IdP session ceiling (<c>session_expiry</c>, Unix seconds) from the
-        /// authenticated user's claims, when the connection emitted one. This is the read-back of the
-        /// value the SDK enforces internally: use it for app-level logic such as a session countdown.
-        /// Returns <c>null</c> when the claim is absent (no ceiling) or the user is not authenticated.
+        /// Retrieves the upstream-IdP session ceiling (<c>session_expiry</c>, Unix seconds) that the
+        /// SDK persisted on the session at login, when the connection emitted one. This reads the exact
+        /// value the SDK enforces internally — the persisted session item, not the ID token claim — so
+        /// the read-back stays consistent with enforcement even after a token refresh that does not
+        /// re-emit the claim. Use it for app-level logic such as a session countdown. Returns
+        /// <c>null</c> when there is no persisted ceiling or the user is not authenticated.
         /// </summary>
         /// <param name="context">The current <see cref="HttpContext"/>.</param>
+        /// <param name="scheme">The Auth0 authentication scheme. Defaults to <see cref="Auth0Constants.AuthenticationScheme"/>.</param>
         /// <returns>The session ceiling in Unix seconds, or <c>null</c> when there is none.</returns>
-        public static long? GetSessionExpiry(this HttpContext context)
+        public static async Task<long?> GetSessionExpiryAsync(this HttpContext context, string? scheme = null)
         {
-            var raw = context.User?.FindFirst(Auth0Constants.SessionExpiryClaim)?.Value;
+            scheme ??= Auth0Constants.AuthenticationScheme;
 
-            return SessionExpiryHelpers.TryParseCeiling(raw, out var seconds) ? seconds : (long?)null;
+            var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
+
+            var authenticateResult = await context.AuthenticateAsync(options.CookieAuthenticationScheme).ConfigureAwait(false);
+            if (!authenticateResult.Succeeded || authenticateResult.Properties == null)
+            {
+                return null;
+            }
+
+            return SessionExpiryHelpers.TryGetPersistedCeiling(authenticateResult.Properties, out var seconds)
+                ? seconds
+                : (long?)null;
         }
 
         /// <summary>

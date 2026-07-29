@@ -66,7 +66,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                         RefreshToken = await context.GetTokenAsync(cookieScheme, "refresh_token"),
                                         Name = ticket.Principal?.FindFirst("name")?.Value,
                                         NameIdentifier = ticket.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                                        SessionExpiry = context.GetSessionExpiry()
+                                        SessionExpiry = await context.GetSessionExpiryAsync()
                                     }));
                                 }
                                 else
