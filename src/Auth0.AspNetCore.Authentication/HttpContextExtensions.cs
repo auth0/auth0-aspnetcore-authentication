@@ -527,7 +527,6 @@ namespace Auth0.AspNetCore.Authentication
 
             var response = result.Response!;
 
-
             // A CTE profile that is not set up for session transfer
             // returns an ordinary, long-lived, multi-use access token through this exact path.
             // A tenant misconfiguration must surface as an error.

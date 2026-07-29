@@ -222,6 +222,50 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             capturedBody.Should().Contain("audience=urn%3Atest.auth0.com%3Asession_transfer");
         }
 
+        // A CTE profile that is not configured for session transfer returns an ordinary access token
+        // on this exact path — TokenClient.Send only checks that access_token is non-empty. If the SDK
+        // filled in the STT URN itself, that long-lived multi-use token would be handed to
+        // BuildSessionTransferRedirect and end up in a query string, and the documented
+        // "branch on IssuedTokenType" check would silently pass.
+        [Theory]
+        // issued_token_type absent entirely
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "(missing)")]
+        // present but an ordinary access token
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"urn:ietf:params:oauth:token-type:access_token\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "urn:ietf:params:oauth:token-type:access_token")]
+        // present but empty
+        [InlineData("{\"access_token\":\"a-real-access-token\",\"issued_token_type\":\"\",\"token_type\":\"Bearer\",\"expires_in\":86400}", "")]
+        public async Task RequestSessionTransferTokenAsync_Throws_WhenIssuedTokenTypeIsNotStt(string body, string reportedType)
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(body)
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = async () => await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer",
+                ActorToken = "agent-jwt"
+            });
+
+            var ex = (await act.Should().ThrowAsync<CustomTokenExchangeException>()).Which;
+            ex.Error.Should().Be("invalid_issued_token_type");
+            // Quoted so the empty-string case still asserts something (Contain("") is rejected).
+            ex.Message.Should().Contain($"was \"{reportedType}\"");
+            // The access token must never leak into the exception message — it would land in logs.
+            ex.Message.Should().NotContain("a-real-access-token");
+        }
+
         [Fact]
         public async Task RequestSessionTransferTokenAsync_AutoSourcesActor_FromFreshSessionIdToken()
         {

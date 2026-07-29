@@ -923,7 +923,10 @@ var actor = http.User.FindFirst("act")?.Value; // JSON: {"sub":"<agent>"}
 > - The agent must be logged in on the initiator app — that session is the actor source.
 > - The STT is single-use and short-lived (~60s); never persist it.
 > - Branch on `result.IssuedTokenType` (`Auth0Constants.SessionTransferTokenType`), never on
->   `result.TokenType` (which is the informational `N_A`).
+>   `result.TokenType`, if the token
+>   endpoint returns 200 without `issued_token_type` set to the session-transfer URN, `RequestSessionTransferTokenAsync`
+>   throws `CustomTokenExchangeException` with `Error == "invalid_issued_token_type"` rather than
+>   handing back an ordinary access token as if it were an STT.
 > - The two-client tenant prerequisites are configured out of band.
 
 ## Organizations
