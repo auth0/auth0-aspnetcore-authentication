@@ -1102,6 +1102,60 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             url.Should().Be("https://target.example.com/login?returnTo=%2Fhome&session_transfer_token=stt123&organization=org_ABC");
         }
 
+        // The STT must land in the query, never after '#' - a browser does not transmit the fragment, so
+        // the token would silently never reach the target. The fragment is preserved and stays last.
+        [Theory]
+        [InlineData("https://target.example.com/login#section",
+                    "https://target.example.com/login?session_transfer_token=stt123#section")]
+        [InlineData("https://target.example.com/login?returnTo=%2Fhome#section",
+                    "https://target.example.com/login?returnTo=%2Fhome&session_transfer_token=stt123#section")]
+        // A fragment containing its own '?' or '&' must not be mistaken for the query.
+        [InlineData("https://target.example.com/login#/route?a=1",
+                    "https://target.example.com/login?session_transfer_token=stt123#/route?a=1")]
+        public void BuildSessionTransferRedirect_PreservesFragment_AndKeepsSttInQuery(string target, string expected)
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+
+            var url = context.BuildSessionTransferRedirect(target, SttResult("stt123"));
+
+            url.Should().Be(expected);
+        }
+
+        [Fact]
+        public void BuildSessionTransferRedirect_PreservesFragment_WithOrganization()
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+
+            var url = context.BuildSessionTransferRedirect(
+                "https://target.example.com/login#section", SttResult("stt123"), organization: "org_ABC");
+
+            // organization joins the query, ahead of the fragment.
+            url.Should().Be("https://target.example.com/login?session_transfer_token=stt123&organization=org_ABC#section");
+        }
+
+        // A targetLoginUrl ending in a bare '?' - Uri.Query returns "?" rather than "", so '&' is chosen
+        // and the result is "login?&session_transfer_token=...". Verified to parse correctly with
+        // Microsoft.AspNetCore.WebUtilities.QueryHelpers (single key, value intact), so this is pinned
+        // as intended behaviour rather than the "login??..." double-'?' it might look like.
+        [Theory]
+        [InlineData("https://target.example.com/login?",
+                    "https://target.example.com/login?&session_transfer_token=stt123")]
+        [InlineData("https://target.example.com/login?#section",
+                    "https://target.example.com/login?&session_transfer_token=stt123#section")]
+        public void BuildSessionTransferRedirect_HandlesBareQuestionMark(string target, string expected)
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+
+            var url = context.BuildSessionTransferRedirect(target, SttResult("stt123"));
+
+            url.Should().Be(expected);
+            url.Should().NotContain("??");
+
+            // The STT is retrievable by a target app using the framework's own query parser.
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(url).Query);
+            query["session_transfer_token"].ToString().Should().Be("stt123");
+        }
+
         [Fact]
         public void BuildSessionTransferRedirect_RequestOverload_ForwardsOrganizationFromRequest()
         {
