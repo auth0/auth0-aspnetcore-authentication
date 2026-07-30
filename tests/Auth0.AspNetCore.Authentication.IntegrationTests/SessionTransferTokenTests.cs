@@ -732,8 +732,13 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 SubjectTokenType = "urn:acme:customer"
             });
 
+            // UseRefreshTokens defaults to false, so this is the SDK's out-of-the-box state once the
+            // agent's id_token expires. The message must name the option rather than leave the developer
+            // reading it as an unrecoverable session problem.
             (await act.Should().ThrowAsync<CustomTokenExchangeException>())
-                .Where(e => e.Code == CustomTokenExchangeErrorCode.ActorUnavailable);
+                .Where(e => e.Code == CustomTokenExchangeErrorCode.ActorUnavailable
+                    && e.Message.Contains("UseRefreshTokens")
+                    && e.Message.Contains("ActorToken"));
 
             handler.Protected().Verify("SendAsync", Times.Never(),
                 ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
