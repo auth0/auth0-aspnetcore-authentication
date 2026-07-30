@@ -146,6 +146,49 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public async Task GetAccessTokenAsync_WhenSessionExpiryReached_ReturnsNullWithoutCallingBackchannel()
+        {
+            // Past the upstream-IdP ceiling: the hard pre-check must short-circuit before serving a
+            // cached token or hitting the token endpoint, surfacing no-session (null).
+            var handler = CreateTokenHandler("fresh");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+            properties.Items[Auth0Constants.SessionExpiryItemKey] =
+                DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds().ToString();
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience });
+
+            result.Should().BeNull();
+            // Neither the cached token nor a refresh: no backchannel call at all.
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_WhenSessionExpiryAbsent_BehavesAsBefore()
+        {
+            // No persisted ceiling (pre-feature session): the pre-check must fall through and serve
+            // the cached token exactly as before.
+            var handler = CreateTokenHandler("fresh");
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.access_token"] = "cached";
+            properties.Items[".Token.expires_at"] = DateTimeOffset.Now.AddHours(1).ToString("o");
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var result = await context.GetAccessTokenAsync(
+                new AccessTokenRequest { Audience = PrimaryAudience });
+
+            result.Should().Be("cached");
+        }
+
+        [Fact]
         public async Task GetAccessTokenAsync_WhenRefreshRejected_FiresRefreshFailedEventAndReturnsNull()
         {
             var handler = CreateFailingHandler(HttpStatusCode.BadRequest,

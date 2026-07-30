@@ -6,6 +6,7 @@
   - [Configuring the refresh leeway](#configuring-the-refresh-leeway)
   - [Updating claims and observing a successful refresh](#updating-claims-and-observing-a-successful-refresh)
 - [Server-side session storage](#server-side-session-storage)
+- [Session expiry from the upstream IdP](#session-expiry-from-the-upstream-idp)
 - [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt)
   - [Requesting a token for another audience](#requesting-a-token-for-another-audience)
   - [Configuring default scopes per audience](#configuring-default-scopes-per-audience)
@@ -288,6 +289,8 @@ Server-side session storage is a built-in ASP.NET Core capability (`CookieAuthen
 
 Keep the **default cookie-based session** when you want to stay stateless and avoid running extra infrastructure - for most applications it is the simplest and best choice. Server-side storage is an opt-in for the cases above, and it requires a store that is shared across all your instances (for example a distributed cache) when you run more than one.
 
+Regardless of where the session is stored, its lifetime can also be capped by the upstream identity provider - see [Session expiry from the upstream IdP](#session-expiry-from-the-upstream-idp).
+
 ### Providing the ITicketStore
 
 You can pass either a type (resolved from the dependency injection container, so it may depend on other registered services such as `IDistributedCache` and `IDataProtectionProvider`) or an already-constructed instance:
@@ -343,6 +346,53 @@ public class RedisTicketStore : ITicketStore
 > :warning: **Running multiple instances:** the store must be shared across them (e.g. a distributed cache such as Redis or SQL Server). An in-memory store only works for a single instance and will cause users to appear logged out when their requests are served by a different instance. Likewise, the [Data Protection keys must be persisted and shared](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview) across all instances - otherwise tickets become unreadable after a key rotation, app restart, or when served by a different node.
 >
 > :warning: **Protecting the ticket:** it holds sensitive data (claims, access and refresh tokens). Encrypting the payload with `IDataProtector` as shown above means an attacker who gains read access to the cache cannot recover those tokens. Treat the cache backend itself as sensitive too: restrict access and enable encryption in transit (e.g. Redis AUTH + TLS) and at rest.
+
+## Session expiry from the upstream IdP
+
+When Auth0 brokers an upstream identity provider (for example an enterprise or social connection) that enforces its **own** session lifetime, that lifetime should cap the session in your application too - otherwise your app could keep a user signed in long after the upstream IdP considers their session over. To support this, Auth0 can emit a `session_expiry` claim on the ID token: an absolute ceiling, in **Unix seconds**, after which the session must no longer be honored.
+
+Enabling the claim is a connection-level prerequisite done in Auth0, not in your app. The connection must have the `id_token_session_expiry_supported` option turned on so the `session_expiry` claim is present on the ID token issued at login. (During development you can also emit it from a Post-Login Action for testing.) When the claim is **absent** the SDK behaves exactly as before - there is nothing to opt into in code.
+
+**Enforcement is automatic and transparent.** You do not call anything to turn it on:
+
+- At login the SDK reads `session_expiry` from the ID token and persists it alongside the session (kept separate from the tokens so it survives token refreshes untouched).
+- On every session **read**, if the ceiling has been reached the SDK rejects the principal and signs the user out - the request proceeds as if there were no session, which triggers your app's existing redirect-to-login on `[Authorize]` routes.
+- Before using a refresh token the SDK short-circuits once the ceiling is reached, so an expired session is never silently extended by a background refresh.
+
+> **Note:** `GetAccessTokenForConnectionAsync` (Token Vault / federated connection tokens) is **not** gated by the session ceiling. Those tokens follow the upstream IdP's own lifetime, so a passed `session_expiry` ceiling does not block or tear down that exchange.
+
+This **layers on top of** the standard ASP.NET Core cookie idle and absolute lifetimes; it does not replace them. The session ends at whichever limit is hit first - idle timeout, absolute cookie lifetime, or the upstream `session_expiry` ceiling.
+
+A small **negative leeway** (~30 seconds) is applied to the comparison, so the session is treated as expired slightly *before* the wall-clock ceiling rather than after, absorbing minor clock skew between your server and Auth0.
+
+### Reading the ceiling in your app
+
+The SDK enforces the ceiling for you; if you also want it for app-level logic (for example a "your session ends in N minutes" countdown), read it back with `GetSessionExpiryAsync`:
+
+```csharp
+// Unix seconds ceiling, or null when the connection emitted no session_expiry claim.
+long? expiresAt = await HttpContext.GetSessionExpiryAsync();
+
+if (expiresAt is long ceiling)
+{
+    var remaining = DateTimeOffset.FromUnixTimeSeconds(ceiling) - DateTimeOffset.UtcNow;
+    // ... surface `remaining` in the UI, warn before expiry, etc.
+}
+```
+
+`GetSessionExpiryAsync` returns `null` when there is no ceiling (the connection did not emit the claim, or the user is not authenticated). It reads the persisted value the SDK enforces internally - the same source used for enforcement, so it stays accurate even after a token refresh that does not re-emit the claim - and it does not change any expiry behavior.
+
+### Fail-open on nonsensical values
+
+Only a sane, positive seconds value enforces a ceiling. Any value that cannot be a real forward-in-time ceiling is ignored and treated as **"no ceiling"** (fail open) rather than locking the user out:
+
+- non-numeric / unparseable values,
+- zero or negative values,
+- values at or above `10,000,000,000` - guarding against a **milliseconds** value emitted by mistake, which would otherwise read as a date thousands of years out and silently switch enforcement off (no real seconds value is that large; `10,000,000,000` seconds is the year 2286).
+
+The one case that fails the login outright is a *valid, positive* ceiling that is already at or before the token's issued-at time (`iat`, plus the same ~30s leeway used when enforcing) - that indicates a session created already-expired, so login is rejected rather than persisting a session that would be rejected on its very next read. When the ID token carries no `iat`, the current time is used as the reference.
+
+> :warning: **Upgrade note:** once a connection starts emitting `session_expiry`, an authenticated session read that previously always succeeded can now resolve to "no session" the moment the ceiling passes. This is intentional and flows through your existing authentication challenge (redirect to login); no code change is required, but be aware that a request can transition from authenticated to unauthenticated purely due to the passage of time.
 
 ## Multi-Resource Refresh Tokens (MRRT)
 

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.PushedAuthorizationRequest;
@@ -166,6 +168,7 @@ namespace Auth0.AspNetCore.Authentication
                 try
                 {
                     IdTokenValidator.Validate(auth0Options, context.SecurityToken, context.Properties?.Items);
+                    PersistSessionExpiry(context);
                 }
                 catch (IdTokenValidationException ex)
                 {
@@ -210,6 +213,49 @@ namespace Auth0.AspNetCore.Authentication
 
                 return Task.CompletedTask;
             };
+        }
+
+        /// <summary>
+        /// Reads the upstream-IdP <c>session_expiry</c> ceiling from the freshly validated ID token
+        /// and persists it on the session so it can be enforced on every subsequent read/refresh.
+        /// Absent claim: nothing is persisted (no ceiling — existing behavior). Present but already
+        /// past at login: fails rather than persisting a session the read-gate would reject on its
+        /// very next read. The login check applies the same negative leeway as the read-gate
+        /// (<see cref="Auth0Constants.SessionExpiryLeewaySeconds"/>), and falls back to the current
+        /// time when the ID token carries no <c>iat</c>.
+        /// </summary>
+        private static void PersistSessionExpiry(TokenValidatedContext context)
+        {
+            var sessionExpiryRaw = context.SecurityToken.Claims
+                .FirstOrDefault(c => c.Type == Auth0Constants.SessionExpiryClaim)?.Value;
+
+            if (!SessionExpiryHelpers.TryParseCeiling(sessionExpiryRaw, out var sessionExpiry))
+            {
+                return;
+            }
+
+            var iatRaw = context.SecurityToken.Claims
+                .FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Iat)?.Value;
+
+            // iat is a plain issued-at timestamp, not a ceiling, so parse it directly rather than
+            // through TryParseCeiling (which applies ceiling-specific sanity bounds). When it is
+            // absent, fall back to "now" so an already-past ceiling is still rejected at login.
+            var reference = long.TryParse(iatRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var iat)
+                ? iat
+                : DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            if (sessionExpiry <= reference + Auth0Constants.SessionExpiryLeewaySeconds)
+            {
+                throw new IdTokenValidationException(
+                    "The session_expiry claim in the ID token indicates the session is already past its " +
+                    "ceiling at login.");
+            }
+
+            if (context.Properties != null)
+            {
+                context.Properties.Items[Auth0Constants.SessionExpiryItemKey] =
+                    sessionExpiry.ToString(CultureInfo.InvariantCulture);
+            }
         }
 
 
