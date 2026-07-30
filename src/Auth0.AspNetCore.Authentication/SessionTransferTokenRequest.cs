@@ -22,13 +22,16 @@ namespace Auth0.AspNetCore.Authentication
 
         /// <summary>
         /// Optional explicit actor token (the agent). When omitted, the actor is auto-sourced from
-        /// the current session's id_token. When supplied, it must be non-blank.
+        /// the current session's id_token. When supplied, it must be non-blank, carry no leading or
+        /// trailing whitespace, and have no <c>"Bearer "</c> prefix.
         /// </summary>
         public string? ActorToken { get; set; }
 
         /// <summary>
         /// Actor token type URI. Paired with <see cref="ActorToken"/>; defaults to the id_token URI
-        /// (<see cref="Auth0Constants.IdTokenType"/>) when an actor is auto-sourced.
+        /// (<see cref="Auth0Constants.IdTokenType"/>) when an actor is auto-sourced. Setting this
+        /// without an <see cref="ActorToken"/> throws - the auto-sourced actor is always a session
+        /// id_token, so the type cannot be overridden on its own.
         /// </summary>
         public string? ActorTokenType { get; set; }
 

@@ -159,6 +159,22 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 .Where(e => e.Code == CustomTokenExchangeErrorCode.InvalidTokenFormat);
         }
 
+        // Mirrors CustomTokenExchangeRequestValidator's subject-token rule: surrounding whitespace is
+        // rejected rather than trimmed, so a copy-pasted token fails the same way in either slot.
+        [Theory]
+        [InlineData("actor-jwt\n")]
+        [InlineData(" actor-jwt")]
+        [InlineData("actor-jwt ")]
+        [InlineData("\tactor-jwt\t")]
+        public void ResolveExplicitActor_Throws_InvalidTokenFormat_WhenUntrimmed(string untrimmed)
+        {
+            var act = () => SessionTransferActorResolver.ResolveExplicitActor(untrimmed, null);
+
+            act.Should().Throw<CustomTokenExchangeException>()
+                .Where(e => e.Code == CustomTokenExchangeErrorCode.InvalidTokenFormat
+                            && e.Message.Contains("whitespace"));
+        }
+
         [Fact]
         public void IsIdTokenFresh_ReturnsFalse_ForMalformedToken()
         {
@@ -759,6 +775,53 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
             (await act.Should().ThrowAsync<CustomTokenExchangeException>())
                 .Where(e => e.Code == CustomTokenExchangeErrorCode.InvalidTokenFormat);
+        }
+
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_Throws_InvalidTokenFormat_WhenExplicitActorUntrimmed()
+        {
+            var handler = SttHandler();
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer",
+                ActorToken = "actor-jwt\n"
+            });
+
+            (await act.Should().ThrowAsync<CustomTokenExchangeException>())
+                .Where(e => e.Code == CustomTokenExchangeErrorCode.InvalidTokenFormat);
+
+            // Rejected before any network call, like the subject-token rules.
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        // An ActorTokenType with no ActorToken is unhonourable - the auto-sourced actor is always a
+        // session id_token - so it must not silently fall through to auto-sourcing.
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_Throws_WhenActorTokenTypeSetWithoutActorToken()
+        {
+            var handler = SttHandler();
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = JwtWithExp(DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds());
+            var context = BuildContext(handler.Object, properties, out _);
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer",
+                ActorTokenType = "urn:acme:actor"    // no ActorToken
+            });
+
+            (await act.Should().ThrowAsync<CustomTokenExchangeException>())
+                .Where(e => e.Code == CustomTokenExchangeErrorCode.InvalidTokenFormat
+                            && e.Message.Contains("ActorTokenType")
+                            && e.Message.Contains("ActorToken"));
+
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
         [Fact]

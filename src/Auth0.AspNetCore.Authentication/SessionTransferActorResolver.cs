@@ -5,20 +5,19 @@ using System.Text.Json;
 namespace Auth0.AspNetCore.Authentication
 {
     /// <summary>
-    /// Resolves the actor token for a Session Transfer Token exchange. Precedence:
-    /// an explicit actor wins; otherwise the caller sources the session id_token and, if stale,
-    /// refreshes it. Freshness is a lightweight <c>exp</c>-only decode — the token is our own session
-    /// token obtained over backchannel TLS and the server validates it anyway, so no JWKS signature
-    /// check is performed (consistent with <see cref="ActClaimReader"/>).
+    /// Resolves the actor token for a Session Transfer Token exchange.
+    /// An explicit actor wins; otherwise the caller sources the session id_token and, if stale,
+    /// refreshes it.
     /// </summary>
     internal static class SessionTransferActorResolver
     {
         /// <summary>
         /// Validates and normalizes an explicit actor token supplied on the request.
-        /// A blank/whitespace-only or <c>"Bearer "</c>-prefixed token throws
-        /// <see cref="CustomTokenExchangeException"/> with <see cref="CustomTokenExchangeErrorCode.InvalidTokenFormat"/>
-        /// (matching the auth0-server-python PoC). Returns the token paired with its type, defaulting
-        /// the type to <see cref="Auth0Constants.IdTokenType"/> when not supplied.
+        /// A blank/whitespace-only token, one carrying leading or trailing whitespace, or a
+        /// <c>"Bearer "</c>-prefixed one throws <see cref="CustomTokenExchangeException"/> with
+        /// <see cref="CustomTokenExchangeErrorCode.InvalidTokenFormat"/>.
+        /// Returns the token paired with its type, defaulting the type to
+        /// <see cref="Auth0Constants.IdTokenType"/> when not supplied.
         /// </summary>
         public static (string ActorToken, string ActorTokenType) ResolveExplicitActor(string actorToken, string? actorTokenType)
         {
@@ -27,6 +26,13 @@ namespace Auth0.AspNetCore.Authentication
                 throw new CustomTokenExchangeException(
                     CustomTokenExchangeErrorCode.InvalidTokenFormat,
                     "actor_token was provided but is blank.");
+            }
+
+            if (actorToken != actorToken.Trim())
+            {
+                throw new CustomTokenExchangeException(
+                    CustomTokenExchangeErrorCode.InvalidTokenFormat,
+                    "actor_token must not include leading or trailing whitespace.");
             }
 
             if (actorToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
