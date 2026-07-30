@@ -971,6 +971,50 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             url.Should().Be("https://target.example.com/login?returnTo=%2Fhome&session_transfer_token=stt123&organization=org_ABC");
         }
 
+        [Fact]
+        public void BuildSessionTransferRedirect_RequestOverload_ForwardsOrganizationFromRequest()
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+            var request = new SessionTransferTokenRequest
+            {
+                SubjectToken = "subject",
+                SubjectTokenType = "urn:acme:token",
+                Organization = "org_ABC"
+            };
+
+            var url = context.BuildSessionTransferRedirect(
+                "https://target.example.com/login", SttResult("stt123"), request);
+
+            url.Should().Be("https://target.example.com/login?session_transfer_token=stt123&organization=org_ABC");
+        }
+
+        [Fact]
+        public void BuildSessionTransferRedirect_RequestOverload_OmitsOrganization_WhenRequestHasNone()
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+            var request = new SessionTransferTokenRequest
+            {
+                SubjectToken = "subject",
+                SubjectTokenType = "urn:acme:token"
+            };
+
+            var url = context.BuildSessionTransferRedirect(
+                "https://target.example.com/login", SttResult("stt123"), request);
+
+            url.Should().Be("https://target.example.com/login?session_transfer_token=stt123");
+        }
+
+        [Fact]
+        public void BuildSessionTransferRedirect_RequestOverload_Throws_ForNullRequest()
+        {
+            var context = BuildContext(SttHandler().Object, new AuthenticationProperties(), out _);
+
+            var act = () => context.BuildSessionTransferRedirect(
+                "https://target.example.com/login", SttResult(), (SessionTransferTokenRequest)null!);
+
+            act.Should().Throw<ArgumentNullException>().WithParameterName("request");
+        }
+
         [Theory]
         [InlineData("http://target.example.com/login")]   // not https
         [InlineData("/relative/login")]                    // relative

@@ -877,15 +877,18 @@ app.MapGet("/impersonate/{customerToken}", async (HttpContext http, string custo
 {
     try
     {
-        var result = await http.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+        var request = new SessionTransferTokenRequest
         {
             SubjectToken = customerToken,                 // the customer to impersonate (opaque to Auth0)
             SubjectTokenType = "urn:acme:customer-token", // routes to your CTE Profile
-        });
+        };
+
+        var result = await http.RequestSessionTransferTokenAsync(request);
 
         var url = http.BuildSessionTransferRedirect(
             "https://customer-app.example.com/login",     // app-controlled target login URL (absolute HTTPS)
-            result);
+            result,
+            request);                                     // forwards request.Organization, if any
 
         return Results.Redirect(url);
     }
@@ -908,6 +911,11 @@ app.MapGet("/impersonate/{customerToken}", async (HttpContext http, string custo
 `BuildSessionTransferRedirect` returns a `string` (not an `IActionResult`) so it works in both Minimal APIs
 (`Results.Redirect(url)`) and MVC (`return Redirect(url);`). It requires an absolute HTTPS `targetLoginUrl`
 and throws `ArgumentException` otherwise - the STT is a live credential, so the target must be app-controlled.
+
+If the exchange was organization-scoped, pass the same `SessionTransferTokenRequest` (as above) rather than
+restating the value: the target app needs the `organization` parameter to match the STT, and passing the
+request keeps one source of truth. There is also an overload taking `string? organization` for callers that
+don't have the request in scope.
 
 ### Target: redeem the STT at login
 
