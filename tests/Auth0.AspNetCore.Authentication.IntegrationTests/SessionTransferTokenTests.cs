@@ -60,7 +60,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             AuthenticationProperties properties,
             out Mock<IAuthenticationService> authService,
             string? resolvedDomain = null,
-            string? audience = null)
+            string? audience = null,
+            TimeSpan? accessTokenExpirationLeeway = null)
         {
             var webAppOptions = new Auth0WebAppOptions
             {
@@ -72,6 +73,10 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             };
 
             var withAccessTokenOptions = new Auth0WebAppWithAccessTokenOptions { Audience = audience };
+            if (accessTokenExpirationLeeway.HasValue)
+            {
+                withAccessTokenOptions.AccessTokenExpirationLeeway = accessTokenExpirationLeeway.Value;
+            }
 
             var principal = new ClaimsPrincipal(new ClaimsIdentity("Cookies"));
             var ticket = new AuthenticationTicket(principal, properties, CookieScheme);
@@ -379,6 +384,69 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             // The rotated refresh token was persisted (rotation-safe).
             persisted.Should().NotBeNull();
             persisted!.Items[".Token.refresh_token"].Should().Be("rotated-rt");
+        }
+
+        // AccessTokenExpirationLeeway is deliberately reused as the id_token freshness margin, so tuning
+        // it must actually move the actor-refresh boundary. The same id_token (2 minutes from exp) is
+        // fresh under a 30s leeway and stale under a 5m one.
+        [Theory]
+        [InlineData(30, 1)]    // leeway 30s  -> still fresh -> STT exchange only
+        [InlineData(300, 2)]   // leeway 5m   -> stale       -> refresh, then STT exchange
+        public async Task RequestSessionTransferTokenAsync_ActorFreshness_HonorsAccessTokenExpirationLeeway(
+            int leewaySeconds, int expectedRequestCount)
+        {
+            var idToken = IdTokenExpiringIn(2);
+            var refreshedIdToken = IdTokenExpiringIn(60);
+
+            var responses = new System.Collections.Generic.Queue<HttpResponseMessage>();
+            if (expectedRequestCount == 2)
+            {
+                responses.Enqueue(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        $"{{\"access_token\":\"new-at\",\"id_token\":\"{refreshedIdToken}\",\"expires_in\":86400}}")
+                });
+            }
+            responses.Enqueue(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(
+                    "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60}")
+            });
+
+            var capturedBodies = new System.Collections.Generic.List<string>();
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                    capturedBodies.Add(req.Content!.ReadAsStringAsync().GetAwaiter().GetResult()))
+                .ReturnsAsync(() => responses.Dequeue());
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = idToken;
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out _,
+                accessTokenExpirationLeeway: TimeSpan.FromSeconds(leewaySeconds));
+
+            var result = await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            result.SessionTransferToken.Should().Be("the-stt");
+            capturedBodies.Should().HaveCount(expectedRequestCount);
+
+            // Whichever id_token the leeway selected is the one sent as the actor.
+            var expectedActor = expectedRequestCount == 2 ? refreshedIdToken : idToken;
+            capturedBodies[expectedRequestCount - 1].Should()
+                .Contain($"actor_token={Uri.EscapeDataString(expectedActor)}");
         }
 
         [Fact]

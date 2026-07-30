@@ -35,6 +35,12 @@ namespace Auth0.AspNetCore.Authentication
         /// already expired, so that a refresh is triggered proactively rather than the token
         /// lapsing mid-request. Applies to both the primary (login-time) token and additional
         /// audience/scope tokens retrieved on demand (MRRT). Defaults to 60 seconds.
+        /// <para>
+        /// It also governs the stored
+        /// <c>id_token</c>: it decides when
+        /// <see cref="HttpContextExtensions.RequestSessionTransferTokenAsync"/> considers an
+        /// auto-sourced actor id_token stale enough to refresh.
+        /// </para>
         /// </summary>
         public TimeSpan AccessTokenExpirationLeeway { get; set; } = TimeSpan.FromSeconds(60);
 
