@@ -32,6 +32,33 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             ActClaimReader.TryRead("only.two").Should().BeNull();
         }
 
+        // The cases above are rejected by the 3-segment check before any decoding. These are JWT-shaped
+        // but carry an undecodable payload, so they exercise the decoder throwing and the catch that
+        // turns that into null - the contract relied on by using Base64UrlEncoder.DecodeBytes.
+        [Theory]
+        [InlineData("header.not!valid!base64.sig")]
+        [InlineData("header.a.sig")]              // 1 char - never a valid base64url length
+        [InlineData("header.====.sig")]
+        [InlineData("header..sig")]               // empty payload decodes to zero bytes, then JSON fails
+        public void Returns_Null_When_Payload_Cannot_Be_Decoded(string jwt)
+        {
+            ActClaimReader.TryRead(jwt).Should().BeNull();
+        }
+
+        // Base64url payloads need 0, 1 or 2 '=' of padding restored depending on length % 4. Each case
+        // below lands on a different remainder, so all padding branches are covered.
+        [Theory]
+        [InlineData("{\"act\":{\"sub\":\"a\"}}", "a")]
+        [InlineData("{\"act\":{\"sub\":\"ab\"}}", "ab")]
+        [InlineData("{\"act\":{\"sub\":\"abc\"}}", "abc")]
+        [InlineData("{\"act\":{\"sub\":\"abcd\"}}", "abcd")]
+        public void Decodes_Payloads_Of_Every_Padding_Length(string payloadJson, string expectedSub)
+        {
+            var jwt = JwtWithPayload(payloadJson);
+
+            ActClaimReader.TryRead(jwt)!.Sub.Should().Be(expectedSub);
+        }
+
         [Fact]
         public void Returns_Null_When_No_Act_Claim()
         {

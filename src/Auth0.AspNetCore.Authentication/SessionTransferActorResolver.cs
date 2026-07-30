@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Auth0.AspNetCore.Authentication
 {
@@ -65,7 +66,7 @@ namespace Auth0.AspNetCore.Authentication
                     return false;
                 }
 
-                var payloadJson = Encoding.UTF8.GetString(Base64UrlDecode(parts[1]));
+                var payloadJson = Encoding.UTF8.GetString(Base64UrlEncoder.DecodeBytes(parts[1]));
                 using var document = JsonDocument.Parse(payloadJson);
 
                 if (!document.RootElement.TryGetProperty("exp", out var expElement) ||
@@ -82,17 +83,6 @@ namespace Auth0.AspNetCore.Authentication
                 // A decode/parse hiccup is treated as stale rather than throwing out of resolution.
                 return false;
             }
-        }
-
-        private static byte[] Base64UrlDecode(string input)
-        {
-            var output = input.Replace('-', '+').Replace('_', '/');
-            switch (output.Length % 4)
-            {
-                case 2: output += "=="; break;
-                case 3: output += "="; break;
-            }
-            return Convert.FromBase64String(output);
         }
     }
 }

@@ -836,8 +836,12 @@ var result = await HttpContext.CustomTokenExchangeAsync(new CustomTokenExchangeR
 var currentActor = result.Act?.Sub;
 ```
 
-> **Note:** `subject_token_type` (and `actor_token_type`) must be custom URIs. The reserved `urn:ietf:` and
-> `urn:auth0:` namespaces are rejected client-side.
+> **Note:** `subject_token_type` must be a custom URI in a namespace you control. The reserved `urn:ietf:`
+> and `urn:auth0:` namespaces are not accepted for it - but that is enforced by Auth0 when the CTE Profile is
+> configured and by the token endpoint, **not** client-side: the SDK sends whatever you pass and surfaces the
+> rejection as `CustomTokenExchangeException`. `actor_token_type` is not subject to the same restriction; it
+> names an RFC 8693 token type, and the SDK itself defaults it to `urn:ietf:params:oauth:token-type:id_token`
+> when auto-sourcing the actor for a session transfer.
 
 ## Impersonation via Session Transfer
 
@@ -917,6 +921,15 @@ restating the value: the target app needs the `organization` parameter to match 
 request keeps one source of truth. There is also an overload taking `string? organization` for callers that
 don't have the request in scope.
 
+> :warning: **The STT travels in a query string, so treat the redirect URL as a credential.** That is
+> inherent to the protocol - the target reads `session_transfer_token` from the query - but it means the
+> token predictably lands in places URLs land: initiator and target access logs, reverse-proxy and CDN logs,
+> browser history, and potentially the `Referer` header on requests the target page makes afterwards. The
+> ~60s lifetime and single-use redemption are what keep that acceptable: by the time the URL is sitting in a
+> log it is already spent or expired. So do not build on the URL as if it were durable - never cache it,
+> persist it, email or message it, put it in a QR code, log it yourself, or hand it to a redirect service.
+> Generate it per request, immediately before redirecting, and let it expire.
+
 ### Target: redeem the STT at login
 
 On the target app, forward the incoming `session_transfer_token` query parameter into the Auth0 login
@@ -961,6 +974,28 @@ var actor = http.User.FindFirst("act")?.Value; // JSON: {"sub":"<agent>"}
 >   throws `CustomTokenExchangeException` with `Error == "invalid_issued_token_type"` rather than
 >   handing back an ordinary access token as if it were an STT.
 > - The two-client tenant prerequisites are configured out of band.
+
+#### Which errors you can match on
+
+`CustomTokenExchangeException.Code` is only set for failures the SDK raises itself, plus token-endpoint
+rejections whose `error` field maps onto a known code. When it is `null`, inspect `ex.Error` /
+`ex.ErrorDescription` instead.
+
+| `ex.Code`                | Raised by  | Fires today                                                    |
+| ------------------------ | ---------- | -------------------------------------------------------------- |
+| `ActorUnavailable`       | SDK        | Yes - no authenticated session at all; or no usable id_token and nothing to refresh it with; or an `mfa_required` refresh carrying no `mfa_token` |
+| `InvalidTokenFormat`     | SDK        | Yes - explicit actor blank, untrimmed, or `"Bearer "`-prefixed; or `ActorTokenType` set without `ActorToken` |
+| `SetActorRequired`       | Token endpoint | Only if the endpoint reports that literal `error` value    |
+| `SessionTransferDisabled`| Token endpoint | Only if the endpoint reports that literal `error` value    |
+
+The two server-side codes are mapped defensively: Auth0 currently reports both of those rejections as a
+generic `invalid_request`, so in practice `Code` is `null` and the detail is in `ex.ErrorDescription`. Do not
+write a `when (ex.Code == CustomTokenExchangeErrorCode.SessionTransferDisabled)` clause as your only handler
+for a misconfigured tenant - keep a general `catch (CustomTokenExchangeException)` that surfaces
+`ex.ErrorDescription`, as the example above does.
+
+One error is deliberately *not* a `Code`: a 200 response carrying a non-STT `issued_token_type` throws with
+`ex.Error == "invalid_issued_token_type"`, since it describes the response shape rather than a rejection.
 
 ### Handling MFA step-up while sourcing the actor
 

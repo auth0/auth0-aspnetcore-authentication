@@ -36,9 +36,10 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             return B64UrlPayload($"{{\"sub\":\"agent|1\",\"exp\":{exp}}}");
         }
 
-        private static Mock<HttpMessageHandler> SttHandler(string capturedBodyReceiver = null!)
+        // Success handler returning an STT response. Tests that need the request body add their own
+        // Callback to the returned mock rather than getting it back from here.
+        private static Mock<HttpMessageHandler> SttHandler()
         {
-            // Success handler returning an STT response. Body capture is done via a Callback the caller adds.
             var handler = new Mock<HttpMessageHandler>();
             handler
                 .Protected()
@@ -186,6 +187,19 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             SessionTransferActorResolver.IsIdTokenFresh("not-a-jwt", System.TimeSpan.Zero).Should().BeFalse();
         }
 
+        // "not-a-jwt" above is rejected by the 3-segment check before decoding. These are JWT-shaped with
+        // an undecodable payload, so they exercise the decoder throwing and being treated as stale -
+        // the contract relied on by using Base64UrlEncoder.DecodeBytes.
+        [Theory]
+        [InlineData("header.not!valid!base64.sig")]
+        [InlineData("header.a.sig")]
+        [InlineData("header.====.sig")]
+        [InlineData("header..sig")]
+        public void IsIdTokenFresh_ReturnsFalse_WhenPayloadCannotBeDecoded(string jwt)
+        {
+            SessionTransferActorResolver.IsIdTokenFresh(jwt, System.TimeSpan.Zero).Should().BeFalse();
+        }
+
         [Fact]
         public void IsIdTokenFresh_ReturnsTrue_ForUnexpiredExp()
         {
@@ -325,6 +339,57 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             capturedBody.Should().Contain("actor_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aid_token");
         }
 
+        // request.Scope reaches the exchange body, and is omitted entirely rather than sent empty when
+        // unset — TokenClient.ExchangeCustomToken skips whitespace scopes, and sending "scope=" would
+        // ask the endpoint for an empty scope instead of letting it apply the profile default.
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("", false)]
+        [InlineData("   ", false)]
+        [InlineData("openid profile", true)]
+        public async Task RequestSessionTransferTokenAsync_SendsRequestedScope(string? scope, bool expectSent)
+        {
+            string capturedBody = string.Empty;
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                    capturedBody = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        "{\"access_token\":\"the-stt\",\"issued_token_type\":\"urn:auth0:params:oauth:token-type:session_transfer_token\",\"token_type\":\"N_A\",\"expires_in\":60,\"scope\":\"openid profile\"}")
+                });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _);
+
+            var result = await context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer",
+                ActorToken = "agent-jwt",
+                Scope = scope
+            });
+
+            if (expectSent)
+            {
+                // FormUrlEncodedContent encodes the separating space as '+', not %20.
+                capturedBody.Should().Contain("scope=openid+profile");
+            }
+            else
+            {
+                capturedBody.Should().NotContain("scope=");
+            }
+
+            // The granted scope comes back from the response, independent of what was requested.
+            result.Scope.Should().Be("openid profile");
+        }
+
         [Fact]
         public async Task RequestSessionTransferTokenAsync_RefreshesStaleIdToken_AndPersists()
         {
@@ -384,6 +449,52 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             // The rotated refresh token was persisted (rotation-safe).
             persisted.Should().NotBeNull();
             persisted!.Items[".Token.refresh_token"].Should().Be("rotated-rt");
+        }
+
+        // Persisting the rotated session writes the auth cookie, so SignInAsync throws
+        // InvalidOperationException once the response has started (the mock stands in for that
+        // framework throw). The documented contract is that it propagates as-is: wrapping it in
+        // CustomTokenExchangeException would report a caller ordering bug as a token-exchange failure.
+        [Fact]
+        public async Task RequestSessionTransferTokenAsync_PropagatesInvalidOperationException_WhenResponseHasStarted()
+        {
+            var freshIdToken = IdTokenExpiringIn(60);
+
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(
+                        $"{{\"access_token\":\"new-at\",\"id_token\":\"{freshIdToken}\",\"expires_in\":86400}}")
+                });
+
+            var properties = new AuthenticationProperties();
+            properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);   // stale, so the refresh runs
+            properties.Items[".Token.refresh_token"] = "rt";
+
+            var context = BuildContext(handler.Object, properties, out var authService);
+            authService
+                .Setup(s => s.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                .ThrowsAsync(new InvalidOperationException("The response has already started."));
+
+            var act = () => context.RequestSessionTransferTokenAsync(new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            });
+
+            await act.Should().ThrowAsync<InvalidOperationException>();
+
+            // Persistence precedes the exchange, so the STT call never went out: only the actor refresh did.
+            handler.Protected().Verify("SendAsync", Times.Once(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
         // AccessTokenExpirationLeeway is deliberately reused as the id_token freshness margin, so tuning

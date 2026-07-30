@@ -398,12 +398,6 @@ namespace Auth0.AspNetCore.Authentication
         /// id_token cannot be refreshed and this method throws
         /// <see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/>.
         /// </para>
-        /// <para>
-        /// <b>Enable <see cref="Auth0WebAppWithAccessTokenOptions.UseRefreshTokens"/>.</b> It defaults to
-        /// <c>false</c>, and without it the session carries no <c>.Token.refresh_token</c>, so a stale
-        /// id_token cannot be refreshed and this method throws
-        /// <see cref="CustomTokenExchangeErrorCode.ActorUnavailable"/>.
-        /// </para>
         /// </summary>
         /// <remarks>
         /// This method is not safe to call concurrently for the same session. When the actor is
@@ -532,6 +526,7 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var response = result.Response!;
+
 
             // A CTE profile that is not set up for session transfer
             // returns an ordinary, long-lived, multi-use access token through this exact path.
