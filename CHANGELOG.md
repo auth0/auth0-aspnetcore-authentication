@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.10.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.10.0) (2026-07-31)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.9.0...1.10.0)
+
+**Added**
+- **Upstream IdP session expiry (IPSIE SL1) enforcement** [\#272](https://github.com/auth0/auth0-aspnetcore-authentication/pull/272) ([tanya732](https://github.com/tanya732)) - when Auth0 brokers an upstream identity provider that enforces its own session lifetime, that ceiling now caps the session in the application too, so a user is not kept signed in past the point the upstream IdP considers their session over. Enforcement is automatic and requires no code opt-in; it activates only when the connection emits a `session_expiry` claim (Unix seconds) on the ID token (connection option `id_token_session_expiry_supported`).
+
+**Security**
+- **Bump dependencies** [\#274](https://github.com/auth0/auth0-aspnetcore-authentication/pull/274) ([dependabot[bot]](https://github.com/apps/dependabot)) - consolidates several Dependabot bumps (supersedes #267, #271): `Microsoft.IdentityModel.Protocols.OpenIdConnect` 8.19.2 → 8.22.0.
+- **Dependency updates** [\#266](https://github.com/auth0/auth0-aspnetcore-authentication/pull/266) ([kailash-b](https://github.com/kailash-b)) - bundles a set of routine Dependabot updates keeping both the NuGet package references and GitHub Actions workflow versions current.
+  - NuGet packages: `Microsoft.AspNetCore.Mvc.Testing` 10.0.9 → 10.0.10, `Microsoft.IdentityModel.Protocols.OpenIdConnect` 8.19.1 → 8.19.2, `Microsoft.NET.Test.Sdk` 18.6.0 → 18.8.1, `System.Text.Encodings.Web` 10.0.9 → 10.0.10.
+
 ## [1.9.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.9.0) (2026-07-08)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.8.0...1.9.0)
 
