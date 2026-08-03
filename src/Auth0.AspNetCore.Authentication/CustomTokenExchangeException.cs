@@ -18,18 +18,52 @@ namespace Auth0.AspNetCore.Authentication
         /// <summary>The <c>error_description</c> from the token endpoint's error body, when present.</summary>
         public string? ErrorDescription { get; }
 
+        /// <summary>
+        /// A machine-readable SDK error code (see <see cref="CustomTokenExchangeErrorCode"/>) for
+        /// failures the SDK raises itself before or around the network call, and for token-endpoint
+        /// rejections whose <c>error</c> field maps onto a known code. Inspect <see cref="Error"/> and
+        /// <see cref="ErrorDescription"/> when this is null.
+        /// </summary>
+        public string? Code { get; }
+
         /// <summary>Creates an exception for a client-side validation failure.</summary>
         public CustomTokenExchangeException(string message) : base(message)
         {
         }
 
+        /// <summary>Creates an exception carrying a machine-readable SDK error code.</summary>
+        public CustomTokenExchangeException(string code, string message) : base(message)
+        {
+            Code = code;
+        }
+
+        /// <summary>
+        /// Creates an exception wrapping an underlying failure — typically a transport error from the
+        /// token endpoint call. The original exception is preserved on
+        /// <see cref="Exception.InnerException"/> so callers can still distinguish, say, a timeout.
+        /// </summary>
+        public CustomTokenExchangeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
         /// <summary>Creates an exception for a token-endpoint rejection.</summary>
         public CustomTokenExchangeException(int? statusCode, string? error, string? errorDescription)
+            : this(statusCode, error, errorDescription, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an exception for a token-endpoint rejection, additionally carrying a machine-readable
+        /// SDK <paramref name="code"/> mapped from the server's <c>error</c> field. <see cref="Error"/>
+        /// and <see cref="ErrorDescription"/> still carry the server's own values verbatim.
+        /// </summary>
+        public CustomTokenExchangeException(int? statusCode, string? error, string? errorDescription, string? code)
             : base(BuildMessage(statusCode, error, errorDescription))
         {
             StatusCode = statusCode;
             Error = error;
             ErrorDescription = errorDescription;
+            Code = code;
         }
 
         private static string BuildMessage(int? statusCode, string? error, string? errorDescription)

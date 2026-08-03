@@ -20,6 +20,8 @@
   - [Handling a missing refresh token or exchange failure](#handling-a-missing-refresh-token-or-exchange-failure)
 - [Custom Token Exchange](#custom-token-exchange)
   - [Delegation / impersonation](#delegation--impersonation)
+- [Impersonation via Session Transfer](#impersonation-via-session-transfer)
+  - [Handling MFA step-up while sourcing the actor](#handling-mfa-step-up-while-sourcing-the-actor)
 - [Organizations](#organizations)
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
@@ -211,12 +213,12 @@ The above snippet checks whether the SDK is configured to use refresh tokens, if
 
 #### Updating claims and observing a successful refresh
 
-When the SDK refreshes an expired access token, it persists the new tokens but, by default, leaves the `ClaimsPrincipal` untouched — so `User.Claims` keeps serving the login-time snapshot for the lifetime of the refresh token, even though each refresh can return a fresh `id_token` that may carry updated user information.
+When the SDK refreshes an expired access token, it persists the new tokens but, by default, leaves the `ClaimsPrincipal` untouched - so `User.Claims` keeps serving the login-time snapshot for the lifetime of the refresh token, even though each refresh can return a fresh `id_token` that may carry updated user information.
 
 Two opt-in additions let you react to a refresh:
 
-- **`RebuildPrincipalOnRefresh`** — when `true`, the `ClaimsPrincipal` is rebuilt from the refreshed `id_token` after a successful primary refresh, so `User.Claims` (and `User.Identity.Name`) reflect current user information. Defaults to `false` (today's behavior).
-- **`OnTokensRefreshed`** — a success event that fires after a successful primary refresh, carrying the refreshed `AccessToken`, `IdToken`, `RefreshToken` (null when not rotated), and `ExpiresAt`. It fires independently of `RebuildPrincipalOnRefresh`, and when both are used the event fires *after* the rebuild so it observes the updated principal.
+- **`RebuildPrincipalOnRefresh`** - when `true`, the `ClaimsPrincipal` is rebuilt from the refreshed `id_token` after a successful primary refresh, so `User.Claims` (and `User.Identity.Name`) reflect current user information. Defaults to `false` (today's behavior).
+- **`OnTokensRefreshed`** - a success event that fires after a successful primary refresh, carrying the refreshed `AccessToken`, `IdToken`, `RefreshToken` (null when not rotated), and `ExpiresAt`. It fires independently of `RebuildPrincipalOnRefresh`, and when both are used the event fires *after* the rebuild so it observes the updated principal.
 
 ```csharp
 services
@@ -244,8 +246,8 @@ services
 
 `RefreshClaimsValidationType` controls how rigorously the refreshed `id_token` is validated before its claims replace the principal. It is only consulted when `RebuildPrincipalOnRefresh` is `true`:
 
-- **`Full`** (default) — validates the refreshed `id_token`'s signature against the cached JWKS, plus issuer/audience and the SDK's business-rule checks. Highest fidelity. The signature check runs only on an actual refresh (when the token expired), not on every request, and the JWKS is cached, so it is inexpensive in the hot path.
-- **`SkipSignature`** — skips signature validation (trusting the back-channel TLS exchange for token authenticity) while still running the SDK's business-rule checks. Lower cost, lower fidelity; an opt-in escape hatch.
+- **`Full`** (default) - validates the refreshed `id_token`'s signature against the cached JWKS, plus issuer/audience and the SDK's business-rule checks. Highest fidelity. The signature check runs only on an actual refresh (when the token expired), not on every request, and the JWKS is cached, so it is inexpensive in the hot path.
+- **`SkipSignature`** - skips signature validation (trusting the back-channel TLS exchange for token authenticity) while still running the SDK's business-rule checks. Lower cost, lower fidelity; an opt-in escape hatch.
 
 ```csharp
     .WithAccessToken(options =>
@@ -257,7 +259,7 @@ services
     });
 ```
 
-If a refresh succeeds but rebuilding the principal fails (a signature failure in `Full` mode, a malformed `id_token`, or a business-rule failure), the SDK degrades gracefully: the refreshed tokens are kept, the existing (stale) principal is retained, a warning is logged, and `OnTokensRefreshed` still fires — the refresh genuinely succeeded.
+If a refresh succeeds but rebuilding the principal fails (a signature failure in `Full` mode, a malformed `id_token`, or a business-rule failure), the SDK degrades gracefully: the refreshed tokens are kept, the existing (stale) principal is retained, a warning is logged, and `OnTokensRefreshed` still fires - the refresh genuinely succeeded.
 
 > :information_source: Both additions apply only to the primary (login-time) refresh path. Tokens fetched for **additional** audiences via [MRRT](#multi-resource-refresh-tokens-mrrt) do not rebuild the principal or fire `OnTokensRefreshed`.
 
@@ -396,13 +398,13 @@ The one case that fails the login outright is a *valid, positive* ceiling that i
 
 ## Multi-Resource Refresh Tokens (MRRT)
 
-[Multi-Resource Refresh Tokens (MRRT)](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token) let a single session obtain access tokens for *additional* audiences and scopes on demand, by exchanging the session's refresh token — without forcing the user through another interactive login.
+[Multi-Resource Refresh Tokens (MRRT)](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token) let a single session obtain access tokens for *additional* audiences and scopes on demand, by exchanging the session's refresh token - without forcing the user through another interactive login.
 
 A typical use case: the user logs in once, and your web app then needs to call a downstream API that expects a token for a *different* audience than the one requested at login. Instead of re-authenticating, you exchange the existing refresh token for a token scoped to that API.
 
 > :information_source: MRRT requires refresh tokens. Configure `UseRefreshTokens = true` and a `ClientSecret`, and ensure MRRT is enabled for your client/APIs in the Auth0 Dashboard. Tokens obtained for additional audiences are cached in the session alongside the login-time ("primary") token and reused until they near expiry.
 
-> :warning: **Token storage and cookie size.** Each additional audience/scope you obtain a token for adds another entry to the cached token set, which by default is serialized into the encrypted **authentication cookie** along with the rest of the session. Cookies cannot grow indefinitely — browsers cap them at around 4 KB each, and request-header limits apply on top of that. An application that fans out across several audiences can therefore accumulate enough tokens to exceed those limits and have the session rejected. If you expect to hold tokens for more than a couple of audiences, move the session **server-side** so only a small session key rides in the cookie while the token set lives in a store you control — see [Server-side session storage](#server-side-session-storage) above. The MRRT API is identical either way; only where the token set is persisted changes.
+> :warning: **Token storage and cookie size.** Each additional audience/scope you obtain a token for adds another entry to the cached token set, which by default is serialized into the encrypted **authentication cookie** along with the rest of the session. Cookies cannot grow indefinitely - browsers cap them at around 4 KB each, and request-header limits apply on top of that. An application that fans out across several audiences can therefore accumulate enough tokens to exceed those limits and have the session rejected. If you expect to hold tokens for more than a couple of audiences, move the session **server-side** so only a small session key rides in the cookie while the token set lives in a store you control - see [Server-side session storage](#server-side-session-storage) above. The MRRT API is identical either way; only where the token set is persisted changes.
 
 ### Requesting a token for another audience
 
@@ -420,7 +422,7 @@ public async Task<IActionResult> CallMessagesApi()
 
     if (accessToken == null)
     {
-        // No refresh token available, or the refresh failed — see "Handling refresh failures" below.
+        // No refresh token available, or the refresh failed - see "Handling refresh failures" below.
         return Challenge();
     }
 
@@ -488,7 +490,7 @@ var accessToken = await HttpContext.GetAccessTokenAsync(new AccessTokenRequest
 
 When a refresh token is present but the exchange fails, the `OnAccessTokenRefreshFailed` event fires and `GetAccessTokenAsync` returns `null`. The supplied `AccessTokenRefreshFailedContext` carries the failure details so you can distinguish a **terminal** failure (such as an `invalid_grant` for a revoked or expired refresh token, which warrants a re-login) from a **transient** one (such as a timeout or rate-limit, which may be retried).
 
-All refresh failures — token-endpoint rejections, malformed responses, and transport/misconfiguration errors — flow through this single event. For HTTP rejections, `StatusCode`, `Error`, and `ErrorDescription` are populated; for transport failures, `Exception` is populated instead.
+All refresh failures - token-endpoint rejections, malformed responses, and transport/misconfiguration errors - flow through this single event. For HTTP rejections, `StatusCode`, `Error`, and `ErrorDescription` are populated; for transport failures, `Exception` is populated instead.
 
 ```csharp
 services
@@ -506,7 +508,7 @@ services
         {
             OnAccessTokenRefreshFailed = async (context) =>
             {
-                // A revoked or expired refresh token is terminal — force a re-login.
+                // A revoked or expired refresh token is terminal - force a re-login.
                 if (context.Error == "invalid_grant")
                 {
                     await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -520,7 +522,7 @@ services
     });
 ```
 
-> :warning: `AccessTokenRefreshFailedContext.Exception` may contain transport/diagnostic detail — log it server-side only, do not surface it to end users.
+> :warning: `AccessTokenRefreshFailedContext.Exception` may contain transport/diagnostic detail - log it server-side only, do not surface it to end users.
 
 ### Handling MFA during token exchange (`mfa_required`)
 
@@ -529,7 +531,7 @@ When an access-token exchange (for example a Multi-Resource Refresh Token reques
 `MfaRequiredException`. You drive the MFA challenge/verify flow with `IAuthenticationApiClient`
 and decide what to do with the resulting tokens.
 
-`ex.MfaToken` is an **opaque, encrypted token with a 5-minute lifetime** — the raw `mfa_token`
+`ex.MfaToken` is an **opaque, encrypted token with a 5-minute lifetime** - the raw `mfa_token`
 never leaves the SDK. Pass it back to the `IAuthenticationApiClient` methods unchanged; do not
 inspect, parse, or store it long-term. `ex.MfaRequirements` describes the challenge types the
 user can satisfy (for example `otp` or `oob`).
@@ -537,7 +539,7 @@ user can satisfy (for example `otp` or `oob`).
 > :information_source: `MfaRequiredException` is raised by `GetAccessTokenAsync` whenever the
 > exchange returns `mfa_required`, regardless of whether you called `WithAuthenticationApiClient()`.
 > You still need `WithAuthenticationApiClient()` to register the `IAuthenticationApiClient` that
-> *completes* the challenge — so register it whenever your tenant may return `mfa_required` on a
+> *completes* the challenge - so register it whenever your tenant may return `mfa_required` on a
 > refresh, otherwise you can catch the exception but have no client to drive the verify step.
 
 #### Register the client
@@ -610,17 +612,17 @@ public class ResourceController : Controller
             });
 
             // tokens.AccessToken is now valid for the requested audience.
-            // Persisting these tokens into the session is your responsibility — see below.
+            // Persisting these tokens into the session is your responsibility - see below.
             return Ok();
         }
         catch (MfaTokenExpiredException)
         {
-            // The 5-minute window elapsed — restart the flow to obtain a fresh token.
+            // The 5-minute window elapsed - restart the flow to obtain a fresh token.
             return RedirectToAction("CallApi");
         }
         catch (MfaTokenInvalidException)
         {
-            // The token was tampered with or malformed — restart the flow.
+            // The token was tampered with or malformed - restart the flow.
             return RedirectToAction("CallApi");
         }
     }
@@ -629,7 +631,7 @@ public class ResourceController : Controller
 
 > :information_source: The SDK returns the MFA-grant tokens to you; it does not write them back
 > into the authentication session automatically. If you want subsequent
-> `GetAccessTokenAsync` calls to reuse them, persist them yourself — for example by updating
+> `GetAccessTokenAsync` calls to reuse them, persist them yourself - for example by updating
 > the authentication properties and calling `HttpContext.SignInAsync(...)` with the updated
 > principal.
 
@@ -642,7 +644,7 @@ lifetime throws `MfaTokenExpiredException`; a tampered or malformed token throws
 
 Out-of-band factors (push notifications, SMS) are **asynchronous**: after you trigger the
 challenge you must poll the token endpoint until the user approves it. Unlike the OTP grant, the
-OOB grant does **not** throw while the user has not yet responded — Auth0 replies with
+OOB grant does **not** throw while the user has not yet responded - Auth0 replies with
 `authorization_pending` (or `slow_down` if you are polling too fast), and the SDK surfaces those
 on `MfaOobTokenResponse.Error` so you can keep polling. A populated `AccessToken` (with
 `Error == null`) means the challenge succeeded. Any genuine failure (for example an expired
@@ -695,7 +697,7 @@ public async Task<IActionResult> PollOob()
     }
     catch (MfaTokenExpiredException)
     {
-        // The 5-minute window elapsed — restart the flow to obtain a fresh token.
+        // The 5-minute window elapsed - restart the flow to obtain a fresh token.
         return RedirectToAction("CallApi");
     }
     // A genuine rejection (e.g. invalid/expired oob_code) throws ErrorApiException.
@@ -703,7 +705,7 @@ public async Task<IActionResult> PollOob()
 ```
 
 > :information_source: The `mfa_token` blob is encrypted and **self-expires 5 minutes after the
-> original `mfa_required`** — not after the challenge is triggered. Since OOB approval is
+> original `mfa_required`** - not after the challenge is triggered. Since OOB approval is
 > user-paced, treat that window as your real polling budget: if it lapses, the next
 > `GetTokenAsync` throws `MfaTokenExpiredException` before any network call, and you must restart
 > from `GetAccessTokenAsync` to mint a fresh token.
@@ -718,15 +720,15 @@ public async Task<IActionResult> PollOob()
 
 ## Token Vault (Federated Connection Access Tokens)
 
-[Token Vault](https://auth0.com/docs/secure/tokens/token-vault) lets your web app obtain a **third-party API access token** (for a federated connection such as Google, GitHub, or Slack) for the logged-in user — so your app, or an agent acting on the user's behalf, can call that provider's API. The token is obtained by exchanging the session's refresh token; the user does not have to re-authenticate.
+[Token Vault](https://auth0.com/docs/secure/tokens/token-vault) lets your web app obtain a **third-party API access token** (for a federated connection such as Google, GitHub, or Slack) for the logged-in user - so your app, or an agent acting on the user's behalf, can call that provider's API. The token is obtained by exchanging the session's refresh token; the user does not have to re-authenticate.
 
 A typical use case: the user logged in with (or has linked) their Google account, and your app needs a Google access token to read their calendar. Instead of running a separate Google OAuth flow, you exchange the existing refresh token for a Google connection token.
 
 > :information_source: Token Vault requires refresh tokens. Configure `UseRefreshTokens = true` and a `ClientSecret`, and enable Token Vault for the connection in the Auth0 Dashboard. Connection tokens are cached in the session, keyed by connection name, and reused until they near expiry.
 
-> :information_source: Unlike MRRT, the federated-connection exchange does **not** take a requested `scope` — it returns the scopes already granted for the connection. Tokens are therefore cached per **connection**, not per audience/scope. To change the granted scopes, reconfigure the connection (or re-link the account) in the Auth0 Dashboard.
+> :information_source: Unlike MRRT, the federated-connection exchange does **not** take a requested `scope` - it returns the scopes already granted for the connection. Tokens are therefore cached per **connection**, not per audience/scope. To change the granted scopes, reconfigure the connection (or re-link the account) in the Auth0 Dashboard.
 
-> :warning: **Token storage and cookie size.** Like MRRT, each connection token is cached in the encrypted **authentication cookie** by default, so retrieving tokens for several connections grows the session the same way fanning out across audiences does. If you expect to hold tokens for more than a couple of connections, move the session **server-side** — see [Server-side session storage](#server-side-session-storage). Where the token set is persisted is the only thing that changes; the API is identical either way.
+> :warning: **Token storage and cookie size.** Like MRRT, each connection token is cached in the encrypted **authentication cookie** by default, so retrieving tokens for several connections grows the session the same way fanning out across audiences does. If you expect to hold tokens for more than a couple of connections, move the session **server-side** - see [Server-side session storage](#server-side-session-storage). Where the token set is persisted is the only thing that changes; the API is identical either way.
 
 ### Retrieving a federated connection token
 
@@ -743,7 +745,7 @@ public async Task<IActionResult> CallGoogleCalendar()
 
     if (googleToken == null)
     {
-        // No refresh token available, or the exchange failed — see "Handling…" below.
+        // No refresh token available, or the exchange failed - see "Handling…" below.
         return Challenge();
     }
 
@@ -757,7 +759,7 @@ public async Task<IActionResult> CallGoogleCalendar()
 
 > :information_source: `GetAccessTokenForConnectionAsync` returns `null` rather than throwing when no refresh token is available or the exchange fails. Always check for `null` before using the token.
 
-The optional `LoginHint` disambiguates which linked identity to use when the user has more than one. It is the **provider-side identity-provider user ID** (e.g. a Google user ID) — not the Auth0 user `sub`, and not the user's email.
+The optional `LoginHint` disambiguates which linked identity to use when the user has more than one. It is the **provider-side identity-provider user ID** (e.g. a Google user ID) - not the Auth0 user `sub`, and not the user's email.
 
 `LoginHint` is part of the cache key: tokens for different login hints on the same connection are cached separately, so requesting identity B never returns identity A's cached token. A request with no `LoginHint` is cached separately from one that specifies a hint.
 
@@ -783,7 +785,7 @@ var googleToken = await HttpContext.GetAccessTokenForConnectionAsync(new AccessT
 
 ### Handling a missing refresh token or exchange failure
 
-A federated connection token can only be obtained via the session's refresh token. When none is present, the `OnMissingRefreshToken` event fires and the method returns `null`. When a refresh token is present but the exchange is rejected, the `OnAccessTokenRefreshFailed` event fires (carrying `StatusCode`, `Error`, `ErrorDescription`) and the method returns `null`. These are the same events used by MRRT — see [Handling refresh failures](#handling-refresh-failures) and [Detecting the absense of a refresh token](#detecting-the-absense-of-a-refresh-token) for full configuration examples.
+A federated connection token can only be obtained via the session's refresh token. When none is present, the `OnMissingRefreshToken` event fires and the method returns `null`. When a refresh token is present but the exchange is rejected, the `OnAccessTokenRefreshFailed` event fires (carrying `StatusCode`, `Error`, `ErrorDescription`) and the method returns `null`. These are the same events used by MRRT - see [Handling refresh failures](#handling-refresh-failures) and [Detecting the absense of a refresh token](#detecting-the-absense-of-a-refresh-token) for full configuration examples.
 
 ## Custom Token Exchange
 
@@ -834,8 +836,209 @@ var result = await HttpContext.CustomTokenExchangeAsync(new CustomTokenExchangeR
 var currentActor = result.Act?.Sub;
 ```
 
-> **Note:** `subject_token_type` (and `actor_token_type`) must be custom URIs. The reserved `urn:ietf:` and
-> `urn:auth0:` namespaces are rejected client-side.
+> **Note:** `subject_token_type` must be a custom URI in a namespace you control. The reserved `urn:ietf:`
+> and `urn:auth0:` namespaces are not accepted for it - but that is enforced by Auth0 when the CTE Profile is
+> configured and by the token endpoint, **not** client-side: the SDK sends whatever you pass and surfaces the
+> rejection as `CustomTokenExchangeException`. `actor_token_type` is not subject to the same restriction; it
+> names an RFC 8693 token type, and the SDK itself defaults it to `urn:ietf:params:oauth:token-type:id_token`
+> when auto-sourcing the actor for a session transfer.
+
+## Impersonation via Session Transfer
+
+Session Transfer builds on Custom Token Exchange to let an initiator app (e.g. a support/admin console -
+the *actor*) start an authenticated web session in a target app *as a customer* (the *subject*), with the
+agent recorded in the `act` claim. The initiator requests a short-lived, single-use **Session Transfer
+Token (STT)** and redirects the agent's browser to the target's login URL carrying that STT; the target
+redeems it at `/authorize`.
+
+This requires a two-client tenant setup (initiator + target, with `session_transfer` delegation configured)
+that is provisioned out of band via the Management API.
+
+### Initiator: request an STT and redirect
+
+`RequestSessionTransferTokenAsync` performs the exchange. The **actor is auto-sourced from the agent's
+current session id_token** (refreshed automatically if stale), so the agent must be logged in. Pass an
+explicit `ActorToken` only to override that. The audience is set for you to
+`urn:{your-domain}:session_transfer`. The STT is one-shot and **never stored** - use it immediately.
+
+> :warning: **Enable `UseRefreshTokens`.** It defaults to `false`, and without it the session carries no
+> refresh token - so once the agent's id_token expires there is no way to refresh it and every call throws
+> `CustomTokenExchangeException` with `Code == ActorUnavailable`. id_tokens are typically far shorter-lived
+> than the authentication cookie, so this is the common path rather than an edge case. The example below
+> works right after login and then starts failing in production with nothing obvious to point at.
+>
+> ```csharp
+> services.AddAuth0WebAppAuthentication(options => { /* ... */ })
+>         .WithAccessToken(options =>
+>         {
+>             options.UseRefreshTokens = true;   // adds offline_access; required for actor auto-sourcing
+>         });
+> ```
+
+```csharp
+// Minimal API - the agent (actor) is already logged in on this app.
+app.MapGet("/impersonate/{customerToken}", async (HttpContext http, string customerToken) =>
+{
+    try
+    {
+        var request = new SessionTransferTokenRequest
+        {
+            SubjectToken = customerToken,                 // the customer to impersonate (opaque to Auth0)
+            SubjectTokenType = "urn:acme:customer-token", // routes to your CTE Profile
+        };
+
+        var result = await http.RequestSessionTransferTokenAsync(request);
+
+        var url = http.BuildSessionTransferRedirect(
+            "https://customer-app.example.com/login",     // app-controlled target login URL (absolute HTTPS)
+            result,
+            request);                                     // forwards request.Organization, if any
+
+        return Results.Redirect(url);
+    }
+    catch (CustomTokenExchangeException ex) when (ex.Code == CustomTokenExchangeErrorCode.ActorUnavailable)
+    {
+        // The agent has no usable session to act as. Send them to log in first.
+        // If this fires for an agent who *is* logged in, check UseRefreshTokens (see the warning above) -
+        // ex.Message names it.
+        return Results.Challenge();
+    }
+    catch (CustomTokenExchangeException ex)
+    {
+        // ex.StatusCode / ex.Error / ex.ErrorDescription describe a token-endpoint rejection
+        // (e.g. session transfer disabled, or setActor required).
+        return Results.Problem(ex.Message);
+    }
+});
+```
+
+`BuildSessionTransferRedirect` returns a `string` (not an `IActionResult`) so it works in both Minimal APIs
+(`Results.Redirect(url)`) and MVC (`return Redirect(url);`). It requires an absolute HTTPS `targetLoginUrl`
+and throws `ArgumentException` otherwise - the STT is a live credential, so the target must be app-controlled.
+
+If the exchange was organization-scoped, pass the same `SessionTransferTokenRequest` (as above) rather than
+restating the value: the target app needs the `organization` parameter to match the STT, and passing the
+request keeps one source of truth. There is also an overload taking `string? organization` for callers that
+don't have the request in scope.
+
+> :warning: **The STT travels in a query string, so treat the redirect URL as a credential.** That is
+> inherent to the protocol - the target reads `session_transfer_token` from the query - but it means the
+> token predictably lands in places URLs land: initiator and target access logs, reverse-proxy and CDN logs,
+> browser history, and potentially the `Referer` header on requests the target page makes afterwards. The
+> ~60s lifetime and single-use redemption are what keep that acceptable: by the time the URL is sitting in a
+> log it is already spent or expired. So do not build on the URL as if it were durable - never cache it,
+> persist it, email or message it, put it in a QR code, log it yourself, or hand it to a redirect service.
+> Generate it per request, immediately before redirecting, and let it expire.
+
+### Target: redeem the STT at login
+
+On the target app, forward the incoming `session_transfer_token` query parameter into the Auth0 login
+request using the existing `LoginAuthenticationPropertiesBuilder`:
+
+```csharp
+app.MapGet("/login", async (HttpContext http, string? session_transfer_token) =>
+{
+    var propertiesBuilder = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri("/");
+
+    if (!string.IsNullOrEmpty(session_transfer_token))
+    {
+        propertiesBuilder.WithParameter("session_transfer_token", session_transfer_token);
+    }
+
+    await http.ChallengeAsync(Auth0Constants.AuthenticationScheme, propertiesBuilder.Build());
+});
+```
+
+After redemption, the established session is short-lived and non-refreshable. The agent behind the
+impersonated session is available via the `act` claim on `HttpContext.User`:
+
+```csharp
+var actor = http.User.FindFirst("act")?.Value; // JSON: {"sub":"<agent>"}
+```
+
+> **Notes:**
+> - The agent must be logged in on the initiator app - that session is the actor source.
+> - The STT is single-use and short-lived (~60s); never persist it.
+> - **Do not call this concurrently for the same session.** When the actor is auto-sourced and the
+>   id_token is stale, this method refreshes and re-signs the session exactly as `GetAccessTokenAsync`
+>   does, so it carries the same hazard: with refresh-token rotation enabled, two concurrent calls
+>   exchange the same refresh token and the second can trip reuse detection and **invalidate the agent's
+>   whole session**. An admin console firing a few impersonation requests at once is enough. Serialize
+>   them, plug in a server-side session store via `WithSessionStore(...)`, or pass an explicit
+>   `ActorToken` to skip the refresh path. `GetAccessTokenAsync` and `GetAccessTokenForConnectionAsync`
+>   count toward the same limit - they share the session's token slots.
+> - Branch on `result.IssuedTokenType` (`Auth0Constants.SessionTransferTokenType`), never on
+>   `result.TokenType`, if the token
+>   endpoint returns 200 without `issued_token_type` set to the session-transfer URN, `RequestSessionTransferTokenAsync`
+>   throws `CustomTokenExchangeException` with `Error == "invalid_issued_token_type"` rather than
+>   handing back an ordinary access token as if it were an STT.
+> - The two-client tenant prerequisites are configured out of band.
+
+#### Which errors you can match on
+
+`CustomTokenExchangeException.Code` is only set for failures the SDK raises itself, plus token-endpoint
+rejections whose `error` field maps onto a known code. When it is `null`, inspect `ex.Error` /
+`ex.ErrorDescription` instead.
+
+| `ex.Code`                | Raised by  | Fires today                                                    |
+| ------------------------ | ---------- | -------------------------------------------------------------- |
+| `ActorUnavailable`       | SDK        | Yes - no authenticated session at all; or no usable id_token and nothing to refresh it with; or an `mfa_required` refresh carrying no `mfa_token` |
+| `InvalidTokenFormat`     | SDK        | Yes - explicit actor blank, untrimmed, or `"Bearer "`-prefixed; or `ActorTokenType` set without `ActorToken` |
+| `SetActorRequired`       | Token endpoint | Only if the endpoint reports that literal `error` value    |
+| `SessionTransferDisabled`| Token endpoint | Only if the endpoint reports that literal `error` value    |
+
+The two server-side codes are mapped defensively: Auth0 currently reports both of those rejections as a
+generic `invalid_request`, so in practice `Code` is `null` and the detail is in `ex.ErrorDescription`. Do not
+write a `when (ex.Code == CustomTokenExchangeErrorCode.SessionTransferDisabled)` clause as your only handler
+for a misconfigured tenant - keep a general `catch (CustomTokenExchangeException)` that surfaces
+`ex.ErrorDescription`, as the example above does.
+
+One error is deliberately *not* a `Code`: a 200 response carrying a non-STT `issued_token_type` throws with
+`ex.Error == "invalid_issued_token_type"`, since it describes the response shape rather than a rejection.
+
+### Handling MFA step-up while sourcing the actor
+
+When the actor is auto-sourced and the agent's session ID token has expired, the SDK refreshes it. If
+your tenant requires step-up MFA on that refresh, `RequestSessionTransferTokenAsync` throws
+`MfaRequiredException` rather than collapsing it into `ActorUnavailable` - the session is fine, it
+just needs a challenge completed.
+
+The refresh requests the `openid` scope, which is bound into the `mfa_token` blob, so the MFA grant
+returns an `id_token`. Pass that back as `ActorToken` to complete the request:
+
+```csharp
+try
+{
+    var result = await HttpContext.RequestSessionTransferTokenAsync(request);
+    return Redirect(HttpContext.BuildSessionTransferRedirect(targetLoginUrl, result));
+}
+catch (MfaRequiredException ex)
+{
+    // Store ex.MfaToken, run the challenge/verify flow (see the MRRT MFA section above),
+    // then retry with the id_token from the completed grant as the explicit actor.
+    var tokens = await _authClient.GetTokenAsync(new MfaOtpTokenRequest
+    {
+        MfaToken = mfaToken,
+        Otp = otp
+    });
+
+    request.ActorToken = tokens.IdToken;   // skips the refresh path entirely
+    var result = await HttpContext.RequestSessionTransferTokenAsync(request);
+    return Redirect(HttpContext.BuildSessionTransferRedirect(targetLoginUrl, result));
+}
+catch (CustomTokenExchangeException ex) when (ex.Code == CustomTokenExchangeErrorCode.ActorUnavailable)
+{
+    // No usable ID token and no refresh token - the agent must log in again.
+    // If they are logged in, check `UseRefreshTokens` (see the warning above).
+    return Challenge();
+}
+```
+
+> :information_source: A transport failure reaching the token endpoint - on either the actor refresh
+> or the exchange - surfaces as `CustomTokenExchangeException` with the original
+> `HttpRequestException` / `TaskCanceledException` on `InnerException`, so a timeout stays
+> distinguishable from a rejection.
 
 ## Organizations
 
@@ -1105,7 +1308,7 @@ Rule of thumb: set `maxSize` to cover the number of distinct domains a single pr
 
 #### NullConfigurationManagerCache
 
-Disables caching entirely — a new configuration manager is created on every request (not recommended for production):
+Disables caching entirely - a new configuration manager is created on every request (not recommended for production):
 
 ```csharp
 .WithCustomDomains(options =>
