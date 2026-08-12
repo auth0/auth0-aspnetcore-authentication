@@ -10,6 +10,8 @@
     <EmbeddedResource Include="wellknownconfig.json" />
     <EmbeddedResource Include="wellknownconfig_with_par.json" />
     <EmbeddedResource Include="wellknownconfig_without_par.json" />
+    <EmbeddedResource Include="wellknownconfig_with_mtls.json" />
+    <EmbeddedResource Include="wellknownconfig_with_mtls_no_aliases.json" />
   </ItemGroup>
 
   <ItemGroup>
