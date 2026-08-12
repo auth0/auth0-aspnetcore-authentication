@@ -26,6 +26,7 @@
 - [Extra parameters](#extra-parameters)
 - [Roles](#roles)
 - [Multiple Custom Domain (MCD) Support](#multiple-custom-domain-mcd-support)
+- [Mutual TLS (mTLS)](#mutual-tls-mtls)
 - [Backchannel Logout](#backchannel-logout)
 - [Blazor Server](#blazor-server)
 
@@ -1343,6 +1344,81 @@ public class MyCustomConfigurationManagerCache : IConfigurationManagerCache
     options.ConfigurationManagerCache = new MyCustomConfigurationManagerCache();
 });
 ```
+
+## Mutual TLS (mTLS)
+
+Mutual TLS (mTLS) authenticates your application to Auth0 with a **client certificate** instead of a client secret or client assertion. Access tokens can additionally be **certificate-bound** (sender-constrained), so a stolen token cannot be replayed without the private key.
+
+### Prerequisites
+
+mTLS requires tenant-side configuration that is only available on specific plans:
+
+- An Enterprise plan with **Highly Regulated Identity**.
+- A custom domain of type `self_managed_certs`, with mTLS endpoint aliases enabled (`enable_endpoint_aliases`).
+- A client-certificate credential registered for your application.
+- For certificate-bound tokens, an API with **Token Sender-Constraining** set to mTLS.
+
+### Configuration
+
+Build an `HttpClient` that presents the client certificate, then pass it to `WithMtls`. The SDK never reads or stores the certificate — it only uses the client you supply.
+
+```csharp
+using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+
+var certificate = X509Certificate2.CreateFromPemFile(
+    "certs/client.crt", "certs/client.key");
+
+// On Windows, a certificate created from PEM has an ephemeral key that Schannel cannot use for a
+// TLS handshake. Round-tripping through PFX gives it a usable key. Harmless on Linux and macOS.
+certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
+
+var handler = new SocketsHttpHandler
+{
+    SslOptions = new SslClientAuthenticationOptions
+    {
+        ClientCertificates = new X509Certificate2Collection(certificate)
+    }
+};
+
+var mtlsHttpClient = new HttpClient(handler);
+
+builder.Services
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = builder.Configuration["Auth0:Domain"];   // self_managed_certs custom domain
+        options.ClientId = builder.Configuration["Auth0:ClientId"];
+        // No ClientSecret: the certificate is the credential.
+    })
+    .WithMtls(options =>
+    {
+        options.HttpClient = mtlsHttpClient;
+    })
+    .WithAccessToken(options =>
+    {
+        options.Audience = builder.Configuration["Auth0:Audience"];   // required for a JWT with cnf
+        options.UseRefreshTokens = true;
+    });
+```
+
+### Important notes
+
+- **Call `WithMtls` before `WithAccessToken`.** When combining with custom domains, the order is `WithCustomDomains` → `WithMtls` → `WithAccessToken`. A wrong order throws at startup.
+- **Leave `ResponseType` at its default.** Do not pre-set it to `code` or `code id_token` in `AddAuth0WebAppAuthentication`: registration-time validation runs before `WithMtls` and would otherwise reject the certificate-only configuration as missing a credential.
+- **The certificate is the sole credential.** Do not also set `ClientSecret`, `ClientAssertionSecurityKey`, or `Backchannel` — each throws at startup.
+- **Keep the `HttpClient` long-lived.** A per-request client would defeat connection pooling and repeat the TLS handshake on every call.
+
+Once configured, every client-authenticated back-channel request — the code exchange, token refresh, MRRT and Token Vault exchanges, session-transfer, MFA challenge, and Pushed Authorization Requests — is routed through the tenant's `mtls_endpoint_aliases` and sends the certificate instead of a secret. Bearer-token endpoints (MFA associate/list) continue to use the standard host.
+
+### Combining with custom domains
+
+`WithMtls` composes with [Multiple Custom Domain (MCD) Support](#multiple-custom-domain-mcd-support). Call `WithCustomDomains` first, then `WithMtls`, then `WithAccessToken`. Endpoint aliases are resolved per domain.
+
+### Limitations
+
+- **The SDK does not own the certificate.** You supply and manage the `HttpClient` (loading, storage, and rotation are yours). Because `HttpClient` does not expose its handler, the SDK cannot verify a certificate is actually attached — it only checks that an `HttpClient` was provided.
+- **No thumbprint verification.** When mTLS is enabled and an access token issued on a `cnf`-bearing grant (authorization code or refresh) is **not** certificate-bound, the SDK logs a one-time warning per client (`cnf.x5t#S256` is absent). It checks the claim's *presence* only; it does not compare the thumbprint to your certificate.
 
 ## Backchannel Logout
 
