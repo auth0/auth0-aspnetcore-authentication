@@ -141,6 +141,10 @@ services.AddAuth0WebAppAuthentication(options =>
 
 For detailed configuration options, caching strategies, security requirements, and more examples, see the [Multiple Custom Domain (MCD) Examples](EXAMPLES.md#multiple-custom-domain-mcd-support).
 
+## Mutual TLS (mTLS)
+
+Authenticate to Auth0 with a client certificate (RFC 8705) instead of a client secret, and optionally bind access tokens to the certificate. See [Mutual TLS (mTLS) Examples](EXAMPLES.md#mutual-tls-mtls).
+
 ## Multi-Resource Refresh Tokens (MRRT)
 
 Multi-Resource Refresh Tokens (MRRT) let a single session obtain access tokens for additional audiences and scopes on demand, by exchanging the session's refresh token — without forcing the user through another interactive login.
