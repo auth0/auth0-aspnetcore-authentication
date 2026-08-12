@@ -125,7 +125,10 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
             TokenRefreshResult result;
@@ -249,7 +252,10 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
             TokenRefreshResult result;
@@ -312,7 +318,10 @@ namespace Auth0.AspNetCore.Authentication
             var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
             var result = await tokenClient.ExchangeCustomToken(
@@ -487,7 +496,10 @@ namespace Auth0.AspNetCore.Authentication
             var audience = $"urn:{audienceHost}:session_transfer";
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
 
             TokenRefreshResult result;
             try
@@ -601,7 +613,10 @@ namespace Auth0.AspNetCore.Authentication
             if (properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
             {
                 var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-                var tokenClient = new TokenClient(httpClient);
+                var tokenClient = new TokenClient(
+                    httpClient,
+                    context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                    context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
                 var resolvedDomain = context.GetResolvedDomain();
 
                 const string actorRefreshScope = "openid";

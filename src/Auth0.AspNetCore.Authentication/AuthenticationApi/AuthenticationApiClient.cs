@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
 using Auth0.AspNetCore.Authentication.Exceptions;
+using Auth0.AspNetCore.Authentication.Mtls;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Auth0.AspNetCore.Authentication.AuthenticationApi;
@@ -38,6 +39,8 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     private readonly string _domain;
     private readonly bool _ownsHttpClient;
     private readonly IMfaTokenProtector _mfaTokenProtector;
+    private readonly Auth0MtlsEndpointResolver? _mtlsEndpointResolver;
+    private string? _mtlsHost;
 
     private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
     {
@@ -50,7 +53,8 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     /// <param name="options">The authentication options.</param>
     /// <param name="mfaTokenProtector">The protector for decrypting MFA token blobs.</param>
     /// <param name="ownsHttpClient">When <c>true</c> (the default), the supplied <see cref="HttpClient"/> is disposed when this client is disposed. Pass <c>false</c> when the <see cref="HttpClient"/> is owned by the caller (for example a shared backchannel client).</param>
-    internal AuthenticationApiClient(HttpClient httpClient, Uri baseUri, Auth0WebAppOptions options, IMfaTokenProtector mfaTokenProtector, bool ownsHttpClient = true)
+    /// <param name="mtlsEndpointResolver">Optional resolver for mTLS endpoint discovery.</param>
+    internal AuthenticationApiClient(HttpClient httpClient, Uri baseUri, Auth0WebAppOptions options, IMfaTokenProtector mfaTokenProtector, bool ownsHttpClient = true, Auth0MtlsEndpointResolver? mtlsEndpointResolver = null)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         BaseUri = baseUri ?? throw new ArgumentNullException(nameof(baseUri));
@@ -58,6 +62,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
         _mfaTokenProtector = mfaTokenProtector ?? throw new ArgumentNullException(nameof(mfaTokenProtector));
         _domain = baseUri.Host;
         _ownsHttpClient = ownsHttpClient;
+        _mtlsEndpointResolver = mtlsEndpointResolver;
     }
 
     /// <inheritdoc />
@@ -244,7 +249,30 @@ public class AuthenticationApiClient : IAuthenticationApiClient
         }
     }
 
-    private Uri BuildUri(string path) => new Uri($"https://{_domain}/{path}");
+    private Uri BuildUri(string path)
+    {
+        if (_options.UseMtls && _mtlsEndpointResolver != null &&
+            (path == "oauth/token" || path == "mfa/challenge"))
+        {
+            return new Uri($"https://{ResolveMtlsHost()}/{path}");
+        }
+
+        return new Uri($"https://{_domain}/{path}");
+    }
+
+    // BuildUri is synchronous while discovery is async. The resolver caches per domain, so this
+    // blocks only on the first client-authenticated call for a cold domain; subsequent calls (and
+    // any call after TokenClient has already warmed the same domain) are a dictionary lookup.
+    private string ResolveMtlsHost()
+    {
+        if (_mtlsHost == null)
+        {
+            var tokenEndpoint = _mtlsEndpointResolver!.ResolveTokenEndpointAsync(_domain, _httpClient).GetAwaiter().GetResult();
+            _mtlsHost = new Uri(tokenEndpoint).Host;
+        }
+
+        return _mtlsHost;
+    }
 
     // The grant calls replay the audience/scope bound into the blob so the new token targets the
     // same resource the original refresh did.
@@ -272,6 +300,12 @@ public class AuthenticationApiClient : IAuthenticationApiClient
 
     private void ApplyClientAuthentication(Dictionary<string, string> body)
     {
+        // Under mTLS the client certificate is the sole credential.
+        if (_options.UseMtls)
+        {
+            return;
+        }
+
         if (_options.ClientAssertionSecurityKey != null)
         {
             body.Add("client_assertion", new JwtTokenFactory(

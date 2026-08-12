@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
 using Auth0.AspNetCore.Authentication.CustomDomains;
 using Auth0.AspNetCore.Authentication.AuthenticationApi;
+using Auth0.AspNetCore.Authentication.Mtls;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 
@@ -23,6 +24,7 @@ namespace Auth0.AspNetCore.Authentication
         private readonly IServiceCollection _services;
         private readonly Auth0WebAppOptions _options;
         private readonly string _authenticationScheme;
+        private bool _accessTokenConfigured;
 
         /// <summary>
         /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
@@ -92,7 +94,8 @@ namespace Auth0.AspNetCore.Authentication
                     new Uri($"https://{_options.Domain}"),
                     _options,
                     sp.GetRequiredService<IMfaTokenProtector>(),
-                    ownsHttpClient: backchannel == null);
+                    ownsHttpClient: backchannel == null,
+                    mtlsEndpointResolver: sp.GetService<Mtls.Auth0MtlsEndpointResolver>());
             });
             return this;
         }
@@ -105,6 +108,72 @@ namespace Auth0.AspNetCore.Authentication
         public Auth0WebAppAuthenticationBuilder WithCustomDomains(Action<Auth0CustomDomainsOptions> configureOptions)
         {
             EnableCustomDomains(configureOptions);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures Mutual TLS (mTLS) client authentication. The supplied
+        /// <see cref="Auth0MtlsOptions.HttpClient"/> — which must carry the client certificate — is used
+        /// as the backchannel for every client-authenticated request, and requests are routed through
+        /// the tenant's <c>mtls_endpoint_aliases</c>.
+        /// </summary>
+        /// <remarks>
+        /// Must be called <b>before</b> <see cref="WithAccessToken"/> and (when combined) <b>after</b>
+        /// <see cref="WithCustomDomains"/>. The certificate is the sole credential: do not also set
+        /// <see cref="Auth0WebAppOptions.ClientSecret"/>, <see cref="Auth0WebAppOptions.ClientAssertionSecurityKey"/>,
+        /// or <see cref="Auth0WebAppOptions.Backchannel"/>.
+        /// </remarks>
+        /// <param name="configureOptions">A delegate used to configure the <see cref="Auth0MtlsOptions"/>.</param>
+        /// <returns>An instance of <see cref="Auth0WebAppAuthenticationBuilder"/>.</returns>
+        public Auth0WebAppAuthenticationBuilder WithMtls(Action<Auth0MtlsOptions> configureOptions)
+        {
+            var mtlsOptions = new Auth0MtlsOptions();
+            configureOptions(mtlsOptions);
+
+            if (mtlsOptions.HttpClient == null)
+            {
+                throw new InvalidOperationException(
+                    "WithMtls requires an HttpClient configured with the client certificate.");
+            }
+
+            if (_accessTokenConfigured)
+            {
+                throw new InvalidOperationException("WithMtls must be called before WithAccessToken.");
+            }
+
+            if (_options.Backchannel != null)
+            {
+                throw new InvalidOperationException(
+                    "Backchannel cannot be set when WithMtls supplies an HttpClient. Configure a single HttpClient " +
+                    "with both the client certificate and your transport settings, and pass it to WithMtls.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(_options.ClientSecret) || _options.ClientAssertionSecurityKey != null)
+            {
+                throw new InvalidOperationException(
+                    "mTLS cannot be combined with a client secret or client assertion; the certificate is the sole credential.");
+            }
+
+            // Dual-write to both option instances: the builder instance drives oidcOptions.Backchannel
+            // (code exchange + PAR) via the ConfigureOpenIdConnect closure, and the DI-registered
+            // named instance is what the HttpContextExtensions call sites read via IOptionsSnapshot.
+            _options.Backchannel = mtlsOptions.HttpClient;
+            _options.UseMtls = true;
+            _services.Configure<Auth0WebAppOptions>(_authenticationScheme, o =>
+            {
+                o.Backchannel = mtlsOptions.HttpClient;
+                o.UseMtls = true;
+            });
+
+            _services.AddHttpClient();
+            _services.TryAddSingleton<Auth0MtlsEndpointResolver>();
+            _services.TryAddSingleton<MtlsCnfInspector>();
+
+            // Register last so, with WithCustomDomains registered first, this post-configure runs after
+            // the custom-domains one and wraps its ConfigurationManager rather than being overwritten.
+            _services.TryAddEnumerable(
+                ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, MtlsOpenIdConnectPostConfigureOptions>());
+
             return this;
         }
 
@@ -192,6 +261,8 @@ namespace Auth0.AspNetCore.Authentication
 
         private void EnableWithAccessToken(Action<Auth0WebAppWithAccessTokenOptions> configureOptions)
         {
+            _accessTokenConfigured = true;
+
             var auth0WithAccessTokensOptions = new Auth0WebAppWithAccessTokenOptions();
 
             configureOptions(auth0WithAccessTokensOptions);
@@ -255,6 +326,12 @@ namespace Auth0.AspNetCore.Authentication
 
         private static void ValidateOptions(Auth0WebAppOptions options)
         {
+            // Under mTLS the certificate is the credential; WithMtls has already enforced exclusivity.
+            if (options.UseMtls)
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(options.ClientSecret) && options.ClientAssertionSecurityKey == null)
             {
                 throw new InvalidOperationException("Both Client Secret and Client Assertion can not be null when requesting an access token, one or the other has to be set.");

@@ -105,6 +105,14 @@ namespace Auth0.AspNetCore.Authentication
         public HttpClient? Backchannel { get; set; }
 
         /// <summary>
+        /// When <c>true</c>, the SDK authenticates with a TLS client certificate (mTLS)
+        /// instead of a client secret or client assertion, and routes client-authenticated
+        /// back-channel requests through the <c>mtls_endpoint_aliases</c> from discovery.
+        /// Set by <see cref="Auth0WebAppAuthenticationBuilder.WithMtls"/>; not set directly.
+        /// </summary>
+        internal bool UseMtls { get; set; }
+
+        /// <summary>
         /// If provided, will set the 'max_age' parameter with the authentication request.
         /// If the identity provider has not actively authenticated the user within the length of time specified, 
         /// the user will be prompted to re-authenticate.
