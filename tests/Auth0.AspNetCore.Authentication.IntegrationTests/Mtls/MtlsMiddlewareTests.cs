@@ -85,6 +85,21 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
         }
 
         [Fact]
+        public void WithCustomDomains_Throws_When_Called_After_WithMtls()
+        {
+            // mTLS wraps the OpenIdConnect ConfigurationManager while custom domains replaces it, so the
+            // custom-domains registration must come first. Calling WithMtls before WithCustomDomains
+            // would discard the mTLS wrapper on the login/PAR path; the builder fails fast instead.
+            Func<TestServer> act = () => TestServerBuilder.CreateServer(
+                configureCustomDomains: cd => cd.DomainResolver = _ => Task.FromResult("tenant.eu.auth0.com"),
+                configureMtls: mtls => mtls.HttpClient = new HttpClient(),
+                withMtlsBeforeCustomDomains: true);
+
+            act.Should().Throw<InvalidOperationException>()
+                .Which.Message.Should().Be("WithCustomDomains must be called before WithMtls.");
+        }
+
+        [Fact]
         public void WithMtls_Succeeds_With_HttpClient_And_No_Secret()
         {
             Func<TestServer> act = () => TestServerBuilder.CreateServer(
@@ -150,8 +165,11 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
             var clientId = configuration["Auth0:ClientId"];
             var sink = new CapturingLoggerProvider();
 
+            // Uses a discovery document that advertises a token_endpoint alias (but no PAR alias, so the
+            // handler does not attempt PAR): under mTLS the config manager fails closed when the token
+            // alias is absent, so the standard fixture would break the login redirect here.
             var handler = new OidcMockBuilder()
-                .MockOpenIdConfig()
+                .MockOpenIdConfig("wellknownconfig_with_mtls_token_only.json")
                 .MockJwks()
                 .MockToken(() => GenerateToken(1, $"https://{domain}/", clientId, nonce, "1"),
                     me => me.HasAuth0ClientHeader(), accessToken: accessToken)
@@ -189,6 +207,33 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
                 configureWithAccessTokensOptions: at => at.Audience = "http://local.auth0");
 
             act.Should().NotThrow();
+        }
+
+        [Fact]
+        public async Task Par_Request_Under_Custom_Domains_Goes_To_Mtls_Alias()
+        {
+            // Verifies the mTLS ConfigurationManager wrapper actually survives composition with custom
+            // domains (rather than merely not throwing at startup): the PAR request on the login path
+            // must be routed to the per-domain mtls alias, which only happens if the mTLS post-configure
+            // wrapped the custom-domains manager instead of being discarded by it.
+            HttpRequestMessage capturedPar = null;
+            var handler = new OidcMockBuilder()
+                .MockOpenIdConfig("wellknownconfig_with_mtls.json")
+                .MockJwks()
+                .MockPAR("https://my-par-request-uri", me => { capturedPar = me; return true; })
+                .Build();
+
+            using var server = TestServerBuilder.CreateServer(
+                configureOptions: opt => opt.UsePushedAuthorization = true,
+                configureCustomDomains: cd => cd.DomainResolver = _ => Task.FromResult("tenant.eu.auth0.com"),
+                configureMtls: mtls => mtls.HttpClient = new HttpClient(handler.Object));
+            using var client = server.CreateClient();
+
+            var response = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+
+            response.Headers.Location.AbsolutePath.Should().Be("/authorize");
+            capturedPar.Should().NotBeNull();
+            capturedPar.RequestUri!.Host.Should().Be("mtls.tenant.eu.auth0.com");
         }
 
         private string GenerateToken(int userId, string issuer, string audience, string nonce, string subject, string organization = null, bool expired = false, string extraAudience = null, string azp = null, DateTime? authTime = null)

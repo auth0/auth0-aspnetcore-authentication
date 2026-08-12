@@ -12,6 +12,7 @@
     <EmbeddedResource Include="wellknownconfig_without_par.json" />
     <EmbeddedResource Include="wellknownconfig_with_mtls.json" />
     <EmbeddedResource Include="wellknownconfig_with_mtls_no_aliases.json" />
+    <EmbeddedResource Include="wellknownconfig_with_mtls_token_only.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -165,9 +165,24 @@ namespace Auth0.AspNetCore.Authentication
         {
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
-            var tokenEndpoint = options.UseMtls && _mtlsEndpointResolver != null
-                ? await _mtlsEndpointResolver.ResolveTokenEndpointAsync(tokenEndpointDomain, _httpClient).ConfigureAwait(false)
-                : $"https://{tokenEndpointDomain}/oauth/token";
+            string tokenEndpoint;
+            if (options.UseMtls)
+            {
+                // A missing resolver here means mTLS was enabled without the services WithMtls registers.
+                // Fail loudly rather than fall back to the standard endpoint, which would strip the
+                // certificate routing and surface as a confusing invalid_client from the token endpoint.
+                if (_mtlsEndpointResolver == null)
+                {
+                    throw new InvalidOperationException(
+                        "mTLS is enabled but no mTLS endpoint resolver is available. Ensure the SDK was configured with WithMtls.");
+                }
+
+                tokenEndpoint = await _mtlsEndpointResolver.ResolveTokenEndpointAsync(tokenEndpointDomain, _httpClient).ConfigureAwait(false);
+            }
+            else
+            {
+                tokenEndpoint = $"https://{tokenEndpointDomain}/oauth/token";
+            }
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint) { Content = requestContent })
             {

@@ -25,6 +25,7 @@ namespace Auth0.AspNetCore.Authentication
         private readonly Auth0WebAppOptions _options;
         private readonly string _authenticationScheme;
         private bool _accessTokenConfigured;
+        private bool _mtlsConfigured;
 
         /// <summary>
         /// Constructs an instance of <see cref="Auth0WebAppAuthenticationBuilder"/>
@@ -154,6 +155,8 @@ namespace Auth0.AspNetCore.Authentication
                     "mTLS cannot be combined with a client secret or client assertion; the certificate is the sole credential.");
             }
 
+            _mtlsConfigured = true;
+
             // Dual-write to both option instances: the builder instance drives oidcOptions.Backchannel
             // (code exchange + PAR) via the ConfigureOpenIdConnect closure, and the DI-registered
             // named instance is what the HttpContextExtensions call sites read via IOptionsSnapshot.
@@ -229,6 +232,17 @@ namespace Auth0.AspNetCore.Authentication
 
         private void EnableCustomDomains(Action<Auth0CustomDomainsOptions> configureOptions)
         {
+            // Custom domains must be configured before mTLS. Both register an
+            // IPostConfigureOptions<OpenIdConnectOptions> that touches ConfigurationManager: custom
+            // domains replaces it, mTLS wraps it. Post-configures run in registration order, so mTLS
+            // only wraps the custom-domains manager if it registers last. If WithMtls ran first, the
+            // custom-domains post-configure would run last and discard the mTLS wrapper, routing the
+            // code exchange and PAR to the non-mTLS endpoints. Fail fast rather than silently.
+            if (_mtlsConfigured)
+            {
+                throw new InvalidOperationException("WithCustomDomains must be called before WithMtls.");
+            }
+
             var customDomainsOptions = new Auth0CustomDomainsOptions();
             configureOptions(customDomainsOptions);
             

@@ -1360,7 +1360,7 @@ mTLS requires tenant-side configuration that is only available on specific plans
 
 ### Configuration
 
-Build an `HttpClient` that presents the client certificate, then pass it to `WithMtls`. The SDK never reads or stores the certificate — it only uses the client you supply.
+Build an `HttpClient` that presents the client certificate, then pass it to `WithMtls`. The SDK never reads or stores the certificate - it only uses the client you supply.
 
 ```csharp
 using System.Net.Http;
@@ -1406,10 +1406,10 @@ builder.Services
 
 - **Call `WithMtls` before `WithAccessToken`.** When combining with custom domains, the order is `WithCustomDomains` → `WithMtls` → `WithAccessToken`. A wrong order throws at startup.
 - **Leave `ResponseType` at its default.** Do not pre-set it to `code` or `code id_token` in `AddAuth0WebAppAuthentication`: registration-time validation runs before `WithMtls` and would otherwise reject the certificate-only configuration as missing a credential.
-- **The certificate is the sole credential.** Do not also set `ClientSecret`, `ClientAssertionSecurityKey`, or `Backchannel` — each throws at startup.
+- **The certificate is the sole credential.** Do not also set `ClientSecret`, `ClientAssertionSecurityKey`, or `Backchannel` - each throws at startup.
 - **Keep the `HttpClient` long-lived.** A per-request client would defeat connection pooling and repeat the TLS handshake on every call.
 
-Once configured, every client-authenticated back-channel request — the code exchange, token refresh, MRRT and Token Vault exchanges, session-transfer, MFA challenge, and Pushed Authorization Requests — is routed through the tenant's `mtls_endpoint_aliases` and sends the certificate instead of a secret. Bearer-token endpoints (MFA associate/list) continue to use the standard host.
+Once configured, every client-authenticated back-channel request - the code exchange, token refresh, MRRT and Token Vault exchanges, session-transfer, MFA challenge, and Pushed Authorization Requests - is routed through the tenant's `mtls_endpoint_aliases` and sends the certificate instead of a secret. Bearer-token endpoints (MFA associate/list) continue to use the standard host.
 
 ### Combining with custom domains
 
@@ -1417,7 +1417,7 @@ Once configured, every client-authenticated back-channel request — the code ex
 
 ### Limitations
 
-- **The SDK does not own the certificate.** You supply and manage the `HttpClient` (loading, storage, and rotation are yours). Because `HttpClient` does not expose its handler, the SDK cannot verify a certificate is actually attached — it only checks that an `HttpClient` was provided.
+- **The SDK does not own the certificate.** You supply and manage the `HttpClient` (loading, storage, and rotation are yours). Because `HttpClient` does not expose its handler, the SDK cannot verify a certificate is actually attached - it only checks that an `HttpClient` was provided.
 - **No thumbprint verification.** When mTLS is enabled and an access token issued on a `cnf`-bearing grant (authorization code or refresh) is **not** certificate-bound, the SDK logs a one-time warning per client (`cnf.x5t#S256` is absent). It checks the claim's *presence* only; it does not compare the thumbprint to your certificate.
 
 ## Backchannel Logout

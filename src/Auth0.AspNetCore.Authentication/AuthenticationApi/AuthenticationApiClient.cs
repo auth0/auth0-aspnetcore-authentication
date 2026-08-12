@@ -126,7 +126,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
         ApplyClientAuthentication(body);
 
         var content = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value)));
-        using var message = new HttpRequestMessage(HttpMethod.Post, BuildUri("oauth/token")) { Content = content };
+        using var message = new HttpRequestMessage(HttpMethod.Post, await BuildUriAsync("oauth/token", cancellationToken).ConfigureAwait(false)) { Content = content };
         using var response = await _httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
 
         // authorization_pending / slow_down arrive as HTTP 400 while the user has not yet approved
@@ -182,7 +182,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
 
         var bearer = ResolveAssociateToken(request.Token);
 
-        using var message = new HttpRequestMessage(HttpMethod.Post, BuildUri("mfa/associate"))
+        using var message = new HttpRequestMessage(HttpMethod.Post, await BuildUriAsync("mfa/associate", cancellationToken).ConfigureAwait(false))
         {
             Content = new StringContent(JsonSerializer.Serialize(request, SerializerOptions), Encoding.UTF8, "application/json")
         };
@@ -196,7 +196,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     {
         if (string.IsNullOrWhiteSpace(accessToken)) throw new ArgumentNullException(nameof(accessToken));
 
-        using var message = new HttpRequestMessage(HttpMethod.Get, BuildUri("mfa/authenticators"));
+        using var message = new HttpRequestMessage(HttpMethod.Get, await BuildUriAsync("mfa/authenticators", cancellationToken).ConfigureAwait(false));
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         return await SendAsync<IList<Authenticator>>(message, cancellationToken).ConfigureAwait(false);
@@ -207,7 +207,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     {
         if (request == null) throw new ArgumentNullException(nameof(request));
 
-        using var message = new HttpRequestMessage(HttpMethod.Delete, BuildUri($"mfa/authenticators/{Uri.EscapeDataString(request.AuthenticatorId)}"));
+        using var message = new HttpRequestMessage(HttpMethod.Delete, await BuildUriAsync($"mfa/authenticators/{Uri.EscapeDataString(request.AuthenticatorId)}", cancellationToken).ConfigureAwait(false));
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", request.AccessToken);
 
         using var response = await _httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
@@ -227,7 +227,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
     private async Task<T> PostFormAsync<T>(string path, Dictionary<string, string> body, CancellationToken cancellationToken)
     {
         var content = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value)));
-        using var message = new HttpRequestMessage(HttpMethod.Post, BuildUri(path)) { Content = content };
+        using var message = new HttpRequestMessage(HttpMethod.Post, await BuildUriAsync(path, cancellationToken).ConfigureAwait(false)) { Content = content };
         return await SendAsync<T>(message, cancellationToken).ConfigureAwait(false);
     }
 
@@ -249,25 +249,37 @@ public class AuthenticationApiClient : IAuthenticationApiClient
         }
     }
 
-    private Uri BuildUri(string path)
+    private async Task<Uri> BuildUriAsync(string path, CancellationToken cancellationToken)
     {
-        if (_options.UseMtls && _mtlsEndpointResolver != null &&
-            (path == "oauth/token" || path == "mfa/challenge"))
+        // Only the two client-authenticated paths route through the mTLS alias; the bearer-token paths
+        // (mfa/associate, mfa/authenticators) always use the standard host.
+        if (_options.UseMtls && (path == "oauth/token" || path == "mfa/challenge"))
         {
-            return new Uri($"https://{ResolveMtlsHost()}/{path}");
+            // A missing resolver means mTLS was enabled without the services WithMtls registers. Fail
+            // loudly rather than route a certificate-less request to the standard host, which the edge
+            // would reject as invalid_client.
+            if (_mtlsEndpointResolver == null)
+            {
+                throw new InvalidOperationException(
+                    "mTLS is enabled but no mTLS endpoint resolver is available. Ensure the SDK was configured with WithMtls.");
+            }
+
+            return new Uri($"https://{await ResolveMtlsHostAsync(cancellationToken).ConfigureAwait(false)}/{path}");
         }
 
         return new Uri($"https://{_domain}/{path}");
     }
 
-    // BuildUri is synchronous while discovery is async. The resolver caches per domain, so this
-    // blocks only on the first client-authenticated call for a cold domain; subsequent calls (and
-    // any call after TokenClient has already warmed the same domain) are a dictionary lookup.
-    private string ResolveMtlsHost()
+    // Resolution is awaited rather than blocked on: a synchronous .GetAwaiter().GetResult() here can
+    // deadlock under a captured SynchronizationContext (e.g. Blazor Server) and parks a threadpool
+    // thread on a cold-domain burst. The resolver caches per domain, so discovery is fetched only on
+    // the first client-authenticated call for a cold domain; subsequent calls (and any call after
+    // TokenClient has already warmed the same domain) are a dictionary lookup.
+    private async Task<string> ResolveMtlsHostAsync(CancellationToken cancellationToken)
     {
         if (_mtlsHost == null)
         {
-            var tokenEndpoint = _mtlsEndpointResolver!.ResolveTokenEndpointAsync(_domain, _httpClient).GetAwaiter().GetResult();
+            var tokenEndpoint = await _mtlsEndpointResolver!.ResolveTokenEndpointAsync(_domain, _httpClient, cancellationToken).ConfigureAwait(false);
             _mtlsHost = new Uri(tokenEndpoint).Host;
         }
 

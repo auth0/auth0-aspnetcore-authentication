@@ -84,6 +84,40 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
             configCalls.Should().Be(1);
         }
 
+        [Fact]
+        public async Task Failed_Discovery_Does_Not_Poison_Cache()
+        {
+            // A transient discovery failure must not cache a faulted task: a later call has to retry and
+            // succeed. This guards the eviction in ResolveAsync's catch against a future GetOrAdd
+            // "simplification" that would cache the failure and cause a self-inflicted outage.
+            var handler = new Mock<HttpMessageHandler>();
+            handler.Protected()
+                .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(m => m.RequestUri!.AbsolutePath.Contains(".well-known/openid-configuration")),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent("transient discovery failure")
+                })
+                .ReturnsAsync(ResourceResponse("wellknownconfig_with_mtls.json"));
+            handler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(m => m.RequestUri!.AbsolutePath.Contains(".well-known/jwks.json")),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(() => ResourceResponse("jwks.json"));
+
+            var resolver = new Auth0MtlsEndpointResolver();
+            var client = new HttpClient(handler.Object);
+
+            // First attempt fails while fetching discovery.
+            Func<Task> firstAttempt = () => resolver.ResolveTokenEndpointAsync(Domain, client);
+            await firstAttempt.Should().ThrowAsync<Exception>();
+
+            // Second attempt must re-fetch discovery (the faulted task was evicted) and succeed.
+            var endpoint = await resolver.ResolveTokenEndpointAsync(Domain, client);
+            endpoint.Should().Be("https://mtls.tenant.eu.auth0.com/oauth/token");
+        }
+
         private static System.Net.Http.HttpResponseMessage ResourceResponse(string resource)
         {
             var name = "Auth0.AspNetCore.Authentication.IntegrationTests." + resource;

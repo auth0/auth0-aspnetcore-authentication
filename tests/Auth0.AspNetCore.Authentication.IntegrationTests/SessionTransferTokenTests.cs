@@ -62,7 +62,8 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             out Mock<IAuthenticationService> authService,
             string? resolvedDomain = null,
             string? audience = null,
-            TimeSpan? accessTokenExpirationLeeway = null)
+            TimeSpan? accessTokenExpirationLeeway = null,
+            Action<Auth0WebAppOptions>? configureWebApp = null)
         {
             var webAppOptions = new Auth0WebAppOptions
             {
@@ -72,6 +73,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 Backchannel = new HttpClient(backchannelHandler),
                 CookieAuthenticationScheme = CookieScheme
             };
+            configureWebApp?.Invoke(webAppOptions);
 
             var withAccessTokenOptions = new Auth0WebAppWithAccessTokenOptions { Audience = audience };
             if (accessTokenExpirationLeeway.HasValue)
@@ -904,6 +906,58 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
 
             var ex = (await act.Should().ThrowAsync<CustomTokenExchangeException>()).Which;
             ex.InnerException.Should().BeOfType<HttpRequestException>();
+        }
+
+        // A mTLS configuration error (UseMtls on but no endpoint resolver registered, i.e. WithMtls
+        // was not used) surfaces from the token client as an InvalidOperationException. Whether it
+        // happens on the exchange (explicit actor) or the actor refresh (auto-sourced, stale id_token),
+        // it must be wrapped in the documented CustomTokenExchangeException with its actionable message
+        // preserved and the original on InnerException — never leaked raw, and never mislabeled as a
+        // connectivity failure.
+        [Theory]
+        [InlineData(true)]   // fail on the actor refresh
+        [InlineData(false)]  // fail on the exchange
+        public async Task RequestSessionTransferTokenAsync_WrapsMtlsConfigurationError(bool failOnActorRefresh)
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            var properties = new AuthenticationProperties();
+            var request = new SessionTransferTokenRequest
+            {
+                SubjectToken = "customer-token",
+                SubjectTokenType = "urn:acme:customer"
+            };
+
+            if (failOnActorRefresh)
+            {
+                // Stale id_token + refresh token, so the actor refresh runs and is the call that fails.
+                properties.Items[".Token.id_token"] = IdTokenExpiringIn(-5);
+                properties.Items[".Token.refresh_token"] = "rt";
+            }
+            else
+            {
+                // Explicit actor skips the refresh entirely, so the exchange is the only call.
+                request.ActorToken = "agent-jwt";
+            }
+
+            var context = BuildContext(handler.Object, properties, out _,
+                configureWebApp: o => o.UseMtls = true);
+
+            var act = () => context.RequestSessionTransferTokenAsync(request);
+
+            var ex = (await act.Should().ThrowAsync<CustomTokenExchangeException>()).Which;
+            ex.Message.Should().Contain("mTLS is enabled but no mTLS endpoint resolver is available");
+            ex.InnerException.Should().BeOfType<InvalidOperationException>();
+            // The misconfiguration is detected before any network call goes out.
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
         }
 
         [Fact]

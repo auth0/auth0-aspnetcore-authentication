@@ -100,6 +100,26 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
         }
 
         [Fact]
+        public async Task MfaChallenge_Throws_When_Mtls_Enabled_But_Resolver_Missing()
+        {
+            // UseMtls is true but no resolver was supplied. The client-authenticated path must fail
+            // loudly rather than route a certificate-less request to the standard host.
+            var (handler, _, _) = BuildHandler("{\"challenge_type\":\"oob\"}");
+            var client = new AuthenticationApiClient(
+                new HttpClient(handler.Object),
+                new Uri($"https://{Domain}"),
+                MtlsOptions(),
+                Protector,
+                ownsHttpClient: false,
+                mtlsEndpointResolver: null);
+
+            Func<Task> act = () => client.MfaChallengeAsync(new MfaChallengeRequest { MfaToken = Blob("mt"), ChallengeType = "oob" });
+
+            (await act.Should().ThrowAsync<InvalidOperationException>()).Which.Message.Should().Be(
+                "mTLS is enabled but no mTLS endpoint resolver is available. Ensure the SDK was configured with WithMtls.");
+        }
+
+        [Fact]
         public async Task MfaAuthenticatorsList_Stays_On_Standard_Host()
         {
             var (handler, captured, bodies) = BuildHandler("[{\"id\":\"a1\",\"authenticator_type\":\"otp\",\"active\":true}]");

@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,20 +39,13 @@ namespace Auth0.AspNetCore.Authentication.Mtls
             }
             catch
             {
-                // Do not cache a failed discovery attempt: a transient failure must not poison the domain.
-                _cache.TryRemove(domain, out _);
+                // Do not cache a failed discovery attempt: a transient failure must not poison the
+                // domain.
+                _cache.TryRemove(new KeyValuePair<string, Task<OpenIdConnectConfiguration>>(domain, task));
                 throw;
             }
 
-            var alias = MtlsEndpointAliases.TryGetAlias(configuration, endpointName);
-            if (string.IsNullOrEmpty(alias))
-            {
-                throw new InvalidOperationException(
-                    $"mTLS is enabled but the authorization server discovery document does not advertise " +
-                    $"`mtls_endpoint_aliases.{endpointName}`. Ensure mTLS endpoint aliases are enabled on your Auth0 tenant.");
-            }
-
-            return alias!;
+            return MtlsEndpointAliases.GetRequiredAlias(configuration, endpointName);
         }
     }
 }

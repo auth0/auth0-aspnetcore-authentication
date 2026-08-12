@@ -127,6 +127,20 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
         }
 
         [Fact]
+        public async Task Refresh_Throws_When_Mtls_Enabled_But_Resolver_Missing()
+        {
+            // UseMtls is true but no resolver was supplied. Rather than silently fall back to the
+            // standard endpoint (which the edge would reject as invalid_client), fail loudly.
+            var (handler, _, _, _) = BuildHandler($"{Header}.{PayloadWithCnf}.sig");
+            var client = new TokenClient(new HttpClient(handler.Object));
+
+            Func<Task> act = () => client.Refresh(MtlsOptions(), "refresh-123");
+
+            (await act.Should().ThrowAsync<InvalidOperationException>()).Which.Message.Should().Be(
+                "mTLS is enabled but no mTLS endpoint resolver is available. Ensure the SDK was configured with WithMtls.");
+        }
+
+        [Fact]
         public async Task Refresh_Warns_When_Token_Not_Cnf_Bound()
         {
             var (handler, _, _, _) = BuildHandler($"{Header}.{PayloadNoCnf}.sig");

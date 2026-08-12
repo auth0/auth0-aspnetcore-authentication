@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -40,6 +41,26 @@ namespace Auth0.AspNetCore.Authentication.Mtls
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns the aliased URL for <paramref name="endpointName"/>, or throws
+        /// <see cref="InvalidOperationException"/> with an actionable message when the alias is absent.
+        /// This is the fail-closed counterpart to <see cref="TryGetAlias"/>: callers that cannot safely
+        /// fall back to the standard (non-mTLS) endpoint use this so the same misconfiguration surfaces
+        /// the same clear error everywhere, rather than a downstream <c>invalid_client</c>.
+        /// </summary>
+        public static string GetRequiredAlias(OpenIdConnectConfiguration? configuration, string endpointName)
+        {
+            var alias = TryGetAlias(configuration, endpointName);
+            if (string.IsNullOrEmpty(alias))
+            {
+                throw new InvalidOperationException(
+                    $"mTLS is enabled but the authorization server discovery document does not advertise " +
+                    $"`mtls_endpoint_aliases.{endpointName}`. Ensure mTLS endpoint aliases are enabled on your Auth0 tenant.");
+            }
+
+            return alias!;
         }
     }
 }
