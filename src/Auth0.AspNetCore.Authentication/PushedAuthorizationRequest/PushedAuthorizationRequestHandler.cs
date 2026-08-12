@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.Exceptions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Auth0.AspNetCore.Authentication.PushedAuthorizationRequest;
@@ -48,10 +50,17 @@ internal static class PushedAuthorizationRequestHandler
         var message = context.ProtocolMessage;
         var properties = context.Properties;
         var clientId = message.ClientId;
-        
-        // As the client_secret isn't send through the front-channel,
-        // we need to ensure it is added when sending the request through the back-channel.
-        message.SetParameter("client_secret", oidcOptions.ClientSecret);
+
+        // As the client_secret isn't sent through the front-channel, we add it for the back-channel
+        // request — unless mTLS is enabled, where the client certificate is the sole credential.
+        var auth0Options = context.HttpContext.RequestServices
+            .GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>()
+            .Get(context.Scheme.Name);
+
+        if (!auth0Options.UseMtls)
+        {
+            message.SetParameter("client_secret", oidcOptions.ClientSecret);
+        }
 
         SetStateParameter(message, properties, oidcOptions);
 
