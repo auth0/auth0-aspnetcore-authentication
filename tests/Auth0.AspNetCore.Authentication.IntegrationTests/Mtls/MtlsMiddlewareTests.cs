@@ -236,6 +236,57 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
             capturedPar.RequestUri!.Host.Should().Be("mtls.tenant.eu.auth0.com");
         }
 
+        [Fact]
+        public async Task Par_Under_Mtls_Fails_Closed_When_Only_Standard_Par_Endpoint_Advertised()
+        {
+            // mTLS + PAR enabled, and the tenant advertises the token_endpoint alias plus a *standard*
+            // pushed_authorization_request_endpoint but no mtls PAR alias. The PAR request carries the
+            // client certificate and no client_secret; the standard host does not do client-certificate
+            // authentication and would reject it as invalid_client. The handler must fail closed with the
+            // actionable alias-missing error instead of silently posting to the standard host.
+            HttpRequestMessage capturedPar = null;
+            var handler = new OidcMockBuilder()
+                .MockOpenIdConfig("wellknownconfig_with_mtls_token_alias_std_par.json")
+                .MockJwks()
+                .MockPAR("https://my-par-request-uri", me => { capturedPar = me; return true; })
+                .Build();
+
+            using var server = TestServerBuilder.CreateServer(
+                configureOptions: opt => opt.UsePushedAuthorization = true,
+                configureMtls: mtls => mtls.HttpClient = new HttpClient(handler.Object));
+            using var client = server.CreateClient();
+
+            Func<Task> act = () => client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+
+            (await act.Should().ThrowAsync<InvalidOperationException>())
+                .Which.Message.Should().Contain("mtls_endpoint_aliases.pushed_authorization_request_endpoint");
+            // The certificate-less request never reached the standard PAR host.
+            capturedPar.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task Par_Under_Mtls_Fails_Closed_When_No_Par_Endpoint_Advertised()
+        {
+            // mTLS + PAR enabled, and the discovery document advertises the token_endpoint alias but no
+            // PAR endpoint at all (neither alias nor standard). The handler must surface the actionable
+            // mtls alias-missing error rather than the generic "no PAR endpoint found" message, so the
+            // cause (aliases not enabled on the tenant) is clear.
+            var handler = new OidcMockBuilder()
+                .MockOpenIdConfig("wellknownconfig_with_mtls_token_only.json")
+                .MockJwks()
+                .Build();
+
+            using var server = TestServerBuilder.CreateServer(
+                configureOptions: opt => opt.UsePushedAuthorization = true,
+                configureMtls: mtls => mtls.HttpClient = new HttpClient(handler.Object));
+            using var client = server.CreateClient();
+
+            Func<Task> act = () => client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+
+            (await act.Should().ThrowAsync<InvalidOperationException>())
+                .Which.Message.Should().Contain("mtls_endpoint_aliases.pushed_authorization_request_endpoint");
+        }
+
         private string GenerateToken(int userId, string issuer, string audience, string nonce, string subject, string organization = null, bool expired = false, string extraAudience = null, string azp = null, DateTime? authTime = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

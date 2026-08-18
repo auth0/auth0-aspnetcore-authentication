@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.Exceptions;
+using Auth0.AspNetCore.Authentication.Mtls;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,37 +27,47 @@ internal static class PushedAuthorizationRequestHandler
         var oidcConfiguration =
             await oidcOptions.ConfigurationManager?.GetConfigurationAsync(default)!;
 
-        // Trying to get the PAR endpoint from the property first, fallback to AdditionalData for older configs.
-        string? parEndpoint = null;
-        if (oidcConfiguration != null)
+        var auth0Options = context.HttpContext.RequestServices
+            .GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>()
+            .Get(context.Scheme.Name);
+
+        string? parEndpoint;
+        if (auth0Options.UseMtls)
         {
+            // Under mTLS the PAR request carries the client certificate and no client_secret, so it must
+            // go to the mtls alias host: the standard host does not perform client-certificate
+            // authentication and would reject the request as invalid_client. Resolve the required alias
+            // and fail closed with the same actionable error the token path raises, rather than silently
+            // falling back to the standard endpoint.
+            parEndpoint = MtlsEndpointAliases.GetRequiredAlias(
+                oidcConfiguration, "pushed_authorization_request_endpoint");
+        }
+        else
+        {
+            // Trying to get the PAR endpoint from the property first, fallback to AdditionalData for older configs.
             parEndpoint = oidcConfiguration?.PushedAuthorizationRequestEndpoint;
             if (string.IsNullOrEmpty(parEndpoint))
             {
                 object? rawParEndpoint = string.Empty;
-                oidcConfiguration.AdditionalData?.TryGetValue("pushed_authorization_request_endpoint", out rawParEndpoint);
+                oidcConfiguration?.AdditionalData?.TryGetValue("pushed_authorization_request_endpoint", out rawParEndpoint);
                 parEndpoint = rawParEndpoint as string;
+            }
+
+            // If PAR was enabled in the options, but no `pushed_authorization_request_endpoint` value is found
+            // in the OIDC configuration, we will throw an error.
+            if (string.IsNullOrEmpty(parEndpoint))
+            {
+                throw new InvalidOperationException(
+                    "Trying to use pushed authorization, but no value for 'pushed_authorization_request_endpoint' was found in the open id configuration.");
             }
         }
 
-        // If PAR was enabled in the options, but no `pushed_authorization_request_endpoint` value is found
-        // in the OIDC configuration, we will throw an error.
-        if (string.IsNullOrEmpty(parEndpoint))
-        {
-            throw new InvalidOperationException(
-                "Trying to use pushed authorization, but no value for 'pushed_authorization_request_endpoint' was found in the open id configuration.");
-        }
-        
         var message = context.ProtocolMessage;
         var properties = context.Properties;
         var clientId = message.ClientId;
 
         // As the client_secret isn't sent through the front-channel, we add it for the back-channel
         // request — unless mTLS is enabled, where the client certificate is the sole credential.
-        var auth0Options = context.HttpContext.RequestServices
-            .GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>()
-            .Get(context.Scheme.Name);
-
         if (!auth0Options.UseMtls)
         {
             message.SetParameter("client_secret", oidcOptions.ClientSecret);

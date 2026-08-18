@@ -23,10 +23,6 @@ namespace Auth0.AspNetCore.Authentication.Mtls
         public Task<string> ResolveTokenEndpointAsync(string domain, HttpClient httpClient, CancellationToken cancellationToken = default)
             => ResolveAsync(domain, "token_endpoint", httpClient, cancellationToken);
 
-        /// <summary>Resolves the aliased pushed authorization request (PAR) endpoint for <paramref name="domain"/>.</summary>
-        public Task<string> ResolvePushedAuthorizationRequestEndpointAsync(string domain, HttpClient httpClient, CancellationToken cancellationToken = default)
-            => ResolveAsync(domain, "pushed_authorization_request_endpoint", httpClient, cancellationToken);
-
         private async Task<string> ResolveAsync(string domain, string endpointName, HttpClient httpClient, CancellationToken cancellationToken)
         {
             var task = _cache.GetOrAdd(domain, d => OpenIdConnectConfigurationRetriever.GetAsync(

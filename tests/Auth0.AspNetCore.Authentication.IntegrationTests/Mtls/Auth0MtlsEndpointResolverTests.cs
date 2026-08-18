@@ -30,20 +30,6 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
         }
 
         [Fact]
-        public async Task Resolves_Aliased_Par_Endpoint_From_Discovery()
-        {
-            var handler = new OidcMockBuilder()
-                .MockOpenIdConfig("wellknownconfig_with_mtls.json")
-                .MockJwks()
-                .Build();
-
-            var resolver = new Auth0MtlsEndpointResolver();
-            var endpoint = await resolver.ResolvePushedAuthorizationRequestEndpointAsync(Domain, new HttpClient(handler.Object));
-
-            endpoint.Should().Be("https://mtls.tenant.eu.auth0.com/oauth/par");
-        }
-
-        [Fact]
         public async Task Throws_Actionable_Message_When_Alias_Absent()
         {
             var handler = new OidcMockBuilder()
@@ -79,7 +65,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Mtls
             var resolver = new Auth0MtlsEndpointResolver();
             var client = new HttpClient(handler.Object);
             await resolver.ResolveTokenEndpointAsync(Domain, client);
-            await resolver.ResolvePushedAuthorizationRequestEndpointAsync(Domain, client);
+            await resolver.ResolveTokenEndpointAsync(Domain, client);
 
             configCalls.Should().Be(1);
         }
