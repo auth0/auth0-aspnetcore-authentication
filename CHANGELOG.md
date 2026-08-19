@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.11.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.11.0) (2026-08-19)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.10.0...1.11.0)
+
+**Added**
+
+- **Mutual TLS (mTLS) support** [\#279](https://github.com/auth0/auth0-aspnetcore-authentication/pull/279) ([kailash-b](https://github.com/kailash-b)) - applications can now authenticate to Auth0 with a client certificate instead of a client secret or client assertion ([RFC 8705](https://datatracker.ietf.org/doc/html/rfc8705)). Access tokens can additionally be certificate-bound, so a stolen token cannot be replayed without the corresponding private key - aimed at highly-regulated, holder-of-key scenarios. The feature is opt-in and additive; the application owns and manages the certificate. Misconfiguration (combining mTLS with a client secret, client assertion, or custom backchannel) is caught at startup.
+- **Impersonation via Session Transfer** [\#273](https://github.com/auth0/auth0-aspnetcore-authentication/pull/273) ([kailash-b](https://github.com/kailash-b)) - builds on the existing Custom Token Exchange support to let an initiator app (e.g. a support/admin console) start an authenticated session in a target app as a customer, with the agent recorded in the `act` claim. The initiator requests a short-lived, single-use Session Transfer Token and redirects the agent's browser to the target app carrying that token.
+
+**Security**
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.10 to 10.0.11 [\#278](https://github.com/auth0/auth0-aspnetcore-authentication/pull/278) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.10.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.10.0) (2026-07-31)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.9.0...1.10.0)
 
