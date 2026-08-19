@@ -1001,6 +1001,71 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             assertion.Which.ErrorDescription.Should().Be("bad profile");
         }
 
+        // A mTLS configuration error (here UseMtls is on but no endpoint resolver is registered, i.e.
+        // WithMtls was not used) surfaces from the token client as an InvalidOperationException. The
+        // public method must not leak it raw: it is wrapped in the documented CustomTokenExchangeException
+        // with the actionable message preserved and the original on InnerException, and it is neither
+        // mislabeled as a connectivity failure nor reported as a token-endpoint rejection.
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WrapsMtlsConfigurationError_AsCustomTokenExchangeException()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _,
+                configureWebApp: o => o.UseMtls = true);
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            var assertion = await act.Should().ThrowAsync<CustomTokenExchangeException>();
+            assertion.Which.Message.Should().Contain("mTLS is enabled but no mTLS endpoint resolver is available");
+            assertion.Which.InnerException.Should().BeOfType<InvalidOperationException>();
+            // The misconfiguration is detected before any network call goes out.
+            handler.Protected().Verify("SendAsync", Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        // Under mTLS the token endpoint is resolved from the OpenID Connect discovery document. A
+        // transient discovery failure surfaces from Microsoft.IdentityModel's document retriever as an
+        // IOException (IDX20804/IDX20807), not an HttpRequestException. The public method must still
+        // wrap it in the documented CustomTokenExchangeException rather than letting the IOException
+        // escape raw to the caller.
+        [Fact]
+        public async Task CustomTokenExchangeAsync_WrapsMtlsDiscoveryFailure_AsCustomTokenExchangeException()
+        {
+            var handler = new Mock<HttpMessageHandler>();
+            handler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.InternalServerError });
+
+            var context = BuildContext(handler.Object, new AuthenticationProperties(), out _,
+                configureWebApp: o => o.UseMtls = true,
+                configureServices: s => s.AddSingleton<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>());
+
+            var act = async () => await context.CustomTokenExchangeAsync(new CustomTokenExchangeRequest
+            {
+                SubjectToken = "ext-token",
+                SubjectTokenType = "urn:acme:legacy-token"
+            });
+
+            var assertion = await act.Should().ThrowAsync<CustomTokenExchangeException>();
+            assertion.Which.InnerException.Should().BeOfType<System.IO.IOException>();
+        }
+
         [Fact]
         public async Task CustomTokenExchangeAsync_OnInvalidRequest_ThrowsBeforeNetworkCall()
         {
@@ -1176,7 +1241,9 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             AuthenticationProperties properties,
             out Mock<IAuthenticationService> authService,
             IMfaTokenProtector? mfaTokenProtector = null,
-            Action<Auth0WebAppWithAccessTokenOptions>? configureWithAccessToken = null)
+            Action<Auth0WebAppWithAccessTokenOptions>? configureWithAccessToken = null,
+            Action<Auth0WebAppOptions>? configureWebApp = null,
+            Action<IServiceCollection>? configureServices = null)
         {
             var webAppOptions = new Auth0WebAppOptions
             {
@@ -1186,6 +1253,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
                 Backchannel = new HttpClient(backchannelHandler),
                 CookieAuthenticationScheme = CookieScheme
             };
+            configureWebApp?.Invoke(webAppOptions);
 
             var withAccessTokenOptions = new Auth0WebAppWithAccessTokenOptions
             {
@@ -1216,6 +1284,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
             services.AddSingleton(withAccessTokenSnapshot.Object);
             services.AddSingleton<IMfaTokenProtector>(
                 mfaTokenProtector ?? new MfaTokenProtector(new EphemeralDataProtectionProvider()));
+            configureServices?.Invoke(services);
 
             return new DefaultHttpContext
             {

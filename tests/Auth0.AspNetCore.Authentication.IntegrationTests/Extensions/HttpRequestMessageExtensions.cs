@@ -50,6 +50,16 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Extensions
         }
 
         /// <summary>
+        /// Indicate whether or not the HttpRequestMessage points to `mfa/challenge`.
+        /// </summary>
+        /// <param name="me">The HttpRequestMessage to inspect.</param>
+        /// <returns>True if the request points to `mfa/challenge`, false if not.</returns>
+        public static bool IsMfaChallengeEndPoint(this HttpRequestMessage me)
+        {
+            return me.RequestUri.AbsolutePath.Contains("mfa/challenge");
+        }
+
+        /// <summary>
         /// Indicate whether or not the HttpRequestMessage countains the `Auth0-Client` header.
         /// </summary>
         /// <param name="me">The HttpRequestMessage to inspect.</param>

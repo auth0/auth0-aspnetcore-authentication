@@ -1,5 +1,6 @@
 ﻿using Auth0.AspNetCore.Authentication;
 using Auth0.AspNetCore.Authentication.AuthenticationApi.Models;
+using Auth0.AspNetCore.Authentication.Mtls;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -13,14 +14,18 @@ namespace Auth0.AspNetCore.Authentication
     internal class TokenClient
     {
         private readonly HttpClient _httpClient;
+        private readonly Auth0MtlsEndpointResolver? _mtlsEndpointResolver;
+        private readonly MtlsCnfInspector? _cnfInspector;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
         {
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
         };
 
-        public TokenClient(HttpClient httpClient)
+        public TokenClient(HttpClient httpClient, Auth0MtlsEndpointResolver? mtlsEndpointResolver = null, MtlsCnfInspector? cnfInspector = null)
         {
             _httpClient = httpClient;
+            _mtlsEndpointResolver = mtlsEndpointResolver;
+            _cnfInspector = cnfInspector;
         }
 
         public async Task<TokenRefreshResult> Refresh(Auth0WebAppOptions options, string refreshToken, string? domain = null, string? audience = null, string? scope = null)
@@ -53,7 +58,16 @@ namespace Auth0.AspNetCore.Authentication
 
             ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
-            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+            var result = await Send(options, body, tokenEndpointDomain).ConfigureAwait(false);
+
+            // cnf check runs only for the refresh_token grant (this method), which covers both the
+            // cookie-validation refresh and GetAccessTokenAsync (MRRT). Other grants are not cnf-bound.
+            if (result.IsSuccess && options.UseMtls)
+            {
+                _cnfInspector?.Inspect(options.ClientId, result.Response?.AccessToken);
+            }
+
+            return result;
         }
 
         public async Task<TokenRefreshResult> ExchangeRefreshTokenForConnectionToken(
@@ -89,7 +103,7 @@ namespace Auth0.AspNetCore.Authentication
 
             ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
-            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+            return await Send(options, body, tokenEndpointDomain).ConfigureAwait(false);
         }
 
         public async Task<TokenRefreshResult> ExchangeCustomToken(
@@ -144,14 +158,33 @@ namespace Auth0.AspNetCore.Authentication
 
             ApplyClientAuthentication(options, body, tokenEndpointDomain);
 
-            return await Send(body, tokenEndpointDomain).ConfigureAwait(false);
+            return await Send(options, body, tokenEndpointDomain).ConfigureAwait(false);
         }
 
-        private async Task<TokenRefreshResult> Send(Dictionary<string, string> body, string tokenEndpointDomain)
+        private async Task<TokenRefreshResult> Send(Auth0WebAppOptions options, Dictionary<string, string> body, string tokenEndpointDomain)
         {
             var requestContent = new FormUrlEncodedContent(body.Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value ?? "")));
 
-            using (var request = new HttpRequestMessage(HttpMethod.Post, $"https://{tokenEndpointDomain}/oauth/token") { Content = requestContent })
+            string tokenEndpoint;
+            if (options.UseMtls)
+            {
+                // A missing resolver here means mTLS was enabled without the services WithMtls registers.
+                // Fail loudly rather than fall back to the standard endpoint, which would strip the
+                // certificate routing and surface as a confusing invalid_client from the token endpoint.
+                if (_mtlsEndpointResolver == null)
+                {
+                    throw new InvalidOperationException(
+                        "mTLS is enabled but no mTLS endpoint resolver is available. Ensure the SDK was configured with WithMtls.");
+                }
+
+                tokenEndpoint = await _mtlsEndpointResolver.ResolveTokenEndpointAsync(tokenEndpointDomain, _httpClient).ConfigureAwait(false);
+            }
+            else
+            {
+                tokenEndpoint = $"https://{tokenEndpointDomain}/oauth/token";
+            }
+
+            using (var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint) { Content = requestContent })
             {
                 using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false))
                 {
@@ -249,6 +282,12 @@ namespace Auth0.AspNetCore.Authentication
 
         private void ApplyClientAuthentication(Auth0WebAppOptions options, Dictionary<string, string> body, string domain)
         {
+            // Under mTLS the client certificate is the sole credential; never send a secret or assertion.
+            if (options.UseMtls)
+            {
+                return;
+            }
+
             if (options.ClientAssertionSecurityKey != null)
             {
                 body.Add("client_assertion", new JwtTokenFactory(options.ClientAssertionSecurityKey, options.ClientAssertionSecurityKeyAlgorithm ?? SecurityAlgorithms.RsaSha256)
@@ -257,7 +296,7 @@ namespace Auth0.AspNetCore.Authentication
 
                 body.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
             }
-            else
+            else if (!string.IsNullOrEmpty(options.ClientSecret))
             {
                 body.Add("client_secret", options.ClientSecret!);
             }

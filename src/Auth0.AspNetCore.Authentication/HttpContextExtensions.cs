@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -125,7 +126,10 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
             TokenRefreshResult result;
@@ -249,7 +253,10 @@ namespace Auth0.AspNetCore.Authentication
             }
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
             TokenRefreshResult result;
@@ -312,19 +319,37 @@ namespace Auth0.AspNetCore.Authentication
             var options = context.RequestServices.GetRequiredService<IOptionsSnapshot<Auth0WebAppOptions>>().Get(scheme);
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
             var resolvedDomain = context.GetResolvedDomain();
 
-            var result = await tokenClient.ExchangeCustomToken(
-                options,
-                request.SubjectToken,
-                request.SubjectTokenType,
-                request.Audience,
-                request.Scope,
-                request.ActorToken,
-                request.ActorTokenType,
-                request.Organization,
-                resolvedDomain).ConfigureAwait(false);
+            TokenRefreshResult result;
+            try
+            {
+                result = await tokenClient.ExchangeCustomToken(
+                    options,
+                    request.SubjectToken,
+                    request.SubjectTokenType,
+                    request.Audience,
+                    request.Scope,
+                    request.ActorToken,
+                    request.ActorTokenType,
+                    request.Organization,
+                    resolvedDomain).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is IOException)
+            {
+                throw new CustomTokenExchangeException(
+                    "The custom token exchange could not reach the token endpoint.", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // A mTLS configuration problem (a missing token_endpoint alias, or WithMtls not
+                // registered) surfaces here.
+                throw new CustomTokenExchangeException(ex.Message, ex);
+            }
 
             if (!result.IsSuccess)
             {
@@ -487,7 +512,10 @@ namespace Auth0.AspNetCore.Authentication
             var audience = $"urn:{audienceHost}:session_transfer";
 
             var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
 
             TokenRefreshResult result;
             try
@@ -503,13 +531,21 @@ namespace Auth0.AspNetCore.Authentication
                     request.Organization,
                     resolvedDomain).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is IOException)
             {
                 // Keep a single failure protocol: a transport error reaching the token endpoint is
                 // reported the same way as a rejection by it, with the original exception preserved
                 // on InnerException.
                 throw new CustomTokenExchangeException(
                     "The session transfer token exchange could not reach the token endpoint.", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // A mTLS configuration problem (a missing token_endpoint alias, or WithMtls not
+                // registered) surfaces here. Wrap it in the documented CustomTokenExchangeException,
+                // keeping its actionable message rather than mislabeling a misconfiguration as a
+                // connectivity failure, so no raw exception escapes the public surface.
+                throw new CustomTokenExchangeException(ex.Message, ex);
             }
 
             if (!result.IsSuccess)
@@ -601,7 +637,10 @@ namespace Auth0.AspNetCore.Authentication
             if (properties.Items.TryGetValue(".Token.refresh_token", out var refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
             {
                 var httpClient = options.Backchannel ?? context.RequestServices.GetRequiredService<IHttpClientFactory>().CreateClient();
-                var tokenClient = new TokenClient(httpClient);
+                var tokenClient = new TokenClient(
+                    httpClient,
+                    context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.Auth0MtlsEndpointResolver>(),
+                    context.RequestServices.GetService<Auth0.AspNetCore.Authentication.Mtls.MtlsCnfInspector>());
                 var resolvedDomain = context.GetResolvedDomain();
 
                 const string actorRefreshScope = "openid";
@@ -611,13 +650,23 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     refreshResult = await tokenClient.Refresh(options, refreshToken!, resolvedDomain, scope: actorRefreshScope).ConfigureAwait(false);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is IOException)
                 {
-                    // Transport errors (HttpRequestException, TaskCanceledException) would otherwise
-                    // escape raw from a method documented to fail via CustomTokenExchangeException.
-                    // ActorUnavailable would be a lie here - the session is fine, the network was not.
+                    // Transport errors (HttpRequestException, TaskCanceledException, and the IOException
+                    // the OpenID Connect discovery retriever throws when mTLS endpoint resolution fails)
+                    // would otherwise escape raw from a method documented to fail via
+                    // CustomTokenExchangeException. ActorUnavailable would be a lie here - the session is
+                    // fine, the network was not.
                     throw new CustomTokenExchangeException(
                         "Failed to refresh the session id_token needed to source the actor token.", ex);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // A mTLS configuration problem (a missing token_endpoint alias, or WithMtls not
+                    // registered) surfaces here on the actor-refresh path. Wrap it in the documented
+                    // CustomTokenExchangeException, keeping its actionable message, so no raw
+                    // exception escapes the public surface.
+                    throw new CustomTokenExchangeException(ex.Message, ex);
                 }
 
                 // A step-up challenge is a recoverable case distinct from "no usable actor": collapsing

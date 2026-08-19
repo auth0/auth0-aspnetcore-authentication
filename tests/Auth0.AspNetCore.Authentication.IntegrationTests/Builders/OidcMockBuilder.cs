@@ -62,7 +62,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
         /// <param name="idTokenFunc">Func that, when called, returns the ID Token to be used in thhe response.</param>
         /// <param name="matcher">Custom matcher Func to only match specific requests.</param>
         /// <returns></returns>
-        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, HttpStatusCode statusCode = HttpStatusCode.OK, string refreshToken = "456")
+        public OidcMockBuilder MockToken(Func<string> idTokenFunc, Func<HttpRequestMessage, bool> matcher = null, int expiresIn = 70, bool includeAccessToken = true, HttpStatusCode statusCode = HttpStatusCode.OK, string refreshToken = "456", string accessToken = "123")
         {
             _mockHandler
               .Protected()
@@ -74,7 +74,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
               .ReturnsAsync(() => new HttpResponseMessage()
               {
                   StatusCode = statusCode,
-                  Content = new StringContent(BuildTokenResponse(idTokenFunc(), expiresIn, includeAccessToken, refreshToken)),
+                  Content = new StringContent(BuildTokenResponse(idTokenFunc(), expiresIn, includeAccessToken, refreshToken, accessToken)),
               })
               .Verifiable();
 
@@ -132,7 +132,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
             }
         }
 
-        private string BuildTokenResponse(string idToken, int expiresIn, bool includeAccessToken, string refreshToken)
+        private string BuildTokenResponse(string idToken, int expiresIn, bool includeAccessToken, string refreshToken, string accessToken = "123")
         {
             var tokenContents = new Dictionary<string, object>
             {
@@ -141,7 +141,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Builders
             };
             if (includeAccessToken)
             {
-                tokenContents["access_token"] = "123";
+                tokenContents["access_token"] = accessToken;
             }
             if (!string.IsNullOrEmpty(refreshToken))
             {

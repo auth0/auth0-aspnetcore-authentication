@@ -121,6 +121,11 @@ namespace Auth0.AspNetCore.Authentication
 
         private static void ValidateOptions(Auth0WebAppOptions auth0Options)
         {
+            if (auth0Options.UseMtls)
+            {
+                return;
+            }
+
             if (CodeResponseTypes.Contains(auth0Options.ResponseType!))
             {
                 if (string.IsNullOrWhiteSpace(auth0Options.ClientSecret) && auth0Options.ClientAssertionSecurityKey == null)
@@ -298,7 +303,10 @@ namespace Auth0.AspNetCore.Authentication
 
         private static async Task<AccessTokenResponse?> RefreshTokens(HttpContext httpContext, Auth0WebAppOptions options, string refreshToken, HttpClient httpClient)
         {
-            var tokenClient = new TokenClient(httpClient);
+            var tokenClient = new TokenClient(
+                httpClient,
+                httpContext.RequestServices.GetService<Mtls.Auth0MtlsEndpointResolver>(),
+                httpContext.RequestServices.GetService<Mtls.MtlsCnfInspector>());
 
             // Get the resolved domain from HttpContext if available (for multiple custom domains)
             var resolvedDomain = httpContext.GetResolvedDomain();

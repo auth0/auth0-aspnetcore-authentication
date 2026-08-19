@@ -211,6 +211,13 @@ namespace Auth0.AspNetCore.Authentication
                     }
                 }
 
+                if (auth0Options.UseMtls)
+                {
+                    var cnfInspector = context.HttpContext.RequestServices
+                        .GetService<Mtls.MtlsCnfInspector>();
+                    cnfInspector?.Inspect(auth0Options.ClientId, context.TokenEndpointResponse?.AccessToken);
+                }
+
                 return Task.CompletedTask;
             };
         }

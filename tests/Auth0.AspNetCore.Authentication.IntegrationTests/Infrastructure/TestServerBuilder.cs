@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
 {
@@ -33,7 +34,7 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
         /// <param name="mockAuthentication">Indicated whether or not the authenitcation should be mocked, useful because some tests require an authenticated user while others require no user to exist.</param>
         /// <param name="authenticationScheme">Optional custom authentication scheme to use.</param>
         /// <returns>The created TestServer instance.</returns>
-        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false, string authenticationScheme = null, Action<Auth0CustomDomainsOptions> configureCustomDomains = null)
+        public static TestServer CreateServer(Action<Auth0WebAppOptions> configureOptions = null, Action<Auth0WebAppWithAccessTokenOptions> configureWithAccessTokensOptions = null, bool mockAuthentication = false, bool useServiceCollectionExtension = false, bool addExtraProvider = false, Action<Auth0WebAppOptions> configureAdditionalOptions = null, bool enableBackchannelLogout = false, string authenticationScheme = null, Action<Auth0CustomDomainsOptions> configureCustomDomains = null, Action<Auth0MtlsOptions> configureMtls = null, bool withMtlsAfterAccessToken = false, bool withMtlsBeforeCustomDomains = false, Microsoft.Extensions.Logging.ILoggerProvider loggerProvider = null)
         {
             var configuration = TestConfiguration.GetConfiguration();
             var host = new HostBuilder()
@@ -143,9 +144,32 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                 }
                             }
 
+                            // WithMtls must run before WithAccessToken and after WithCustomDomains.
+                            if (configureCustomDomains != null && !withMtlsBeforeCustomDomains)
+                            {
+                                builder.WithCustomDomains(configureCustomDomains);
+                            }
+
+                            if (configureMtls != null && !withMtlsAfterAccessToken)
+                            {
+                                builder.WithMtls(configureMtls);
+                            }
+
+                            // Deliberately-wrong ordering, used only to assert the custom-domains ordering guard.
+                            if (configureCustomDomains != null && withMtlsBeforeCustomDomains)
+                            {
+                                builder.WithCustomDomains(configureCustomDomains);
+                            }
+
                             if (configureWithAccessTokensOptions != null)
                             {
                                 builder.WithAccessToken(configureWithAccessTokensOptions);
+                            }
+
+                            // Deliberately-wrong ordering, used only to assert the access-token ordering guard.
+                            if (configureMtls != null && withMtlsAfterAccessToken)
+                            {
+                                builder.WithMtls(configureMtls);
                             }
 
                             if (enableBackchannelLogout)
@@ -153,12 +177,12 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure
                                 builder.WithBackchannelLogout();
                             }
 
-                            if (configureCustomDomains != null)
-                            {
-                                builder.WithCustomDomains(configureCustomDomains);
-                            }
-
                             services.AddControllersWithViews();
+
+                            if (loggerProvider != null)
+                            {
+                                services.AddLogging(logging => logging.AddProvider(loggerProvider));
+                            }
                         })
                         .ConfigureTestServices(services =>
                         {
