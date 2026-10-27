@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.Exceptions;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Builders;
@@ -11,6 +12,7 @@ using Auth0.AspNetCore.Authentication.IntegrationTests.Extensions;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Infrastructure;
 using Auth0.AspNetCore.Authentication.IntegrationTests.Utils;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Xunit;
 
 namespace Auth0.AspNetCore.Authentication.IntegrationTests;
@@ -860,6 +862,224 @@ public class BackchannelLogoutTests
         protectedResponse2.StatusCode.Should().Be(HttpStatusCode.Found);
         protectedResponse2.Headers.Location.Should().NotBeNull();
         protectedResponse2.Headers.Location!.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
+    }
+
+    [Theory]
+    [InlineData("tenant2.auth0.com")]
+    [InlineData("TENANT1.auth0.com")]
+    public async Task Should_Keep_Session_Revoked_When_Request_Resolves_To_Different_Domain_With_Multiple_Custom_Domains(string replayedDomain)
+    {
+        var nonce = "";
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+                // ReSharper disable once AccessToModifiedClosure
+                .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
+                .Build())
+            .Build();
+
+        // The resolver trusts a request header (falling back to the primary domain), so the caller
+        // controls which domain is resolved for a request.
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = domain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, true, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = ctx =>
+                    Task.FromResult(ctx.Request.Headers["X-Tenant-Domain"].FirstOrDefault() ?? domain);
+            });
+        using var client = server.CreateClient();
+
+        var loginResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+        var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+        var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+        nonce = queryParameters["nonce"];
+        var state = queryParameters["state"];
+
+        var callbackMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+        var callbackResponse = await client.SendAsync(callbackMessage, setCookie.Value);
+        var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
+
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)200);
+
+        // Replay the revoked session cookie while steering the resolver to a different domain.
+        var protectedMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        protectedMessage.Headers.Add("X-Tenant-Domain", replayedDomain);
+        var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
+
+        // The revocation is keyed on the issuer bound to the session, so the session stays revoked.
+        protectedResponse.StatusCode.Should().Be(HttpStatusCode.Found);
+        protectedResponse.Headers.Location.Should().NotBeNull();
+        protectedResponse.Headers.Location!.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
+    }
+
+    [Fact]
+    public async Task Should_Not_Logout_When_Sid_Doesnt_Match_And_Request_Resolves_To_Different_Domain_With_Multiple_Custom_Domains()
+    {
+        var nonce = "";
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+                // ReSharper disable once AccessToModifiedClosure
+                .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
+                .Build())
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = domain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+            },
+            null, false, true, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = ctx =>
+                    Task.FromResult(ctx.Request.Headers["X-Tenant-Domain"].FirstOrDefault() ?? domain);
+            });
+        using var client = server.CreateClient();
+
+        var loginResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+        var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+        var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+        nonce = queryParameters["nonce"];
+        var state = queryParameters["state"];
+
+        var callbackMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+        var callbackResponse = await client.SendAsync(callbackMessage, setCookie.Value);
+        var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
+
+        // Revoke a different session on the same domain.
+        var logoutToken = new JwtTokenBuilder(1)
+            .WithIssuer($"https://{domain}/")
+            .WithAudience(clientId)
+            .WithClaim(JwtRegisteredClaimNames.Sid, "other-sid")
+            .WithClaim("events", "{ \"http://schemas.openid.net/event/backchannel-logout\": {} }")
+            .Build();
+
+        var formData = new Dictionary<string, string> { { "logout_token", logoutToken } };
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"{TestServerBuilder.Host}/backchannel-logout");
+        req.Content = new FormUrlEncodedContent(formData);
+        using var response = await client.SendAsync(req);
+
+        response.StatusCode.Should().Be((HttpStatusCode)200);
+
+        var protectedMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        protectedMessage.Headers.Add("X-Tenant-Domain", "tenant2.auth0.com");
+        var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
+
+        // A session that was not revoked is unaffected.
+        protectedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        protectedResponse.Headers.Location.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_Reject_Session_Without_Bound_Issuer_With_Multiple_Custom_Domains()
+    {
+        var nonce = "";
+        var configuration = TestConfiguration.GetConfiguration();
+        var domain = "tenant1.auth0.com";
+        var clientId = configuration["Auth0:ClientId"];
+
+        var mockHandler = new OidcMockBuilder()
+            .MockOpenIdConfig()
+            .MockJwks()
+            .MockToken(() => new JwtTokenBuilder(1)
+                .WithIssuer($"https://{domain}/")
+                .WithAudience(clientId)
+                .WithClaim(JwtRegisteredClaimNames.Sid, "sid")
+                // ReSharper disable once AccessToModifiedClosure
+                .WithClaim(JwtRegisteredClaimNames.Nonce, nonce)
+                .Build())
+            .Build();
+
+        using var server = TestServerBuilder.CreateServer(
+            opt =>
+            {
+                opt.Domain = domain;
+                opt.Backchannel = new HttpClient(mockHandler.Object);
+                // Simulate a session that carries no issuer: the app replaces the principal with one
+                // whose claims have the default issuer, and the persisted domain is absent.
+                opt.OpenIdConnectEvents = new OpenIdConnectEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        context.Properties!.Items.Remove(Auth0Constants.ResolvedDomainKey);
+                        context.Principal = new ClaimsPrincipal(new ClaimsIdentity(
+                            new[] { new Claim("sid", "sid") }, "Custom"));
+                        return Task.CompletedTask;
+                    }
+                };
+            },
+            null, false, true, false, null,
+            enableBackchannelLogout: true,
+            configureCustomDomains: opt =>
+            {
+                opt.DomainResolver = _ => Task.FromResult(domain);
+            });
+        using var client = server.CreateClient();
+
+        var loginResponse = await client.SendAsync($"{TestServerBuilder.Host}/{TestServerBuilder.Login}");
+        var setCookie = Assert.Single(loginResponse.Headers, h => h.Key == "Set-Cookie");
+
+        var queryParameters = UriUtils.GetQueryParams(loginResponse.Headers.Location);
+        nonce = queryParameters["nonce"];
+        var state = queryParameters["state"];
+
+        var callbackMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Callback}?state={state}&nonce={nonce}&code=123");
+        var callbackResponse = await client.SendAsync(callbackMessage, setCookie.Value);
+        var callbackCookies = callbackResponse.Headers.GetValues("Set-Cookie").ToList();
+
+        var protectedMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"{TestServerBuilder.Host}/{TestServerBuilder.Protected}");
+        var protectedResponse = await client.SendAsync(protectedMessage, callbackCookies);
+
+        // Without an issuer bound to the session the revocation check cannot be keyed safely, so
+        // the session is rejected rather than falling back to the request-resolved domain.
+        protectedResponse.StatusCode.Should().Be(HttpStatusCode.Found);
+        protectedResponse.Headers.Location.Should().NotBeNull();
+        protectedResponse.Headers.Location!.AbsoluteUri.Should().Contain(TestServerBuilder.Login);
     }
 
     [Fact]
