@@ -39,7 +39,9 @@ namespace Auth0.AspNetCore.Authentication
                 items.TryGetValue(Auth0Constants.ResolvedDomainKey, out var resolvedDomain) &&
                 !string.IsNullOrWhiteSpace(resolvedDomain))
             {
-                return resolvedDomain;
+                // Persisted as the resolver returned it; host names are case-insensitive while the
+                // revocation key uses the token's (lower-case) iss verbatim, so normalize the case.
+                return resolvedDomain.ToLowerInvariant();
             }
 
             return null;

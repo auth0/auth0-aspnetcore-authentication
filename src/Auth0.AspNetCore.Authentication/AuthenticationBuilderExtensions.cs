@@ -179,7 +179,8 @@ namespace Auth0.AspNetCore.Authentication
                         ?.Get(authenticationScheme)
                         ?.IsMultipleCustomDomainsEnabled == true;
 
-                    string issuer;
+                    var sid = context.Principal?.FindFirst("sid")?.Value;
+                    string? issuer;
 
                     if (isMcdEnabled)
                     {
@@ -188,25 +189,28 @@ namespace Auth0.AspNetCore.Authentication
                         // trusting it would let a revoked session dodge revocation by switching domains.
                         var sessionIssuer = SessionIssuer.Get(context.Principal, context.Properties.Items);
 
-                        if (string.IsNullOrWhiteSpace(sessionIssuer))
+                        // A logout token always carries a sid, so only a session with one can be revoked.
+                        if (string.IsNullOrWhiteSpace(sessionIssuer) && !string.IsNullOrWhiteSpace(sid))
                         {
                             // Without a session-bound issuer revocation can't be checked; fail closed.
+                            var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                            loggerFactory?.CreateLogger("Auth0").LogWarning(
+                                "Back-channel logout is enabled with multiple custom domains, but the session carries no issuer to check revocation against; signing the user out.");
+
                             context.RejectPrincipal();
                             await context.HttpContext.SignOutAsync();
 
                             return;
                         }
 
-                        issuer = Utils.ToAuthority(sessionIssuer);
+                        issuer = string.IsNullOrWhiteSpace(sessionIssuer) ? null : Utils.ToAuthority(sessionIssuer);
                     }
                     else
                     {
                         issuer = Utils.ToAuthority($"https://{options.Domain}/");
                     }
 
-                    var sid = context.Principal?.FindFirst("sid")?.Value;
-
-                    var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
+                    var isLoggedOut = issuer != null && await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
 
                     if (isLoggedOut)
                     {

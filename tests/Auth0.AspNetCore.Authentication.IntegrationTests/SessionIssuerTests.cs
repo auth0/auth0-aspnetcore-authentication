@@ -41,6 +41,15 @@ namespace Auth0.AspNetCore.Authentication.IntegrationTests
         }
 
         [Fact]
+        public void Get_Lowercases_Persisted_Domain()
+        {
+            var principal = PrincipalWith(new Claim("sid", "sid"));
+            var items = new Dictionary<string, string?> { [Auth0Constants.ResolvedDomainKey] = "TENANT1.auth0.com" };
+
+            SessionIssuer.Get(principal, items).Should().Be("tenant1.auth0.com");
+        }
+
+        [Fact]
         public void Get_Returns_Null_When_Session_Carries_No_Issuer()
         {
             var principal = PrincipalWith(new Claim("sid", "sid"));
