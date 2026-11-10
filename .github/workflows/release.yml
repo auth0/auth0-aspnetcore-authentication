@@ -40,5 +40,5 @@ jobs:
       dotnet-version: 8.0.x
       project-paths: "['src/Auth0.AspNetCore.Authentication/Auth0.AspNetCore.Authentication.csproj']"
     secrets:
-      nuget-token: ${{ secrets.NUGET_APIKEY }}
+      nuget-user: ${{ secrets.NUGET_USER }}
       github-token: ${{ secrets.GITHUB_TOKEN }}
