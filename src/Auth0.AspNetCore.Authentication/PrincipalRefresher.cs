@@ -42,15 +42,16 @@ namespace Auth0.AspNetCore.Authentication
 
                 // In multiple-custom-domains mode the SDK disables static issuer validation
                 // (ValidateIssuer = false) because the real issuer is the per-request resolved
-                // domain. Resolve it the same way the rest of the SDK does (prefer the token's
-                // own issuer, then the domain resolved for this request) so issuer validation
-                // still holds instead of failing against the static ValidIssuer.
+                // domain. Pin the refreshed token to the issuer bound to the session so a request
+                // resolving to another domain cannot move the session's issuer (and with it the
+                // back-channel logout revocation key) to that domain. The domain resolved for this
+                // request is only used for sessions that carry no issuer at all.
                 var validateIssuer = oidcOptions.TokenValidationParameters.ValidateIssuer;
                 var validIssuer = oidcOptions.TokenValidationParameters.ValidIssuer;
 
                 if (!validateIssuer)
                 {
-                    var resolvedIssuer = currentPrincipal.FindFirst("iss")?.Value
+                    var resolvedIssuer = SessionIssuer.Get(currentPrincipal, properties)
                         ?? httpContext.GetResolvedDomain();
 
                     if (!string.IsNullOrWhiteSpace(resolvedIssuer))

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Auth0.AspNetCore.Authentication.BackchannelLogout;
+using Auth0.AspNetCore.Authentication.CustomDomains;
 using Microsoft.Extensions.Logging;
 
 namespace Auth0.AspNetCore.Authentication
@@ -173,19 +174,43 @@ namespace Auth0.AspNetCore.Authentication
                 {
                     await VerifyBackchannelLogoutSupport(context.HttpContext, oidcOptions);
 
-                    // Prefer issuer from the authenticated principal
-                    var resolvedIssuer = context.HttpContext.User?.FindFirst("iss")?.Value;
+                    var isMcdEnabled = context.HttpContext.RequestServices
+                        .GetService<IOptionsMonitor<Auth0CustomDomainsOptions>>()
+                        ?.Get(authenticationScheme)
+                        ?.IsMultipleCustomDomainsEnabled == true;
 
-                    // Fall back to the domain resolved by StartupFilter (cached in HttpContext.Items)
-                    if (string.IsNullOrWhiteSpace(resolvedIssuer))
+                    var sid = context.Principal?.FindFirst("sid")?.Value;
+                    string? issuer;
+
+                    if (isMcdEnabled)
                     {
-                        resolvedIssuer = context.HttpContext.GetResolvedDomain();
+                        // Key the lookup on the issuer bound to the session, never on the domain resolved
+                        // for this request: that is derived from request data (e.g. the Host header), so
+                        // trusting it would let a revoked session dodge revocation by switching domains.
+                        var sessionIssuer = SessionIssuer.Get(context.Principal, context.Properties.Items);
+
+                        // A logout token always carries a sid, so only a session with one can be revoked.
+                        if (string.IsNullOrWhiteSpace(sessionIssuer) && !string.IsNullOrWhiteSpace(sid))
+                        {
+                            // Without a session-bound issuer revocation can't be checked; fail closed.
+                            var loggerFactory = context.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                            loggerFactory?.CreateLogger("Auth0").LogWarning(
+                                "Back-channel logout is enabled with multiple custom domains, but the session carries no issuer to check revocation against; signing the user out.");
+
+                            context.RejectPrincipal();
+                            await context.HttpContext.SignOutAsync();
+
+                            return;
+                        }
+
+                        issuer = string.IsNullOrWhiteSpace(sessionIssuer) ? null : Utils.ToAuthority(sessionIssuer);
+                    }
+                    else
+                    {
+                        issuer = Utils.ToAuthority($"https://{options.Domain}/");
                     }
 
-                    var issuer = Utils.ToAuthority(resolvedIssuer ?? $"https://{options.Domain}/");
-                    var sid = context.Principal?.FindFirst("sid")?.Value;
-
-                    var isLoggedOut = await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
+                    var isLoggedOut = issuer != null && await logoutTokenHandler.IsLoggedOutAsync(issuer, sid);
 
                     if (isLoggedOut)
                     {
