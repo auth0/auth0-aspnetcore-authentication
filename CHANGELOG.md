@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.12.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.12.0) (2026-11-10)
+[Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.11.0...1.12.0)
+
+**Security**
+- chore(deps): Bump System.Text.Encodings.Web from 10.0.11 to 10.0.12 [\#286](https://github.com/auth0/auth0-aspnetcore-authentication/pull/286) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.ViewFeatures from 2.3.12 to 2.3.13 [\#285](https://github.com/auth0/auth0-aspnetcore-authentication/pull/285) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore(deps): Bump Microsoft.AspNetCore.Mvc.Testing from 10.0.11 to 10.0.12 [\#284](https://github.com/auth0/auth0-aspnetcore-authentication/pull/284) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.11.0](https://github.com/auth0/auth0-aspnetcore-authentication/tree/1.11.0) (2026-08-19)
 [Full Changelog](https://github.com/auth0/auth0-aspnetcore-authentication/compare/1.10.0...1.11.0)
 
